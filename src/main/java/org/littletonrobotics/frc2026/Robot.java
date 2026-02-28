@@ -11,8 +11,7 @@ import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.MathShared;
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUsageId;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -253,12 +252,11 @@ public class Robot extends LoggedRobot {
           ObjectDetection.getInstance().getFuelTranslations().stream()
               .map(
                   (translation) ->
-                      new Pose3d(
+                      new Translation3d(
                           translation.getX(),
                           translation.getY(),
-                          FieldConstants.fuelDiameter / 2.0,
-                          Rotation3d.kZero))
-              .toArray(Pose3d[]::new));
+                          FieldConstants.fuelDiameter / 2.0))
+              .toArray(Translation3d[]::new));
     }
 
     // Log hub state
