@@ -229,7 +229,7 @@ public class RobotState {
     slamtakeTreeMap.put(observation.timestamp, observation.state);
 
     // Remove old observations
-    while (slamtakeTreeMap.firstKey() < (Timer.getFPGATimestamp() - slamtakePosePersistanceTime)) {
+    while (slamtakeTreeMap.firstKey() < (Timer.getTimestamp() - slamtakePosePersistanceTime)) {
       slamtakeTreeMap.pollFirstEntry();
     }
   }

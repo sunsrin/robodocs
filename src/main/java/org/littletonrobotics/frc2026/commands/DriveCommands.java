@@ -17,10 +17,13 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.frc2026.Constants;
@@ -37,15 +40,21 @@ import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
   public static final double deadband = 0.1;
+  private static final double ffStartDelay = 2.0; // Secs
+  private static final double ffRampRate = 0.1; // Volts/Sec
   private static final double wheelRadiusMaxVelocity = 0.25; // Rad/Sec
   private static final double wheelRadiusRampRate = 0.05; // Rad/Sec^2
 
   private static final LoggedTunableNumber driveLaunchKp =
-      new LoggedTunableNumber("DriveCommands/Launching/kP", 12.0);
+      new LoggedTunableNumber("DriveCommands/Launching/kP", 8.0);
   private static final LoggedTunableNumber driveLaunchKd =
-      new LoggedTunableNumber("DriveCommands/Launching/kD", 1.5);
-  private static final LoggedTunableNumber driveLaunchToleranceDeg =
-      new LoggedTunableNumber("DriveCommands/Launching/ToleranceDeg", 10.0);
+      new LoggedTunableNumber("DriveCommands/Launching/kD", 0.5);
+  private static final LoggedTunableNumber driveYawLaunchToleranceDeg =
+      new LoggedTunableNumber("DriveCommands/Launching/YawToleranceDeg", 5.0);
+  private static final LoggedTunableNumber drivePitchLaunchToleranceDeg =
+      new LoggedTunableNumber("DriveCommands/Launching/PitchToleranceDeg", 5.0);
+  private static final LoggedTunableNumber driveRollLaunchToleranceDeg =
+      new LoggedTunableNumber("DriveCommands/Launching/RollToleranceDeg", 5.0);
   private static final LoggedTunableNumber driveLaunchMaxPolarVelocityRadPerSec =
       new LoggedTunableNumber("DriveCommands/Launching/MaxPolarVelocityRadPerSec", 0.6);
   private static final LoggedTunableNumber driveLauncherCORMinErrorDeg =
@@ -116,13 +125,23 @@ public class DriveCommands {
   }
 
   public static boolean atLaunchGoal() {
+    var rotation3d =
+        RobotState.getInstance().getEstimatedRotation3dAtTimestamp(Timer.getTimestamp());
+    boolean inPitchAndRollTolerance =
+        rotation3d.isEmpty()
+            || (Math.abs(rotation3d.get().getX())
+                    <= Units.degreesToRadians(driveRollLaunchToleranceDeg.get())
+                && Math.abs(rotation3d.get().getY())
+                    <= Units.degreesToRadians(drivePitchLaunchToleranceDeg.get()));
+
     return DriverStation.isEnabled()
         && Math.abs(
                 RobotState.getInstance()
                     .getRotation()
                     .minus(LaunchCalculator.getInstance().getParameters().driveAngle())
                     .getRadians())
-            <= Units.degreesToRadians(driveLaunchToleranceDeg.get());
+            <= Units.degreesToRadians(driveYawLaunchToleranceDeg.get())
+        && inPitchAndRollTolerance;
   }
 
   public static Command joystickDriveWhileLaunching(
@@ -256,6 +275,69 @@ public class DriveCommands {
               "DriveCommands/Launching/SetpointVelocityRadPerSec", parameters.driveVelocity());
         },
         drive);
+  }
+
+  /**
+   * Measures the velocity feedforward constants for the drive motors.
+   *
+   * <p>This command should only be used in voltage control mode.
+   */
+  public static Command feedforwardCharacterization(Drive drive) {
+    List<Double> velocitySamples = new LinkedList<>();
+    List<Double> voltageSamples = new LinkedList<>();
+    Timer timer = new Timer();
+
+    return Commands.sequence(
+        // Reset data
+        Commands.runOnce(
+            () -> {
+              velocitySamples.clear();
+              voltageSamples.clear();
+            }),
+
+        // Allow modules to orient
+        Commands.run(
+                () -> {
+                  drive.runCharacterization(0.0);
+                },
+                drive)
+            .withTimeout(ffStartDelay),
+
+        // Start timer
+        Commands.runOnce(timer::restart),
+
+        // Accelerate and gather data
+        Commands.run(
+                () -> {
+                  double voltage = timer.get() * ffRampRate;
+                  drive.runCharacterization(voltage);
+                  velocitySamples.add(drive.getFFCharacterizationVelocity());
+                  voltageSamples.add(voltage);
+                },
+                drive)
+
+            // When cancelled, calculate and print results
+            .finallyDo(
+                () -> {
+                  int n = velocitySamples.size();
+                  double sumX = 0.0;
+                  double sumY = 0.0;
+                  double sumXY = 0.0;
+                  double sumX2 = 0.0;
+                  for (int i = 0; i < n; i++) {
+                    sumX += velocitySamples.get(i);
+                    sumY += voltageSamples.get(i);
+                    sumXY += velocitySamples.get(i) * voltageSamples.get(i);
+                    sumX2 += velocitySamples.get(i) * velocitySamples.get(i);
+                  }
+                  double kS = (sumY * sumX2 - sumX * sumXY) / (n * sumX2 - sumX * sumX);
+                  double kV = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+
+                  NumberFormat formatter = new DecimalFormat("#0.00000");
+                  System.out.println("********** Drive FF Characterization Results **********");
+                  System.out.println("\tkS: " + formatter.format(kS));
+                  System.out.println("\tkV: " + formatter.format(kV));
+                }));
   }
 
   /** Measures the robot's wheel radius by spinning in a circle. */

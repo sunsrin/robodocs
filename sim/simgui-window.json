@@ -1,32 +1,36 @@
 {
   "Docking": {
     "Data": [
-      "DockNode          ID=0x00000002 Pos=10,28 Size=944,551 Split=Y",
-      "DockNode        ID=0x0000000D Parent=0x00000002 SizeRef=837,320 Split=X",
-      "DockNode      ID=0x0000000B Parent=0x0000000D SizeRef=543,293 Split=X",
-      "DockNode    ID=0x0000000A Parent=0x0000000B SizeRef=295,201 Split=Y Selected=0x39AD1970",
-      "DockNode  ID=0x00000003 Parent=0x0000000A SizeRef=427,132 Selected=0x39AD1970",
-      "DockNode  ID=0x00000004 Parent=0x0000000A SizeRef=427,186 Selected=0xC8493FD8",
-      "DockNode    ID=0x00000001 Parent=0x0000000B SizeRef=422,201 Split=Y",
-      "DockNode  ID=0x00000008 Parent=0x00000001 SizeRef=289,55 Selected=0xCDEF627F",
-      "DockNode  ID=0x00000009 Parent=0x00000001 SizeRef=289,263 Selected=0x949F284C",
-      "DockNode      ID=0x0000000C Parent=0x0000000D SizeRef=174,293 Selected=0x05F38D96",
-      "DockNode        ID=0x00000005 Parent=0x00000002 SizeRef=837,224 Split=X",
-      "DockNode      ID=0x00000006 Parent=0x00000005 SizeRef=191,237 Selected=0x6AE6D891",
-      "DockNode      ID=0x00000007 Parent=0x00000005 SizeRef=603,237 Selected=0x138219D4"
+      "DockNode              ID=0x00000002 Pos=9,25 Size=944,551 Split=Y",
+      "DockNode            ID=0x0000000D Parent=0x00000002 SizeRef=837,323 Split=X",
+      "DockNode          ID=0x0000000B Parent=0x0000000D SizeRef=713,293 Split=X",
+      "DockNode        ID=0x0000000A Parent=0x0000000B SizeRef=293,201 Split=Y Selected=0x39AD1970",
+      "DockNode      ID=0x00000003 Parent=0x0000000A SizeRef=427,133 Selected=0x39AD1970",
+      "DockNode      ID=0x00000004 Parent=0x0000000A SizeRef=427,188 Selected=0xC8493FD8",
+      "DockNode        ID=0x00000001 Parent=0x0000000B SizeRef=418,201 Split=Y Selected=0x949F284C",
+      "DockNode      ID=0x00000008 Parent=0x00000001 SizeRef=418,158 Split=Y",
+      "DockNode    ID=0x0000000F Parent=0x00000008 SizeRef=345,103 Split=Y Selected=0x3F3DC88C",
+      "DockNode  ID=0x00000009 Parent=0x0000000F SizeRef=418,50 Selected=0xCD98DCC6",
+      "DockNode  ID=0x0000000E Parent=0x0000000F SizeRef=418,51 Selected=0x3F3DC88C",
+      "DockNode    ID=0x00000010 Parent=0x00000008 SizeRef=345,53 Selected=0x82F7A442",
+      "DockNode      ID=0x00000011 Parent=0x00000001 SizeRef=418,163 Selected=0x949F284C",
+      "DockNode          ID=0x0000000C Parent=0x0000000D SizeRef=229,293 Selected=0x05F38D96",
+      "DockNode            ID=0x00000005 Parent=0x00000002 SizeRef=837,226 Split=X",
+      "DockNode          ID=0x00000006 Parent=0x00000005 SizeRef=191,237 Selected=0x6AE6D891",
+      "DockNode          ID=0x00000007 Parent=0x00000005 SizeRef=603,237 Selected=0x138219D4"
     ]
   },
   "MainWindow": {
     "GLOBAL": {
       "font": "Proggy Dotted",
       "fps": "120",
-      "height": "592",
+      "height": "587",
       "maximized": "0",
       "style": "0",
       "userScale": "2",
-      "width": "969",
-      "xpos": "732",
-      "ypos": "252"
+      "width": "970",
+      "xpos": "363",
+      "ypos": "135"
     }
   },
   "Window": {
@@ -37,32 +41,49 @@
     },
     "###/SmartDashboard/Alerts": {
       "Collapsed": "0",
-      "DockId": "0x00000009,0",
-      "Pos": "305,86",
-      "Size": "418,265"
+      "DockId": "0x00000011,0",
+      "Pos": "304,185",
+      "Size": "418,163"
     },
     "###/SmartDashboard/Auto Choices": {
       "Collapsed": "0",
-      "DockId": "0x00000008,0",
-      "Pos": "305,28",
-      "Size": "418,56"
+      "Pos": "333,101",
+      "Size": "254,54"
+    },
+    "###/SmartDashboard/Auto/Question #1 Chooser": {
+      "Collapsed": "0",
+      "DockId": "0x0000000E,0",
+      "Pos": "304,77",
+      "Size": "418,51"
+    },
+    "###/SmartDashboard/Auto/Question #2 Chooser": {
+      "Collapsed": "0",
+      "DockId": "0x00000010,0",
+      "Pos": "304,130",
+      "Size": "418,53"
+    },
+    "###/SmartDashboard/Auto/Routine": {
+      "Collapsed": "0",
+      "DockId": "0x00000009,0",
+      "Pos": "304,25",
+      "Size": "418,50"
     },
     "###Addressable LEDs": {
       "Collapsed": "0",
       "DockId": "0x0000000C,0",
-      "Pos": "725,28",
+      "Pos": "724,25",
       "Size": "229,323"
     },
     "###FMS": {
       "Collapsed": "0",
       "DockId": "0x00000004,0",
-      "Pos": "10,163",
+      "Pos": "9,160",
       "Size": "293,188"
     },
     "###Joysticks": {
       "Collapsed": "0",
       "DockId": "0x00000007,0",
-      "Pos": "239,353",
+      "Pos": "238,350",
       "Size": "715,226"
     },
     "###Keyboard 0 Settings": {
@@ -87,7 +108,7 @@
     },
     "###Other Devices": {
       "Collapsed": "0",
-      "Pos": "1025,20",
+      "Pos": "378,45",
       "Size": "250,695"
     },
     "###RoboRIO": {
@@ -98,7 +119,7 @@
     "###System Joysticks": {
       "Collapsed": "0",
       "DockId": "0x00000006,0",
-      "Pos": "10,353",
+      "Pos": "9,350",
       "Size": "227,226"
     },
     "###Timing": {
@@ -114,7 +135,7 @@
     "Robot State": {
       "Collapsed": "0",
       "DockId": "0x00000003,0",
-      "Pos": "10,28",
+      "Pos": "9,25",
       "Size": "293,133"
     }
   }

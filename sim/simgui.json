@@ -19,9 +19,18 @@
   "NTProvider": {
     "types": {
       "/AdvantageKit/RealOutputs/Alerts": "Alerts",
+      "/AdvantageKit/RealOutputs/Choreo Alerts": "Alerts",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Alerts": "Alerts",
-      "/SmartDashboard/Auto Choices": "String Chooser"
+      "/SmartDashboard/April Tag Layout Type": "String Chooser",
+      "/SmartDashboard/AprilTag Layout": "String Chooser",
+      "/SmartDashboard/Auto Choices": "String Chooser",
+      "/SmartDashboard/Auto/Question #1 Chooser": "String Chooser",
+      "/SmartDashboard/Auto/Question #2 Chooser": "String Chooser",
+      "/SmartDashboard/Auto/Question #3 Chooser": "String Chooser",
+      "/SmartDashboard/Auto/Question #4 Chooser": "String Chooser",
+      "/SmartDashboard/Auto/Routine": "String Chooser",
+      "/SmartDashboard/Choreo Alerts": "Alerts"
     },
     "windows": {
       "/SmartDashboard/Alerts": {
@@ -29,8 +38,21 @@
           "visible": true
         }
       },
-      "/SmartDashboard/Auto Choices": {
+      "/SmartDashboard/Auto/Question #1 Chooser": {
         "window": {
+          "name": "Question #1",
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Auto/Question #2 Chooser": {
+        "window": {
+          "name": "Question #2",
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Auto/Routine": {
+        "window": {
+          "name": "Auto Routine",
           "visible": true
         }
       }

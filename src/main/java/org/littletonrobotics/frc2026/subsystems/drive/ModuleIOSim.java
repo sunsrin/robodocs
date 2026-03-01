@@ -109,7 +109,7 @@ public class ModuleIOSim implements ModuleIO {
       case CHARACTERIZE -> {
         driveClosedLoop = false;
         turnClosedLoop = true;
-        driveFFVolts = outputs.driveCharacterizationOutput;
+        driveAppliedVolts = outputs.driveCharacterizationOutput;
         turnController.setSetpoint(outputs.turnRotation.getRadians());
       }
     }

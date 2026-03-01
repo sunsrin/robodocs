@@ -21,8 +21,8 @@ public class DriveConstants {
   public static final double compbotFrameWidthYInches = 27.5;
   public static final double compbotFullWidthXInches = 33.0;
   public static final double compbotFullWidthYInches = 34.0;
-  public static final double compbotMaxLinearSpeed = 4.2; // Theoretical max is 4.4196
-  public static final double compbotMaxTrajectoryLinearSpeed = 4.0;
+  public static final double compbotMaxLinearSpeed = 4.4; // Theoretical max is 4.54
+  public static final double compbotMaxTrajectoryLinearSpeed = 4.2;
   public static final double compbotMaxAngularSpeed =
       5.374; // maxLinearSpeed / driveBaseRadius (0.7814886979 meters)
   public static final double compbotWheelRadiusInches = 1.99588001;
@@ -111,15 +111,15 @@ public class DriveConstants {
 
   // MARK: - Shared Constants
 
-  public static final double driveKs = 5.0;
-  public static final double driveKv = 0.0;
-  public static final double driveKp = 35.0;
+  public static final double driveKs = 0.14569;
+  public static final double driveKv = 0.13455;
+  public static final double driveKp = 2.0;
   public static final double driveKd = 0.0;
-  public static final double turnKp = 4000.0;
-  public static final double turnKd = 50.0;
+  public static final double turnKp = 200.0;
+  public static final double turnKd = 2.0;
   public static final double turnDeadbandDegrees = 0.3;
   public static final double driveCurrentLimitAmps = 80;
-  public static final double driveSupplyCurrentLimitAmps = 40;
+  public static final double driveSupplyCurrentLimitAmps = 30;
   public static final double turnCurrentLimitAmps = 40;
 
   public static final double trackWidthX =

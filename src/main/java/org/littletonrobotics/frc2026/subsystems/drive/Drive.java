@@ -217,4 +217,13 @@ public class Drive extends FullSubsystem {
     }
     return values;
   }
+
+  /** Returns the average velocity of the modules in rotations/sec (Phoenix native units). */
+  public double getFFCharacterizationVelocity() {
+    double output = 0.0;
+    for (int i = 0; i < 4; i++) {
+      output += modules[i].getFFCharacterizationVelocity() / 4.0;
+    }
+    return output;
+  }
 }

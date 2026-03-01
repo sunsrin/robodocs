@@ -44,8 +44,8 @@ public class Hood extends FullSubsystem {
       new LoggedTunableNumber("Hood/Homing/VelocityThreshold", 0.05);
 
   static {
-    kP.initDefault(30000);
-    kD.initDefault(300);
+    kP.initDefault(1200);
+    kD.initDefault(4);
     toleranceDeg.initDefault(1.0);
   }
 

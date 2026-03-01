@@ -322,6 +322,8 @@ public class RobotContainer {
 
     // Characterization
     autoSelector.addRoutine(
+        "Combobulated Salesman", DriveCommands.feedforwardCharacterization(drive));
+    autoSelector.addRoutine(
         "Discombobulated Salesman", DriveCommands.wheelRadiusCharacterization(drive));
   }
 
@@ -432,7 +434,7 @@ public class RobotContainer {
 
     // Outpost preset
     primary
-        .lowerLeftPaddle()
+        .lowerRightPaddle()
         .whileTrue(
             flywheel
                 .runFixedCommand(LaunchCalculator.outpostPreset.flywheelSpeed())
@@ -445,7 +447,7 @@ public class RobotContainer {
 
     // Tower preset
     primary
-        .lowerRightPaddle()
+        .lowerLeftPaddle()
         .whileTrue(
             flywheel
                 .runFixedCommand(LaunchCalculator.towerPreset.flywheelSpeed())
