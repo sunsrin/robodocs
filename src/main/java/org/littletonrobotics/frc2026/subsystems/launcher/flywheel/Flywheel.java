@@ -48,9 +48,9 @@ public class Flywheel extends FullSubsystem {
   private static final LoggedTunableNumber kP = new LoggedTunableNumber("Flywheel/kP", 0.4);
   private static final LoggedTunableNumber kD = new LoggedTunableNumber("Flywheel/kD", 0.0);
   private static final LoggedTunableNumber kS = new LoggedTunableNumber("Flywheel/kS", 0.22);
-  private static final LoggedTunableNumber kV = new LoggedTunableNumber("Flywheel/kV", 0.0185);
+  private static final LoggedTunableNumber kV = new LoggedTunableNumber("Flywheel/kV", 0.019);
   private static final LoggedTunableNumber maxAcceleration =
-      new LoggedTunableNumber("Flywheel/MaxAcceleration", 50.0);
+      new LoggedTunableNumber("Flywheel/MaxAcceleration", 250.0);
 
   private SlewRateLimiter slewRateLimiter = new SlewRateLimiter(maxAcceleration.get());
 

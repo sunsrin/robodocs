@@ -13,6 +13,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.net.WebServer;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.FloatArrayPublisher;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -29,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.io.File;
 import java.lang.reflect.Method;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
@@ -116,15 +121,18 @@ public class RobotContainer {
   private final Alert autoWinnerNotSet = new Alert("!!! AUTO WINNER NOT SET !!!", AlertType.kError);
   private final Alert aprilTagLayoutAlert = new Alert("", AlertType.kInfo);
 
-  // Dashboard inputs
-  AutoSelector autoSelector = new AutoSelector("Auto");
+  // Dashboard inputs and outputs
+  private final AutoSelector autoSelector = new AutoSelector("Auto");
   private final LoggedDashboardChooser<AprilTagLayoutType> aprilTagLayoutChooser;
+  private final FloatArrayPublisher fuelVizFuelPublisher;
+  private final FloatArrayPublisher fuelVizRobotPublisher;
+  private final BooleanPublisher fuelVizIsRedPublisher;
 
   private boolean coastOverride = false;
 
   /** Keeps track of the number of balls in the hopper with the fuel sim. */
   public class SimFuelCount {
-    @Getter private static final int capacity = 60;
+    @Getter private static final int capacity = 80;
     @Getter private static final double launchBPS = 16.0;
 
     @Setter @Getter private int fuelStored;
@@ -270,6 +278,16 @@ public class RobotContainer {
             flywheel.runFixedCommand(
                 () -> LaunchCalculator.getInstance().getParameters().flywheelIdleSpeed()),
             disableAutoSpinup));
+
+    // Set up fuel visualizer
+    var fuelVizTable = NetworkTableInstance.getDefault().getTable("FuelVisualizer");
+    fuelVizFuelPublisher = fuelVizTable.getFloatArrayTopic("Fuel").publish();
+    fuelVizRobotPublisher = fuelVizTable.getFloatArrayTopic("Robot").publish();
+    fuelVizIsRedPublisher = fuelVizTable.getBooleanTopic("IsRed").publish();
+    WebServer.start(
+        5801,
+        Paths.get(Filesystem.getDeployDirectory().getAbsolutePath().toString(), "fuelvisualizer")
+            .toString());
   }
 
   private void configureAutos() {
@@ -281,7 +299,11 @@ public class RobotContainer {
     autoSelector.addRoutine(
         "Home Depot Salesman",
         List.of(
-            new AutoQuestion("Through Tower?", List.of(AutoQuestionResponse.NO)),
+            new AutoQuestion(
+                "Start Location?",
+                List.of(AutoQuestionResponse.LEFT_TRENCH, AutoQuestionResponse.LEFT_BUMP)),
+            new AutoQuestion(
+                "Through Tower?", List.of(AutoQuestionResponse.NO, AutoQuestionResponse.YES)),
             new AutoQuestion("Post-Launch?", List.of(AutoQuestionResponse.NOTHING))),
         autoBuilder.homeDepotSalesman());
 
@@ -289,7 +311,11 @@ public class RobotContainer {
     autoSelector.addRoutine(
         "Lowe's Hardware Salesman",
         List.of(
-            new AutoQuestion("Through Tower?", List.of(AutoQuestionResponse.NO)),
+            new AutoQuestion(
+                "Start Location?",
+                List.of(AutoQuestionResponse.RIGHT_TRENCH, AutoQuestionResponse.RIGHT_BUMP)),
+            new AutoQuestion(
+                "Through Tower?", List.of(AutoQuestionResponse.NO, AutoQuestionResponse.YES)),
             new AutoQuestion("Post-Launch?", List.of(AutoQuestionResponse.NOTHING))),
         autoBuilder.lowesHardwareSalesman());
 
@@ -303,7 +329,9 @@ public class RobotContainer {
                     AutoQuestionResponse.LEFT_TRENCH,
                     AutoQuestionResponse.LEFT_BUMP,
                     AutoQuestionResponse.RIGHT_BUMP,
-                    AutoQuestionResponse.RIGHT_TRENCH))),
+                    AutoQuestionResponse.RIGHT_TRENCH)),
+            new AutoQuestion(
+                "Post-Launch?", List.of(AutoQuestionResponse.NOTHING, AutoQuestionResponse.CLIMB))),
         autoBuilder.monopolySalesman());
 
     // Timid Salesman
@@ -752,6 +780,26 @@ public class RobotContainer {
     SmartDashboard.putBoolean(
         "Shifts/Active First?",
         DriverStation.getAlliance().orElse(Alliance.Blue) == HubShiftUtil.getFirstActiveAlliance());
+
+    // Update fuel visualizer
+    var fuelTranslations = ObjectDetection.getInstance().getFuelTranslations();
+    float[] fuelTranslationsArray = new float[fuelTranslations.size() * 2];
+    int[] index = {0};
+    fuelTranslations.forEach(
+        t -> {
+          fuelTranslationsArray[index[0]++] = (float) t.getX();
+          fuelTranslationsArray[index[0]++] = (float) t.getY();
+        });
+    fuelVizFuelPublisher.set(fuelTranslationsArray);
+    var robotPose = RobotState.getInstance().getEstimatedPose();
+    fuelVizRobotPublisher.set(
+        new float[] {
+          (float) robotPose.getX(),
+          (float) robotPose.getY(),
+          (float) robotPose.getRotation().getRadians()
+        });
+    fuelVizIsRedPublisher.set(
+        DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red));
 
     // Controller disconnected alerts
     primaryDisconnected.set(!DriverStation.isJoystickConnected(primary.getHID().getPort()));

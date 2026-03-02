@@ -25,6 +25,7 @@ import org.littletonrobotics.frc2026.commands.DriveToPose;
 import org.littletonrobotics.frc2026.commands.DriveTrajectory;
 import org.littletonrobotics.frc2026.subsystems.drive.Drive;
 import org.littletonrobotics.frc2026.subsystems.hopper.Hopper;
+import org.littletonrobotics.frc2026.subsystems.hopper.Hopper.HopperLevel;
 import org.littletonrobotics.frc2026.subsystems.kicker.Kicker;
 import org.littletonrobotics.frc2026.subsystems.launcher.flywheel.Flywheel;
 import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake;
@@ -32,6 +33,7 @@ import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake.SlamGoal;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 
 public class AutoCommands {
+
   public static Command returnToLaunchPose(Drive drive) {
     return new DriveToPose(
         drive,
@@ -177,6 +179,14 @@ public class AutoCommands {
 
   public static Command driveToPose(Drive drive, Supplier<Pose2d> target) {
     return new DriveToPose(drive, () -> AllianceFlipUtil.apply(target.get()));
+  }
+
+  public static Command waitUntilLevel(Hopper hopper, HopperLevel level) {
+    return Commands.waitUntil(() -> hopper.getHopperLevel().equals(level));
+  }
+
+  public static Command waitUntilLevelOrTimeout(Hopper hopper, HopperLevel level, double seconds) {
+    return Commands.waitUntil(() -> hopper.getHopperLevel().equals(level)).withTimeout(seconds);
   }
 
   /**

@@ -21,7 +21,7 @@ import org.littletonrobotics.frc2026.util.VirtualSubsystem;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class AutoSelector extends VirtualSubsystem {
-  private static final int maxQuestions = 2;
+  private static final int maxQuestions = 4;
   private static final AutoRoutine defaultRoutine =
       new AutoRoutine("Posthumous Salesman", List.of(), Commands.none());
 

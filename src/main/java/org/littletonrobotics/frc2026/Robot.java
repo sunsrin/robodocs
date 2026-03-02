@@ -246,7 +246,7 @@ public class Robot extends LoggedRobot {
 
     // Log fuel state
     fuelLoggingTimer.start();
-    if (fuelLoggingTimer.advanceIfElapsed(0.05)) {
+    if (fuelLoggingTimer.advanceIfElapsed(0.05) && Constants.getMode() != Mode.REAL) {
       Logger.recordOutput(
           "ObjectDetection/FuelTranslations",
           ObjectDetection.getInstance().getFuelTranslations().stream()

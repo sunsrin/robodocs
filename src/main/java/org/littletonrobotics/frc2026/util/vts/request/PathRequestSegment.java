@@ -20,18 +20,19 @@ public class PathRequestSegment {
 
   /**
    * Do not allow the robot velocity to exceed the specified value. Negative to disable constraint.
+   * Measured in meters per second.
    */
   @Builder.Default public final double maxVelocity = -1.0;
 
   /**
    * Do not allow the robot acceleration to exceed the specified value. Negative to disable
-   * constraint.
+   * constraint. Measured in meters per second squared.
    */
   @Builder.Default public final double maxAcceleration = -1.0;
 
   /**
    * Do not allow the robot angular velocity to exceed the specified value. Negative to disable
-   * constraint.
+   * constraint. Measured in radians.
    */
   @Builder.Default public final double maxAngularVelocity = -1.0;
 
@@ -41,7 +42,7 @@ public class PathRequestSegment {
   /**
    * Keep the robot within a rectangular lane defined by the start and end waypoints, where the
    * value is the allowed distance from the line directly connecting these waypoints. Negative to
-   * disable.
+   * disable. Measured in meters.
    */
   @Builder.Default public final double keepInLaneWidth = -1.0;
 

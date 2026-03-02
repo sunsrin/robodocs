@@ -23,6 +23,15 @@ public class PathRequestHelpers {
     return builder.segments(list);
   }
 
+  public static PathRequestBuilder segments(
+      PathRequestBuilder builder, List<PathRequestSegment> segments) {
+    List<PathRequestSegment> list = new ArrayList<>(builder.build().segments);
+    for (var segment : segments) {
+      list.add(segment);
+    }
+    return builder.segments(list);
+  }
+
   /** Add waypoints to a path request. */
   public static PathRequestSegmentBuilder waypoints(
       PathRequestSegmentBuilder builder, PathWaypoint... waypoints) {

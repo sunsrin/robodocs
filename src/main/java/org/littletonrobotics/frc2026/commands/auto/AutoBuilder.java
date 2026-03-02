@@ -24,6 +24,7 @@ import org.littletonrobotics.frc2026.AutoSelector.AutoQuestionResponse;
 import org.littletonrobotics.frc2026.RobotState;
 import org.littletonrobotics.frc2026.subsystems.drive.Drive;
 import org.littletonrobotics.frc2026.subsystems.hopper.Hopper;
+import org.littletonrobotics.frc2026.subsystems.hopper.Hopper.HopperLevel;
 import org.littletonrobotics.frc2026.subsystems.kicker.Kicker;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.flywheel.Flywheel;
@@ -43,43 +44,57 @@ public class AutoBuilder {
 
   private final Supplier<List<AutoQuestionResponse>> responses;
 
+  private static final double outpostIntakeTime = 3.0;
+
   public Command homeDepotSalesman() {
     return Commands.sequence(
-        Commands.either(
-                followTrajectory("HomeDepot_startToOutpost", drive, true),
-                followTrajectory("HomeDepot_startToOutpostAround", drive, true),
-                () -> responses.get().get(0).equals(AutoQuestionResponse.YES))
-            .andThen(Commands.waitSeconds(2.5)),
+        Commands.select(
+                Map.of(
+                    AutoQuestionResponse.LEFT_TRENCH,
+                    Commands.either(
+                        followTrajectory("trenchLeftStartToOutpostLeftIntakeAround", drive, true),
+                        followTrajectory("trenchLeftStartToOutpostLeftIntake", drive, true),
+                        () -> responses.get().get(1).equals(AutoQuestionResponse.NO)),
+                    AutoQuestionResponse.LEFT_BUMP,
+                    Commands.either(
+                        followTrajectory("bumpLeftInnerToOutpostLeftIntakeAround", drive, true),
+                        followTrajectory("bumpLeftInnerToOutpostLeftIntake", drive, true),
+                        () -> responses.get().get(1).equals(AutoQuestionResponse.NO))),
+                () -> responses.get().get(0))
+            .andThen(Commands.waitSeconds(outpostIntakeTime)),
         AutoCommands.driveToPose(drive, () -> Launch.rightTower)
             .raceWith(
                 Commands.sequence(
                     AutoCommands.waitUntilWithinTolerance(
                         Launch.rightTower, 0.1, Rotation2d.fromDegrees(5)),
                     index(hopper, kicker, flywheel, intake)
-                        .withDeadline(
-                            Commands.waitSeconds(
-                                10)))), // TODO: Replace wait with hopper depth checks
+                        .withDeadline(waitUntilLevelOrTimeout(hopper, HopperLevel.EMPTY, 6)))),
         Commands.select(
             Map.of(
-                AutoQuestionResponse.CLIMB,
-                followTrajectory("launchRightTowerToClimbRight", drive, false),
                 AutoQuestionResponse.NOTHING,
-                Commands.none()),
-            () -> responses.get().get(1)));
+                Commands.none(),
+                AutoQuestionResponse.CLIMB,
+                followTrajectory("launchRightTowerToClimbRight", drive, false)),
+            () -> responses.get().get(2)));
   }
 
   public Command lowesHardwareSalesman() {
     return Commands.sequence(
         // Intake from outpost
-        followTrajectory("trenchRightStartToOutpost", drive, true),
-        Commands.waitSeconds(2.5),
+        Commands.select(
+            Map.of(
+                AutoQuestionResponse.RIGHT_TRENCH,
+                followTrajectory("trenchRightStartToOutpostFrontIntake", drive, true),
+                AutoQuestionResponse.RIGHT_BUMP,
+                followTrajectory("bumpRightInnerToOutpostFrontIntake", drive, true)),
+            () -> responses.get().get(0)),
+        Commands.waitSeconds(outpostIntakeTime),
 
         // Intake from depot
         Commands.either(
-            Commands.none(), // TODO: Implement --> followTrajectory("LowesHardware_outpostToDepot",
-            // drive, false),
-            followTrajectory("LowesHardware_outpostToDepotAround", drive, false),
-            () -> responses.get().get(0).equals(AutoQuestionResponse.YES)),
+            followTrajectory("outpostFrontIntakeToDepotAround", drive, false),
+            followTrajectory("outpostFrontIntakeToDepot", drive, false),
+            () -> responses.get().get(1).equals(AutoQuestionResponse.NO)),
 
         // Launch intaken fuel
         AutoCommands.driveToPose(drive, () -> Launch.leftTower)
@@ -88,9 +103,7 @@ public class AutoBuilder {
                     AutoCommands.waitUntilWithinTolerance(
                         Launch.leftTower, 0.1, Rotation2d.fromDegrees(5)),
                     index(hopper, kicker, flywheel, intake)
-                        .withDeadline(
-                            Commands.waitSeconds(
-                                10)))), // TODO: Replace wait with hopper depth checks
+                        .withDeadline(waitUntilLevelOrTimeout(hopper, HopperLevel.EMPTY, 6)))),
         Commands.select(
             Map.of(
                 AutoQuestionResponse.CLIMB,
@@ -112,6 +125,7 @@ public class AutoBuilder {
                     .getTranslation()
                     .getDistance(AllianceFlipUtil.apply(Launch.rightTower.getTranslation()));
     return Commands.sequence(
+        // Drive to closest intaking position
         Commands.select(
             Map.of(
                 AutoQuestionResponse.LEFT_TRENCH,
@@ -119,16 +133,14 @@ public class AutoBuilder {
                 AutoQuestionResponse.LEFT_BUMP,
                 followTrajectory("bumpLeftInnerToTower", drive, true),
                 AutoQuestionResponse.RIGHT_BUMP,
-                Commands.waitSeconds(3.0)
-                    .andThen(
-                        followTrajectory("bumpRightInnerToOutpost", drive, true),
-                        Commands.waitSeconds(10)),
+                followTrajectory("bumpRightInnerToOutpostFrontIntake", drive, true)
+                    .andThen(Commands.waitSeconds(outpostIntakeTime)),
                 AutoQuestionResponse.RIGHT_TRENCH,
-                Commands.waitSeconds(3.0)
-                    .andThen(
-                        followTrajectory("trenchRightStartToOutpost", drive, true),
-                        Commands.waitSeconds(10))),
+                followTrajectory("trenchRightStartToOutpostFrontIntake", drive, true)
+                    .andThen(Commands.waitSeconds(outpostIntakeTime))),
             () -> responses.get().get(0)),
+
+        // Drive to and launch from launch pose
         Commands.either(
                 AutoCommands.driveToPose(drive, () -> Launch.leftTower),
                 AutoCommands.driveToPose(drive, () -> Launch.rightTower),
@@ -139,7 +151,18 @@ public class AutoBuilder {
                         () -> isLeft.getAsBoolean() ? Launch.leftTower : Launch.rightTower,
                         0.1,
                         Rotation2d.fromDegrees(5)),
-                    index(hopper, kicker, flywheel, intake))));
+                    index(hopper, kicker, flywheel, intake))),
+
+        // Initiate chosen end behavior
+        Commands.select(
+            Map.of(
+                AutoQuestionResponse.NOTHING,
+                Commands.none(),
+                AutoQuestionResponse.CLIMB,
+                isLeft.getAsBoolean()
+                    ? followTrajectory("launchLeftTowerToClimbLeft", drive, false)
+                    : followTrajectory("launchRightTowerToClimbRight", drive, false)),
+            () -> responses.get().get(1)));
   }
 
   public Command timidSalesman() {

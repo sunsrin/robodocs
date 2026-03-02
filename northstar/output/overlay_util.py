@@ -51,3 +51,18 @@ def overlay_obj_detect_observation(image: cv2.Mat, observation: ObjDetectObserva
         (0, 0, 225),
         2,
     )
+
+
+def overlay_circle_obj_detect_observation(image: cv2.Mat, observation: ObjDetectObservation) -> None:
+    cv2.ellipse(
+        image,
+        (int((observation.corner_pixels[0][0] + observation.corner_pixels[1][0]) / 2),
+         int((observation.corner_pixels[0][1] + observation.corner_pixels[2][1]) / 2)),
+        (int((observation.corner_pixels[1][0] - observation.corner_pixels[0][0]) / 2),
+         int((observation.corner_pixels[2][1] - observation.corner_pixels[0][1]) / 2)),
+        0,
+        180,
+        360,
+        (0, 0, 225),
+        2,
+    )

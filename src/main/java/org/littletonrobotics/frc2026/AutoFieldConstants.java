@@ -116,13 +116,17 @@ public class AutoFieldConstants {
   }
 
   public static class Outpost {
-    public static final Waypoint intake =
-        Waypoint.builder()
-            .translation(
-                FieldConstants.Outpost.centerPoint.plus(
-                    new Translation2d(DriveConstants.fullWidthX / 2 + 0.1, 0.4)))
-            .area(Area.OUTPOST)
-            .build();
+    public static final Pose2d leftIntake =
+        new Pose2d(
+            FieldConstants.Outpost.centerPoint.plus(
+                new Translation2d(DriveConstants.fullWidthX / 2 + 0.1, 0.25)),
+            Rotation2d.fromDegrees(-90));
+
+    public static final Pose2d frontIntake =
+        new Pose2d(
+            FieldConstants.Outpost.centerPoint.plus(
+                new Translation2d(DriveConstants.fullWidthX / 2.0 + 0.25, 0.4)),
+            Rotation2d.kPi);
   }
 
   public static class Tower {
@@ -195,13 +199,13 @@ public class AutoFieldConstants {
   }
 
   public static class Launch {
-    public static final Pose2d rightTower =
-        LaunchCalculator.getStationaryAimedPose(
-            Climb.right.getTranslation().plus(new Translation2d(1.5, -0.5)), true);
-
     public static final Pose2d leftTower =
         LaunchCalculator.getStationaryAimedPose(
             Climb.left.getTranslation().plus(new Translation2d(1.5, 0.5)), true);
+
+    public static final Pose2d rightTower =
+        LaunchCalculator.getStationaryAimedPose(
+            Climb.right.getTranslation().plus(new Translation2d(1.5, -0.5)), true);
 
     public static Pose2d leftBump =
         LaunchCalculator.getStationaryAimedPose(

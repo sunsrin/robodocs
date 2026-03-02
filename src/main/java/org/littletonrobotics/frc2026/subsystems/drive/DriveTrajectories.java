@@ -93,21 +93,32 @@ public class DriveTrajectories {
             .segments(
                 PathRequestSegment.builder()
                     .waypoints(
+                        // Starting launch pose
                         PathWaypoint.from(Launch.leftBump).build(),
+                        // Just before bump
                         PathWaypoint.from(
                                 new Pose2d(
                                     FieldConstants.LinesVertical.starting
                                         - DriveConstants.fullWidthX / 2.0,
                                     FieldConstants.LinesHorizontal.leftBumpMiddle,
                                     Rotation2d.fromDegrees(45)))
-                            .build(),
+                            .build())
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Just after bump
                         PathWaypoint.from(
                                 new Pose2d(
                                     FieldConstants.LinesVertical.neutralZoneNear
                                         + DriveConstants.fullWidthX / 2.0,
                                     FieldConstants.LinesHorizontal.leftBumpMiddle,
                                     Rotation2d.fromDegrees(45)))
-                            .build(),
+                            .build())
+                    .maxAngularVelocity(0.01)
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Beginning of fuel pool
                         PathWaypoint.from(
                                 new Translation2d(
                                     FieldConstants.LinesVertical.neutralZoneNear + 2.0,
@@ -123,21 +134,32 @@ public class DriveTrajectories {
             .segments(
                 PathRequestSegment.builder()
                     .waypoints(
+                        // Starting launch pose
                         PathWaypoint.from(Launch.rightBump).build(),
+                        // Just before bump
                         PathWaypoint.from(
                                 new Pose2d(
                                     FieldConstants.LinesVertical.starting
                                         - DriveConstants.fullWidthX / 2.0,
                                     FieldConstants.LinesHorizontal.rightBumpMiddle,
                                     Rotation2d.fromDegrees(-45)))
-                            .build(),
+                            .build())
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Just after bump
                         PathWaypoint.from(
                                 new Pose2d(
                                     FieldConstants.LinesVertical.neutralZoneNear
                                         + DriveConstants.fullWidthX / 2.0,
                                     FieldConstants.LinesHorizontal.rightBumpMiddle,
                                     Rotation2d.fromDegrees(-45)))
-                            .build(),
+                            .build())
+                    .maxAngularVelocity(0.01)
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Beginning of fuel pool
                         PathWaypoint.from(
                                 new Translation2d(
                                     FieldConstants.LinesVertical.neutralZoneNear + 2.0,
@@ -153,21 +175,32 @@ public class DriveTrajectories {
             .segments(
                 PathRequestSegment.builder()
                     .waypoints(
+                        // Starting launch pose
                         PathWaypoint.from(Launch.leftTower).build(),
+                        // Just before bump
                         PathWaypoint.from(
                                 new Pose2d(
                                     FieldConstants.LinesVertical.starting
                                         - DriveConstants.fullWidthX / 2.0,
                                     FieldConstants.LinesHorizontal.leftBumpMiddle,
                                     Rotation2d.fromDegrees(45)))
-                            .build(),
+                            .build())
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Just after bump
                         PathWaypoint.from(
                                 new Pose2d(
                                     FieldConstants.LinesVertical.neutralZoneNear
                                         + DriveConstants.fullWidthX / 2.0,
                                     FieldConstants.LinesHorizontal.leftBumpMiddle,
                                     Rotation2d.fromDegrees(45)))
-                            .build(),
+                            .build())
+                    .maxAngularVelocity(0.01)
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Beginning of fuel pool
                         PathWaypoint.from(
                                 new Translation2d(
                                     FieldConstants.LinesVertical.neutralZoneNear + 2.0,
@@ -183,21 +216,32 @@ public class DriveTrajectories {
             .segments(
                 PathRequestSegment.builder()
                     .waypoints(
+                        // Starting launch pose
                         PathWaypoint.from(Launch.rightTower).build(),
+                        // Just before bump
                         PathWaypoint.from(
                                 new Pose2d(
                                     FieldConstants.LinesVertical.starting
                                         - DriveConstants.fullWidthX / 2.0,
                                     FieldConstants.LinesHorizontal.rightBumpMiddle,
                                     Rotation2d.fromDegrees(-45)))
-                            .build(),
+                            .build())
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Just after bump
                         PathWaypoint.from(
                                 new Pose2d(
                                     FieldConstants.LinesVertical.neutralZoneNear
                                         + DriveConstants.fullWidthX / 2.0,
                                     FieldConstants.LinesHorizontal.rightBumpMiddle,
                                     Rotation2d.fromDegrees(-45)))
-                            .build(),
+                            .build())
+                    .maxAngularVelocity(0.01)
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Beginning of fuel pool
                         PathWaypoint.from(
                                 new Translation2d(
                                     FieldConstants.LinesVertical.neutralZoneNear + 2.0,
@@ -207,7 +251,7 @@ public class DriveTrajectories {
             .stopAtEnd(false)
             .build());
 
-    // Home Depot Salesman trajectories
+    // Climb Trajectories
     paths.put(
         "launchRightTowerToClimbRight",
         PathRequest.builder()
@@ -225,6 +269,24 @@ public class DriveTrajectories {
                     .build())
             .build());
 
+    paths.put(
+        "launchLeftTowerToClimbLeft",
+        PathRequest.builder()
+            .segments(
+                PathRequestSegment.builder()
+                    .waypoints(
+                        PathWaypoint.from(Launch.leftTower).build(),
+                        PathWaypoint.from(Climb.leftOffset).build())
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(PathWaypoint.from(Climb.left).build())
+                    .keepInLaneWidth(0.008)
+                    .maxVelocity(0.5)
+                    .maxAngularVelocity(0.01)
+                    .build())
+            .build());
+
+    // Home Depot Salesman trajectories
     PathRequestBuilder trenchLeftStartToTower =
         PathRequest.builder()
             .segments(
@@ -255,11 +317,6 @@ public class DriveTrajectories {
                     .maxVelocity(1.5)
                     .maxAngularVelocity(0.1)
                     .keepInLaneWidth(0.05)
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints(
-                        // Before Tower Intermediate
-                        PathWaypoint.from(new Translation2d(0.75, 5.0)).build())
                     .build());
 
     PathRequestBuilder bumpLeftInnerToTower =
@@ -292,48 +349,43 @@ public class DriveTrajectories {
                     .maxVelocity(1.5)
                     .maxAngularVelocity(0.1)
                     .keepInLaneWidth(0.05)
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints(
-                        // Before Tower Intermediate
-                        PathWaypoint.from(new Translation2d(0.75, 5.0)).build())
                     .build());
 
-    paths.put("trenchLeftStartToTower", trenchLeftStartToTower.build());
-
-    paths.put("bumpLeftInnerToTower", bumpLeftInnerToTower.build());
-
-    paths.put(
-        "HomeDepot_startToOutpost",
-        trenchLeftStartToTower
-            .build()
-            .clone()
+    PathRequestBuilder towerLeftThroughToOutpostLeftIntake =
+        PathRequest.builder()
             .segments(
                 PathRequestSegment.builder()
                     .waypoints(
                         // Before tower
-                        PathWaypoint.from(new Pose2d(0.53, 4.68, Rotation2d.fromDegrees(-90)))
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    Tower.leftThrough.translation(), Rotation2d.fromDegrees(-90)))
                             .build())
                     .build(),
                 PathRequestSegment.builder()
                     .waypoints(
                         // Through tower
-                        PathWaypoint.from(new Pose2d(0.53, 2.7, Rotation2d.fromDegrees(-90)))
-                            .build(),
-                        // Outpost
-                        PathWaypoint.from(new Pose2d(0.53, 0.9, Rotation2d.fromDegrees(-90)))
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    Tower.rightThrough.translation(), Rotation2d.fromDegrees(-90)))
                             .build())
                     .maxVelocity(1.5)
                     .maxAngularVelocity(0.1)
-                    .build())
-            .build());
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Outpost
+                        PathWaypoint.from(Outpost.leftIntake).build())
+                    .build());
 
-    paths.put(
-        "HomeDepot_startToOutpostAround",
-        trenchLeftStartToTower
-            .build()
-            .clone()
+    PathRequestBuilder towerLeftThroughToOutpostLeftIntakeAround =
+        PathRequest.builder()
             .segments(
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Before Tower Intermediate
+                        PathWaypoint.from(new Translation2d(0.75, 5.0)).build())
+                    .build(),
                 PathRequestSegment.builder()
                     .waypoints(
                         // Outside tower left
@@ -360,17 +412,46 @@ public class DriveTrajectories {
                                             DriveConstants.fullWidthX / 2.0 + 0.25, 0.0)),
                                     Rotation2d.kPi))
                             .build())
-                    .build())
+                    .build());
+
+    paths.put("trenchLeftStartToTower", trenchLeftStartToTower.build());
+
+    paths.put("bumpLeftInnerToTower", bumpLeftInnerToTower.build());
+
+    paths.put(
+        "trenchLeftStartToOutpostLeftIntake",
+        trenchLeftStartToTower
+            .build()
+            .clone()
+            .segments(towerLeftThroughToOutpostLeftIntake.build().segments)
+            .build());
+
+    paths.put(
+        "trenchLeftStartToOutpostLeftIntakeAround",
+        trenchLeftStartToTower
+            .build()
+            .clone()
+            .segments(towerLeftThroughToOutpostLeftIntakeAround.build().segments)
+            .build());
+
+    paths.put(
+        "bumpLeftInnerToOutpostLeftIntake",
+        bumpLeftInnerToTower
+            .build()
+            .clone()
+            .segments(towerLeftThroughToOutpostLeftIntake.build().segments)
+            .build());
+
+    paths.put(
+        "bumpLeftInnerToOutpostLeftIntakeAround",
+        bumpLeftInnerToTower
+            .build()
+            .clone()
+            .segments(towerLeftThroughToOutpostLeftIntakeAround.build().segments)
             .build());
 
     // Lowe's Hardware Salesman trajectories
-    Pose2d LH_outpost =
-        new Pose2d(
-            FieldConstants.Outpost.centerPoint.plus(
-                new Translation2d(DriveConstants.fullWidthX / 2.0 + 0.25, 0.15)),
-            Rotation2d.kPi);
-
-    PathRequestBuilder trenchRightStartToOutpost =
+    PathRequestBuilder trenchRightStartToOutpostFrontIntake =
         PathRequest.builder()
             .segments(
                 PathRequestSegment.builder()
@@ -380,11 +461,11 @@ public class DriveTrajectories {
                                 new Pose2d(Trench.rightStart.translation(), Rotation2d.kPi))
                             .build(),
                         // Outpost
-                        PathWaypoint.from(LH_outpost).build())
+                        PathWaypoint.from(Outpost.frontIntake).build())
                     .keepInLaneWidth(0.15)
                     .build());
 
-    PathRequestBuilder bumpRightInnerToOutpost =
+    PathRequestBuilder bumpRightInnerToOutpostFrontIntake =
         PathRequest.builder()
             .segments(
                 PathRequestSegment.builder()
@@ -393,7 +474,7 @@ public class DriveTrajectories {
                         PathWaypoint.from(new Pose2d(Bump.rightInner.translation(), Rotation2d.kPi))
                             .build(),
                         // Outpost
-                        PathWaypoint.from(LH_outpost).build())
+                        PathWaypoint.from(Outpost.frontIntake).build())
                     .keepInLaneWidth(0.15)
                     .build());
 
@@ -420,18 +501,48 @@ public class DriveTrajectories {
                     .keepInLaneWidth(0.05)
                     .build());
 
-    paths.put("trenchRightStartToOutpost", trenchRightStartToOutpost.build());
+    paths.put("trenchRightStartToOutpostFrontIntake", trenchRightStartToOutpostFrontIntake.build());
 
-    paths.put("bumpRightInnerToOutpost", bumpRightInnerToOutpost.build());
+    paths.put("bumpRightInnerToOutpostFrontIntake", bumpRightInnerToOutpostFrontIntake.build());
 
     paths.put(
-        "LowesHardware_outpostToDepotAround",
+        "outpostFrontIntakeToDepot",
         PathRequest.builder()
             .segments(
                 PathRequestSegment.builder()
                     .waypoints(
                         // Outpost
-                        PathWaypoint.from(LH_outpost).build(),
+                        PathWaypoint.from(Outpost.frontIntake).build())
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Outside tower right
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    Tower.rightThrough.translation(), Rotation2d.fromDegrees(90)))
+                            .build())
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Through tower
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    Tower.leftThrough.translation(), Rotation2d.fromDegrees(90)))
+                            .build())
+                    .maxVelocity(1.5)
+                    .maxAngularVelocity(0.1)
+                    .build())
+            .segments(depotRightToLeft.build().segments)
+            .build());
+
+    paths.put(
+        "outpostFrontIntakeToDepotAround",
+        PathRequest.builder()
+            .segments(
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Outpost
+                        PathWaypoint.from(Outpost.frontIntake).build(),
                         // Outside tower right
                         PathWaypoint.from(Tower.rightOutside.translation()).build())
                     .build(),
@@ -451,24 +562,7 @@ public class DriveTrajectories {
                         PathWaypoint.from(new Translation2d(0.75, 5.0)).build())
                     .keepInLaneWidth(0.05)
                     .build())
-            .segments(depotRightToLeft.build().segments.toArray(new PathRequestSegment[0]))
-            .build());
-
-    paths.put(
-        "launchLeftTowerToClimbLeft",
-        PathRequest.builder()
-            .segments(
-                PathRequestSegment.builder()
-                    .waypoints(
-                        PathWaypoint.from(Launch.leftTower).build(),
-                        PathWaypoint.from(Climb.leftOffset).build())
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints(PathWaypoint.from(Climb.left).build())
-                    .keepInLaneWidth(0.008)
-                    .maxVelocity(0.5)
-                    .maxAngularVelocity(0.01)
-                    .build())
+            .segments(depotRightToLeft.build().segments)
             .build());
   }
 }

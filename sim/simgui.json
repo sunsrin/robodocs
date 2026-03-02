@@ -50,6 +50,18 @@
           "visible": true
         }
       },
+      "/SmartDashboard/Auto/Question #3 Chooser": {
+        "window": {
+          "name": "Question #3",
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Auto/Question #4 Chooser": {
+        "window": {
+          "name": "Question #4",
+          "visible": true
+        }
+      },
       "/SmartDashboard/Auto/Routine": {
         "window": {
           "name": "Auto Routine",
