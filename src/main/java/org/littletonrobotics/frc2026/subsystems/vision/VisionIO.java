@@ -25,7 +25,7 @@ public interface VisionIO {
   @AutoLog
   class ObjDetectVisionIOInputs {
     public double[] timestamps = new double[] {};
-    public double[][] frames = new double[][] {};
+    public float[][] frames = new float[][] {};
     public long fps = 0;
   }
 

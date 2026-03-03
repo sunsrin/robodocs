@@ -486,6 +486,9 @@ public class GenerateTrajectories {
     DecimalFormat format = new DecimalFormat("#.000000");
     format.setRoundingMode(RoundingMode.HALF_DOWN);
 
+    // Add Choreo version
+    hashString.append(ChoreoLauncher.choreoVersion);
+
     // Add drive config to hashString
     hashString.append(format.format(robotConfig.frontLeft().x().val()));
     hashString.append(format.format(robotConfig.frontLeft().y().val()));

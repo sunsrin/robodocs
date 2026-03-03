@@ -241,9 +241,9 @@ public class Vision extends VirtualSubsystem {
       for (int frameIndex = 0;
           frameIndex < objDetectInputs[instanceIndex].timestamps.length;
           frameIndex++) {
-        double[] frame = objDetectInputs[instanceIndex].frames[frameIndex];
+        float[] frame = objDetectInputs[instanceIndex].frames[frameIndex];
         for (int i = 0; i < frame.length; i += 10) {
-          switch ((int) frame[i]) {
+          switch ((int) Math.round(frame[i])) {
             case 0 -> {
               // Fuel
               if (frame[i + 1] >= fuelDetectConfidenceThreshold) {

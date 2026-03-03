@@ -128,10 +128,14 @@ public class VisionIONorthstar implements VisionIO {
     // Get object detection data
     var objDetectQueue = objDetectObservationSubscriber.readQueue();
     objDetectInputs.timestamps = new double[objDetectQueue.length];
-    objDetectInputs.frames = new double[objDetectQueue.length][];
+    objDetectInputs.frames = new float[objDetectQueue.length][];
     for (int i = 0; i < objDetectQueue.length; i++) {
       objDetectInputs.timestamps[i] = objDetectQueue[i].timestamp / 1000000.0;
-      objDetectInputs.frames[i] = objDetectQueue[i].value;
+      double[] doubleArray = objDetectQueue[i].value;
+      objDetectInputs.frames[i] = new float[doubleArray.length];
+      for (int j = 0; j < doubleArray.length; j++) {
+        objDetectInputs.frames[i][j] = (float) doubleArray[j];
+      }
     }
     if (slowPeriodic) {
       objDetectInputs.fps = fpsObjDetectSubscriber.get();
