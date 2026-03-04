@@ -60,7 +60,6 @@ public class LaunchCalculator {
       double hoodAngle,
       double hoodVelocity,
       double flywheelSpeed,
-      double flywheelIdleSpeed,
       double distance,
       double distanceNoLookahead,
       double timeOfFlight,
@@ -96,6 +95,8 @@ public class LaunchCalculator {
   public static final double towerPresetDistance = 2.5;
   public static final double trenchPresetDistance = 3.03;
   public static final double outpostPresetDistance = 4.84;
+  public static final double passingPresetDistance = 7.0;
+  public static final LaunchPreset passingPreset;
   public static final LaunchPreset hubPreset;
   public static final LaunchPreset towerPreset;
   public static final LaunchPreset trenchPreset;
@@ -111,8 +112,8 @@ public class LaunchCalculator {
               "LaunchCalculator/Presets/HoodMax/HoodAngle", Units.radiansToDegrees(Hood.maxAngle)),
           new LoggedTunableNumber("LaunchCalculator/Presets/HoodMax/FlywheelSpeed", 50));
 
-  private static final LoggedTunableNumber maxIdleSpeed =
-      new LoggedTunableNumber("LaunchCalculator/MaxIdleSpeed", 200);
+  public static final LoggedTunableNumber passingIdleSpeed =
+      new LoggedTunableNumber("LaunchCalculator/PassingIdleSpeed", 50);
 
   public static record LaunchPreset(
       LoggedTunableNumber hoodAngleDeg, LoggedTunableNumber flywheelSpeed) {}
@@ -215,6 +216,14 @@ public class LaunchCalculator {
       passingTimeOfFlightMap.put(passingMaxDistance, 0.0);
     }
 
+    passingPreset =
+        new LaunchPreset(
+            new LoggedTunableNumber(
+                "LaunchCalculator/Presets/Passing/HoodAngle",
+                hoodAngleMap.get(passingPresetDistance).getDegrees()),
+            new LoggedTunableNumber(
+                "LaunchCalculator/Presets/Passing/FlywheelSpeed",
+                flywheelSpeedMap.get(passingPresetDistance)));
     hubPreset =
         new LaunchPreset(
             new LoggedTunableNumber(
@@ -356,7 +365,6 @@ public class LaunchCalculator {
             hoodAngle + Units.degreesToRadians(hoodAngleOffsetDeg),
             hoodVelocity,
             flywheelVelocity,
-            MathUtil.clamp(flywheelVelocity, 0, maxIdleSpeed.get()),
             lookaheadLauncherToTargetDistance,
             launcherToTargetDistance,
             timeOfFlight,

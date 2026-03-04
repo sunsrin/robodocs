@@ -24,7 +24,6 @@ import org.littletonrobotics.frc2026.AutoSelector.AutoQuestionResponse;
 import org.littletonrobotics.frc2026.RobotState;
 import org.littletonrobotics.frc2026.subsystems.drive.Drive;
 import org.littletonrobotics.frc2026.subsystems.hopper.Hopper;
-import org.littletonrobotics.frc2026.subsystems.hopper.Hopper.HopperLevel;
 import org.littletonrobotics.frc2026.subsystems.kicker.Kicker;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.flywheel.Flywheel;
@@ -67,8 +66,7 @@ public class AutoBuilder {
                 Commands.sequence(
                     AutoCommands.waitUntilWithinTolerance(
                         Launch.rightTower, 0.1, Rotation2d.fromDegrees(5)),
-                    index(hopper, kicker, flywheel, intake)
-                        .withDeadline(waitUntilLevelOrTimeout(hopper, HopperLevel.EMPTY, 6)))),
+                    index(hopper, kicker, flywheel, intake).withTimeout(6))),
         Commands.select(
             Map.of(
                 AutoQuestionResponse.NOTHING,
@@ -102,8 +100,7 @@ public class AutoBuilder {
                 Commands.sequence(
                     AutoCommands.waitUntilWithinTolerance(
                         Launch.leftTower, 0.1, Rotation2d.fromDegrees(5)),
-                    index(hopper, kicker, flywheel, intake)
-                        .withDeadline(waitUntilLevelOrTimeout(hopper, HopperLevel.EMPTY, 6)))),
+                    index(hopper, kicker, flywheel, intake).withTimeout(6))),
         Commands.select(
             Map.of(
                 AutoQuestionResponse.CLIMB,

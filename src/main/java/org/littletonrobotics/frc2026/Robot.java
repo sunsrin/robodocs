@@ -34,6 +34,7 @@ import org.littletonrobotics.frc2026.Constants.Mode;
 import org.littletonrobotics.frc2026.Constants.RobotType;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.leds.Leds;
+import org.littletonrobotics.frc2026.util.EnergyLogger;
 import org.littletonrobotics.frc2026.util.FullSubsystem;
 import org.littletonrobotics.frc2026.util.HubShiftUtil;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
@@ -195,6 +196,8 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
 
+    EnergyLogger.periodicBeforeScheduler();
+
     // Main periodic functions
     LoggedTracer.reset();
     VirtualSubsystem.runAllPeriodic();
@@ -203,6 +206,8 @@ public class Robot extends LoggedRobot {
     VirtualSubsystem.runAllPeriodicAfterScheduler();
     FullSubsystem.runAllPeriodicAfterScheduler();
     LoggedTracer.record("Robot/AfterScheduler");
+    EnergyLogger.recordOutputs();
+    LoggedTracer.record("Robot/EnergyUtilRecordOutput");
 
     // Clear old fuel
     ObjectDetection.getInstance().clearOldFuelPoses();

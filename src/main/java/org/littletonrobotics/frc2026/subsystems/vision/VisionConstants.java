@@ -15,6 +15,7 @@ import java.util.function.Function;
 import lombok.Builder;
 import lombok.experimental.ExtensionMethod;
 import org.littletonrobotics.frc2026.Constants;
+import org.littletonrobotics.frc2026.RobotState;
 import org.littletonrobotics.frc2026.util.geometry.GeomUtil;
 
 @ExtensionMethod({GeomUtil.class})
@@ -58,6 +59,31 @@ public class VisionConstants {
                   .denoise(monoDenoise)
                   .stdDevFactor(1.0)
                   .fovRads(Units.degreesToRadians(75.0))
+                  .build(),
+              CameraConfig.builder()
+                  .poseFunction(
+                      (Double timestamp) -> {
+                        if (RobotState.getInstance().isHopperExtended()) {
+                          return Optional.of(
+                              new Pose3d(
+                                  Units.inchesToMeters(24.099),
+                                  Units.inchesToMeters(8.947),
+                                  Units.inchesToMeters(24.529),
+                                  new Rotation3d(
+                                      0.0,
+                                      Units.degreesToRadians(20.070),
+                                      Units.degreesToRadians(-4.698))));
+                        } else {
+                          return Optional.empty();
+                        }
+                      })
+                  .id("")
+                  .width(1280)
+                  .height(960)
+                  .exposure(colorExposure)
+                  .gain(colorGain)
+                  .stdDevFactor(5.0)
+                  .fovRads(Units.degreesToRadians(90.0))
                   .build()
             };
         case ALPHABOT ->

@@ -15,6 +15,7 @@ import lombok.Setter;
 import org.littletonrobotics.frc2026.Robot;
 import org.littletonrobotics.frc2026.subsystems.slamtake.SlamIO.SlamIOOutputMode;
 import org.littletonrobotics.frc2026.subsystems.slamtake.SlamIO.SlamIOOutputs;
+import org.littletonrobotics.frc2026.util.EnergyLogger;
 import org.littletonrobotics.junction.Logger;
 
 public class Slam {
@@ -40,6 +41,9 @@ public class Slam {
 
     motorDisconnectedAlert.set(
         Robot.showHardwareAlerts() && !motorConnectedDebouncer.calculate(inputs.connected));
+
+    // Record energy usage
+    EnergyLogger.recordSubsytemEnergy("Slam", inputs.supplyCurrentAmps);
 
     // Stop when disabled
     if (DriverStation.isDisabled()) {

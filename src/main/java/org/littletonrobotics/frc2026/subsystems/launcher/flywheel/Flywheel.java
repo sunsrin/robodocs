@@ -20,6 +20,7 @@ import org.littletonrobotics.frc2026.Robot;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.flywheel.FlywheelIO.FlywheelIOOutputMode;
 import org.littletonrobotics.frc2026.subsystems.launcher.flywheel.FlywheelIO.FlywheelIOOutputs;
+import org.littletonrobotics.frc2026.util.EnergyLogger;
 import org.littletonrobotics.frc2026.util.EqualsUtil;
 import org.littletonrobotics.frc2026.util.FullSubsystem;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
@@ -97,6 +98,14 @@ public class Flywheel extends FullSubsystem {
     follower3Disconnected.set(
         Robot.showHardwareAlerts()
             && !motorFollower3ConnectedDebouncer.calculate(inputs.follower3Connected));
+
+    // Record energy usage
+    EnergyLogger.recordSubsytemEnergy(
+        "Flywheel",
+        inputs.supplyCurrentAmps,
+        inputs.follower1SupplyCurrentAmps,
+        inputs.follower2SupplyCurrentAmps,
+        inputs.follower3SupplyCurrentAmps);
 
     SmartDashboard.putString("Flywheel Speed", String.format("%.0f", inputs.velocityRadsPerSec));
     SmartDashboard.putBoolean("Flywheel At Goal", atGoal);

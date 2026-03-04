@@ -509,6 +509,11 @@ public class GenerateTrajectories {
       return Hashing.sha256().hashString(hashString, StandardCharsets.UTF_8).toString();
     }
 
+    // Add all aspects of the request to hashString
+    hashString.append(request.stopAtStart);
+    hashString.append(request.stopAtEnd);
+    hashString.append(request.targetDt);
+
     // Add all aspects of each segment to hashString
     for (PathRequestSegment segment : request.segments) {
       for (PathWaypoint waypoint : segment.waypoints) {

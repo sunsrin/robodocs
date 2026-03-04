@@ -16,9 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import org.littletonrobotics.frc2026.subsystems.hopper.Hopper.HopperLevel;
 import org.littletonrobotics.frc2026.subsystems.leds.LedsIO.LedsIOOutputs;
 import org.littletonrobotics.frc2026.util.HubShiftUtil;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
@@ -37,18 +35,10 @@ public class Leds extends VirtualSubsystem {
   public boolean superstructureCoast = false;
   private boolean estopped = false;
   public boolean inLaunchingTolerance = false;
-  public HopperLevel hopperLevel = HopperLevel.EMPTY;
   private Optional<Alliance> alliance = Optional.empty();
 
   // Constants
   public double shiftNearEndTime = 5.0;
-  private static final Map<HopperLevel, Color> hopperLevelMap =
-      Map.of(
-          HopperLevel.EMPTY, Color.kBlack,
-          HopperLevel.FULL_0_25, Color.kPurple,
-          HopperLevel.FULL_25_50, Color.kBlue,
-          HopperLevel.FULL_50_75, Color.kCyan,
-          HopperLevel.FULL_75_100, Color.kGreen);
 
   private final LedsIO io;
   private final LedsIOInputsAutoLogged inputs = new LedsIOInputsAutoLogged();
@@ -156,8 +146,6 @@ public class Leds extends VirtualSubsystem {
             waveFastDuration);
       } else if (inLaunchingTolerance) {
         wave(fullSection, Color.kGreen, Color.kWhite, waveFastCycleLength, waveFastDuration);
-      } else {
-        solid(fullSection, hopperLevelMap.get(hopperLevel));
       }
     }
 

@@ -64,7 +64,6 @@ import org.littletonrobotics.frc2026.subsystems.leds.LedsIO;
 import org.littletonrobotics.frc2026.subsystems.leds.LedsIOHAL;
 import org.littletonrobotics.frc2026.subsystems.rollers.RollerSystemIO;
 import org.littletonrobotics.frc2026.subsystems.rollers.RollerSystemIOSim;
-import org.littletonrobotics.frc2026.subsystems.sensors.FuelSensorIO;
 import org.littletonrobotics.frc2026.subsystems.slamtake.SlamIO;
 import org.littletonrobotics.frc2026.subsystems.slamtake.SlamIOSim;
 import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake;
@@ -107,9 +106,7 @@ public class RobotContainer {
 
   // Operator overrides
   private final Trigger disableAutoSpinup = overrides.operatorSwitch(0);
-  // private final Trigger disableAutoIntake = overrides.operatorSwitch(1);
-  private final Trigger ignoreHubState = overrides.operatorSwitch(2);
-  // private final Trigger forcePegClimb = overrides.operatorSwitch(3);
+  private final Trigger ignoreHubState = overrides.operatorSwitch(1);
 
   // Alerts
   private final Alert primaryDisconnected =
@@ -181,8 +178,6 @@ public class RobotContainer {
           hopper =
               new Hopper(
                   new RollerSystemIOSim(DCMotor.getKrakenX60Foc(2), 4.0, 0.005, true),
-                  new FuelSensorIO() {},
-                  new FuelSensorIO() {},
                   Optional.of(simFuelCount));
           kicker = new Kicker(new RollerSystemIO() {}, Optional.of(simFuelCount));
           leds = new Leds(new LedsIOHAL());
@@ -204,12 +199,7 @@ public class RobotContainer {
       slamtake = new Slamtake(new SlamIO() {}, new RollerSystemIO() {});
     }
     if (hopper == null) {
-      hopper =
-          new Hopper(
-              new RollerSystemIO() {},
-              new FuelSensorIO() {},
-              new FuelSensorIO() {},
-              Optional.empty());
+      hopper = new Hopper(new RollerSystemIO() {}, Optional.empty());
     }
     if (hood == null) {
       hood = new Hood(new HoodIO() {});
@@ -276,7 +266,18 @@ public class RobotContainer {
         new ContinuousConditionalCommand(
             flywheel.stopCommand(),
             flywheel.runFixedCommand(
-                () -> LaunchCalculator.getInstance().getParameters().flywheelIdleSpeed()),
+                () -> {
+                  var parameters = LaunchCalculator.getInstance().getParameters();
+                  var shift = HubShiftUtil.getShiftedShiftInfo();
+                  if (!parameters.passing()
+                      && (shift.active()
+                          || shift.remainingTime() < 5.0
+                          || ignoreHubState.getAsBoolean())) {
+                    return parameters.flywheelSpeed();
+                  } else {
+                    return LaunchCalculator.passingIdleSpeed.get();
+                  }
+                }),
             disableAutoSpinup));
 
     // Set up fuel visualizer
@@ -429,7 +430,7 @@ public class RobotContainer {
 
     // Outtake
     primary
-        .leftClaw()
+        .a()
         .whileTrue(
             Commands.parallel(
                     Commands.startEnd(
@@ -471,6 +472,19 @@ public class RobotContainer {
                         () ->
                             Units.degreesToRadians(
                                 LaunchCalculator.outpostPreset.hoodAngleDeg().get()),
+                        () -> 0.0)));
+
+    // Passing preset
+    primary
+        .leftClaw()
+        .whileTrue(
+            flywheel
+                .runFixedCommand(LaunchCalculator.passingPreset.flywheelSpeed())
+                .alongWith(
+                    hood.runFixedCommand(
+                        () ->
+                            Units.degreesToRadians(
+                                LaunchCalculator.passingPreset.hoodAngleDeg().get()),
                         () -> 0.0)));
 
     // Tower preset
@@ -574,9 +588,6 @@ public class RobotContainer {
                             Units.degreesToRadians(
                                 LaunchCalculator.hoodMaxPreset.hoodAngleDeg().get()),
                         () -> 0.0)));
-
-    // Precision climber control once climber merged in
-    // climber.setDutyCycleOut(-secondary.getLeftY());
 
     // Hood zero commands
     secondary.x().onTrue(hood.zeroCommand());

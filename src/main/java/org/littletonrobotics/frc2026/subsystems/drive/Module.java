@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import org.littletonrobotics.frc2026.Robot;
 import org.littletonrobotics.frc2026.subsystems.drive.ModuleIO.ModuleIOOutputMode;
 import org.littletonrobotics.frc2026.subsystems.drive.ModuleIO.ModuleIOOutputs;
+import org.littletonrobotics.frc2026.util.EnergyLogger;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
 import org.littletonrobotics.junction.Logger;
 
@@ -55,6 +56,10 @@ public class Module {
     driveDisconnectedAlert.set(Robot.showHardwareAlerts() && !inputs.driveConnected);
     turnDisconnectedAlert.set(Robot.showHardwareAlerts() && !inputs.turnConnected);
     encoderDisconnectedAlert.set(Robot.showHardwareAlerts() && !inputs.encoderConnected);
+
+    // Record energy usage
+    EnergyLogger.recordSubsytemEnergy("FullDrive/Drive/" + index, inputs.driveSupplyCurrentAmps);
+    EnergyLogger.recordSubsytemEnergy("FullDrive/Turn/" + index, inputs.turnSupplyCurrentAmps);
 
     // Record cycle times
     LoggedTracer.record("Drive/Module" + index + "/Periodic");

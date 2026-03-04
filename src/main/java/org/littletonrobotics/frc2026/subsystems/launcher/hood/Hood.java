@@ -23,6 +23,7 @@ import org.littletonrobotics.frc2026.Robot;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.hood.HoodIO.HoodIOOutputMode;
 import org.littletonrobotics.frc2026.subsystems.launcher.hood.HoodIO.HoodIOOutputs;
+import org.littletonrobotics.frc2026.util.EnergyLogger;
 import org.littletonrobotics.frc2026.util.FullSubsystem;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
 import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
@@ -77,6 +78,9 @@ public class Hood extends FullSubsystem {
 
     motorDisconnectedAlert.set(
         Robot.showHardwareAlerts() && !motorConnectedDebouncer.calculate(inputs.motorConnected));
+
+    // Record energy usage
+    EnergyLogger.recordSubsytemEnergy("Hood", inputs.supplyCurrentAmps);
 
     // Stop when disabled
     if (DriverStation.isDisabled() || (!hoodZeroed && outputs.mode != HoodIOOutputMode.OPEN_LOOP)) {

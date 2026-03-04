@@ -9,12 +9,11 @@ package org.littletonrobotics.frc2026.subsystems.slamtake;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation;
 import java.util.function.BooleanSupplier;
 import lombok.Getter;
 import lombok.Setter;
 import org.littletonrobotics.frc2026.RobotState;
-import org.littletonrobotics.frc2026.RobotState.SlamtakeObservation;
 import org.littletonrobotics.frc2026.subsystems.rollers.RollerSystem;
 import org.littletonrobotics.frc2026.subsystems.rollers.RollerSystemIO;
 import org.littletonrobotics.frc2026.subsystems.slamtake.SlamIO.SlamIOOutputMode;
@@ -29,9 +28,9 @@ public class Slamtake extends FullSubsystem {
   private static final LoggedTunableNumber rollerOuttakeVolts =
       new LoggedTunableNumber("Slamtake/Roller/OuttakeVolts", -6.0);
   private static final LoggedTunableNumber deployAmps =
-      new LoggedTunableNumber("Slamtake/Slam/DeployAmps", -25.0);
+      new LoggedTunableNumber("Slamtake/Slam/DeployAmps", -15.0);
   private static final LoggedTunableNumber retractAmps =
-      new LoggedTunableNumber("Slamtake/Slam/RetractAmps", 0.0);
+      new LoggedTunableNumber("Slamtake/Slam/RetractAmps", 25.0);
   private final RollerSystem roller;
   private final Slam slam;
 
@@ -94,9 +93,16 @@ public class Slamtake extends FullSubsystem {
       }
     }
 
-    // Send slamtake data to RobotState
-    RobotState.getInstance()
-        .addSlamtakeObservation(new SlamtakeObservation(Timer.getTimestamp(), slamState));
+    // Send hopper extension data to RobotState
+    if (DriverStation.isEnabled()) {
+      if (slamState == SlamState.DEPLOYED) {
+        // Hopper is pushed forward when first deployed, then stays extended
+        RobotState.getInstance().setHopperExtended(true);
+      }
+    } else {
+      // State is always unknown when disabled, disable vision
+      RobotState.getInstance().setHopperExtended(false);
+    }
 
     // Record cycle time
     LoggedTracer.record("Slamtake/Periodic");

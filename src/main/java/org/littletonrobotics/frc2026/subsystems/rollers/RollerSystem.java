@@ -15,6 +15,7 @@ import lombok.Setter;
 import org.littletonrobotics.frc2026.Robot;
 import org.littletonrobotics.frc2026.subsystems.rollers.RollerSystemIO.RollerSystemIOMode;
 import org.littletonrobotics.frc2026.subsystems.rollers.RollerSystemIO.RollerSystemIOOutputs;
+import org.littletonrobotics.frc2026.util.EnergyLogger;
 import org.littletonrobotics.junction.Logger;
 
 public class RollerSystem {
@@ -68,6 +69,12 @@ public class RollerSystem {
         Robot.showHardwareAlerts()
             && inputs.hasFollower
             && !followerMotorConnectedDebouncer.calculate(inputs.followerConnected));
+
+    // Record energy usage
+    EnergyLogger.recordSubsytemEnergy(
+        "Rollers/" + name,
+        inputs.supplyCurrentAmps,
+        inputs.hasFollower ? inputs.followerSupplyCurrentAmps : 0.0);
 
     // Update mode
     if (DriverStation.isDisabled()) {
