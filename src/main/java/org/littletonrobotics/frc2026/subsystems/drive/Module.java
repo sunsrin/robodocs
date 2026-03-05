@@ -58,8 +58,8 @@ public class Module {
     encoderDisconnectedAlert.set(Robot.showHardwareAlerts() && !inputs.encoderConnected);
 
     // Record energy usage
-    EnergyLogger.recordSubsytemEnergy("FullDrive/Drive/" + index, inputs.driveSupplyCurrentAmps);
-    EnergyLogger.recordSubsytemEnergy("FullDrive/Turn/" + index, inputs.turnSupplyCurrentAmps);
+    EnergyLogger.recordEnergyUsage("FullDrive/Drive/" + index, inputs.driveSupplyCurrentAmps);
+    EnergyLogger.recordEnergyUsage("FullDrive/Turn/" + index, inputs.turnSupplyCurrentAmps);
 
     // Record cycle times
     LoggedTracer.record("Drive/Module" + index + "/Periodic");

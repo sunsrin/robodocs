@@ -322,6 +322,10 @@ public class FieldConstants {
         new Translation2d(fieldLength / 2.0 - depth / 2.0, fieldWidth / 2.0 + width / 2.0);
     public static final Translation2d nearRightCorner =
         new Translation2d(fieldLength / 2.0 - depth / 2.0, fieldWidth / 2.0 - width / 2.0);
+    public static final Translation2d leftCenter =
+        new Translation2d(fieldLength / 2.0, fieldWidth / 2.0 + width / 2.0);
+    public static final Translation2d rightCenter =
+        new Translation2d(fieldLength / 2.0, fieldWidth / 2.0 - width / 2.0);
   }
 
   @RequiredArgsConstructor

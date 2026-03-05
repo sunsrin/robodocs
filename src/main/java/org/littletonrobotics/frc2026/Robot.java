@@ -196,18 +196,24 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
 
-    EnergyLogger.periodicBeforeScheduler();
+    // Reset logged tracer
+    LoggedTracer.reset();
+
+    // Update battery voltage for energy logging
+    EnergyLogger.updateBatteryVoltage();
+    LoggedTracer.record("EnergyLogger/UpdateBatteryVoltage");
 
     // Main periodic functions
-    LoggedTracer.reset();
     VirtualSubsystem.runAllPeriodic();
     CommandScheduler.getInstance().run();
     LoggedTracer.record("Robot/Commands");
     VirtualSubsystem.runAllPeriodicAfterScheduler();
     FullSubsystem.runAllPeriodicAfterScheduler();
     LoggedTracer.record("Robot/AfterScheduler");
+
+    // Record energy usage
     EnergyLogger.recordOutputs();
-    LoggedTracer.record("Robot/EnergyUtilRecordOutput");
+    LoggedTracer.record("EnergyLogger/RecordOutput");
 
     // Clear old fuel
     ObjectDetection.getInstance().clearOldFuelPoses();

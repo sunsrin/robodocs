@@ -60,7 +60,6 @@ public class RollerSystem {
   }
 
   public void periodic() {
-
     io.updateInputs(inputs);
     Logger.processInputs(inputsName, inputs);
     disconnected.set(
@@ -71,8 +70,8 @@ public class RollerSystem {
             && !followerMotorConnectedDebouncer.calculate(inputs.followerConnected));
 
     // Record energy usage
-    EnergyLogger.recordSubsytemEnergy(
-        "Rollers/" + name,
+    EnergyLogger.recordEnergyUsage(
+        "Rollers/" + inputsName,
         inputs.supplyCurrentAmps,
         inputs.hasFollower ? inputs.followerSupplyCurrentAmps : 0.0);
 

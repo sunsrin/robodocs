@@ -82,7 +82,7 @@ public class Vision extends VirtualSubsystem {
     }
 
     // Update recording state
-    boolean shouldRecord = DriverStation.isFMSAttached() || recordingRequest.get();
+    boolean shouldRecord = DriverStation.isFMSAttached() || recordingRequest.get() || alwaysRecord;
     for (var ioInst : io) {
       ioInst.setRecording(shouldRecord);
     }

@@ -18,6 +18,7 @@ import org.littletonrobotics.frc2026.util.FullSubsystem;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
 import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class Hopper extends FullSubsystem {
   private static final LoggedTunableNumber rollerLaunchVolts =
@@ -40,6 +41,11 @@ public class Hopper extends FullSubsystem {
 
   public void periodic() {
     roller.periodic();
+
+    // Log sim fuel count
+    if (simFuelCount.isPresent()) {
+      Logger.recordOutput("Hopper/SimFueldCount", simFuelCount.get().getFuelStored());
+    }
 
     // Update roller output
     double rollerVolts = 0.0;

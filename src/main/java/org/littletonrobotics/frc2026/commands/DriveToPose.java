@@ -19,6 +19,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import java.util.Optional;
 import java.util.function.Supplier;
 import lombok.Getter;
 import org.littletonrobotics.frc2026.Constants;
@@ -83,6 +84,7 @@ public class DriveToPose extends Command {
 
   private final Drive drive;
   private final Supplier<Pose2d> target;
+  private final Supplier<Optional<Double>> omegaOverride;
 
   private TrapezoidProfile driveProfile;
   private final PIDController driveController =
@@ -99,13 +101,19 @@ public class DriveToPose extends Command {
   private double thetaErrorAbs = 0.0;
   @Getter private boolean running = false;
 
-  public DriveToPose(Drive drive, Supplier<Pose2d> target) {
+  public DriveToPose(
+      Drive drive, Supplier<Pose2d> target, Supplier<Optional<Double>> omegaOverride) {
     this.drive = drive;
     this.target = target;
+    this.omegaOverride = omegaOverride;
     if (drive != null) addRequirements(drive);
 
     // Enable continuous input for theta controller
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
+  }
+
+  public DriveToPose(Drive drive, Supplier<Pose2d> target) {
+    this(drive, target, () -> Optional.empty());
   }
 
   @Override
@@ -225,7 +233,7 @@ public class DriveToPose extends Command {
           ChassisSpeeds.fromFieldRelativeSpeeds(
               driveVelocity.getX(),
               driveVelocity.getY(),
-              thetaVelocity,
+              omegaOverride.get().isPresent() ? omegaOverride.get().get() : thetaVelocity,
               currentPose.getRotation()));
     }
 

@@ -28,9 +28,9 @@ public class Slamtake extends FullSubsystem {
   private static final LoggedTunableNumber rollerOuttakeVolts =
       new LoggedTunableNumber("Slamtake/Roller/OuttakeVolts", -6.0);
   private static final LoggedTunableNumber deployAmps =
-      new LoggedTunableNumber("Slamtake/Slam/DeployAmps", -15.0);
+      new LoggedTunableNumber("Slamtake/Slam/DeployAmps", -22.0);
   private static final LoggedTunableNumber retractAmps =
-      new LoggedTunableNumber("Slamtake/Slam/RetractAmps", 25.0);
+      new LoggedTunableNumber("Slamtake/Slam/RetractAmps", 20.0);
   private final RollerSystem roller;
   private final Slam slam;
 
@@ -39,7 +39,7 @@ public class Slamtake extends FullSubsystem {
   private Debouncer slamVelocityDebouncer =
       new Debouncer(slamVelocityDebounceTime.get(), DebounceType.kRising);
   private static final LoggedTunableNumber slamSettleVelocity =
-      new LoggedTunableNumber("Slamtake/Slam/SettleVelocity", 0.1);
+      new LoggedTunableNumber("Slamtake/Slam/SettleVelocity", 2.0);
 
   @Getter @Setter @AutoLogOutput private IntakeGoal intakeGoal = IntakeGoal.STOP;
   @Getter @Setter @AutoLogOutput private SlamGoal slamGoal = SlamGoal.RETRACT;

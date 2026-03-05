@@ -49,8 +49,7 @@ class CoreMLObjectDetector(ObjectDetector):
 
         # Run CoreML model
         image_coreml = Image.fromarray(image_scaled)
-        for _ in range(4):
-            prediction = self._model.predict({"image": image_coreml})
+        prediction = self._model.predict({"image": image_coreml})
 
         observations: List[ObjDetectObservation] = []
         for coordinates, confidence in zip(prediction["coordinates"], prediction["confidence"]):

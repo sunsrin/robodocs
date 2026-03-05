@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.littletonrobotics.frc2026.Constants;
@@ -65,6 +66,10 @@ public class DriveTrajectory extends Command {
     xController.reset();
     yController.reset();
     thetaController.reset();
+
+    Logger.recordOutput(
+        "DriveTrajectory/Trajectory",
+        Arrays.stream(trajectory.getPoses()).map(AllianceFlipUtil::apply).toArray(Pose2d[]::new));
   }
 
   @Override
@@ -109,6 +114,7 @@ public class DriveTrajectory extends Command {
     Logger.recordOutput(
         "DriveTrajectory/RotationError",
         currentPose.getRotation().minus(desiredState.getPose().getRotation()).getDegrees());
+    Logger.recordOutput("DriveTrajectory/OmegaOverrideActive", omegaOverride.get().isPresent());
   }
 
   @Override

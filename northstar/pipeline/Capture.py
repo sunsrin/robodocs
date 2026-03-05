@@ -208,7 +208,7 @@ class PylonCapture(Capture):
                 elif self._mode == "cropped":
                     self._camera.GetNodeMap().GetNode("Width").SetValue(1800)
                     self._camera.GetNodeMap().GetNode("Height").SetValue(1200)
-                    self._camera.GetNodeMap().GetNode("OffsetX").SetValue(168)
+                    self._camera.GetNodeMap().GetNode("OffsetX").SetValue(68)
                     self._camera.GetNodeMap().GetNode("OffsetY").SetValue(8)
 
                 self._camera.GetNodeMap().GetNode("ReverseX").SetValue(self._is_flipped)

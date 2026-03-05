@@ -33,8 +33,9 @@ public class Leds extends VirtualSubsystem {
   // Robot state tracking
   public boolean lowBatteryAlert = false;
   public boolean superstructureCoast = false;
-  private boolean estopped = false;
   public boolean inLaunchingTolerance = false;
+  public boolean autoWinnerNotSet = false;
+  private boolean estopped = false;
   private Optional<Alliance> alliance = Optional.empty();
 
   // Constants
@@ -132,9 +133,8 @@ public class Leds extends VirtualSubsystem {
     } else if (DriverStation.isAutonomous()) {
       wave(fullSection, Color.kGold, Color.kDarkBlue, waveFastCycleLength, waveFastDuration);
     } else {
-      if (!(DriverStation.getGameSpecificMessage().length() > 0)
-          && HubShiftUtil.getAllianceWinOverride().isEmpty()) {
-        strobe(fullSection, Color.kWhite, Color.kRed, .1);
+      if (autoWinnerNotSet) {
+        strobe(fullSection, Color.kWhite, Color.kRed, 0.1);
       } else if (HubShiftUtil.getShiftedShiftInfo().remainingTime() <= shiftNearEndTime) {
         wave(
             fullSection,

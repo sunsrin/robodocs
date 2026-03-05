@@ -16,17 +16,22 @@ import lombok.Builder;
 import lombok.experimental.ExtensionMethod;
 import org.littletonrobotics.frc2026.Constants;
 import org.littletonrobotics.frc2026.RobotState;
+import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
 import org.littletonrobotics.frc2026.util.geometry.GeomUtil;
 
 @ExtensionMethod({GeomUtil.class})
 public class VisionConstants {
+  public static final boolean alwaysRecord = false;
+
   public static final double ambiguityThreshold = 0.4;
   public static final double targetLogTimeSecs = 0.1;
   public static final double fieldBorderMargin = 0.5;
   public static final double xyStdDevCoefficient = 0.01;
   public static final double thetaStdDevCoefficient = 0.03;
+  public static final double fuelDetectConfidenceThreshold = 0.0; // Enforced by Northstar
 
-  public static final double fuelDetectConfidenceThreshold = 0.2;
+  private static LoggedTunableNumber frontCameraPitchFudgeDegrees =
+      new LoggedTunableNumber("Vision/FrontCameraPitchFudgeDeg", 1.6);
 
   private static int monoExposure = 1800;
   private static double monoGain = 15.0;
@@ -71,13 +76,14 @@ public class VisionConstants {
                                   Units.inchesToMeters(24.529),
                                   new Rotation3d(
                                       0.0,
-                                      Units.degreesToRadians(20.070),
+                                      Units.degreesToRadians(
+                                          20.070 + frontCameraPitchFudgeDegrees.get()),
                                       Units.degreesToRadians(-4.698))));
                         } else {
                           return Optional.empty();
                         }
                       })
-                  .id("")
+                  .id("24736221")
                   .width(1280)
                   .height(960)
                   .exposure(colorExposure)

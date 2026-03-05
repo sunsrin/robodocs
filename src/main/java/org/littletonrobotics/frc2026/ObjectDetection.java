@@ -34,7 +34,7 @@ public class ObjectDetection {
   private Set<FuelPoseRecord> fuelPoses = new HashSet<>();
 
   private static final LoggedTunableNumber fuelPersistanceTime =
-      new LoggedTunableNumber("ObjectDetection/FuelPersistanceTime", 15.0);
+      new LoggedTunableNumber("ObjectDetection/FuelPersistanceTime", 3.0);
   private static final LoggedTunableNumber allowedRoll =
       new LoggedTunableNumber("ObjectDetection/AllowedRoll", Units.degreesToRadians(5));
   private static final LoggedTunableNumber allowedPitch =
@@ -122,11 +122,12 @@ public class ObjectDetection {
     }
     Pose2d fieldToRobot = fieldToRobotOptional.get();
 
-    Pose3d robotToCamera =
-        VisionConstants.cameras[observation.camera()]
-            .poseFunction()
-            .apply(observation.timestamp())
-            .get();
+    var robotToCameraOptional =
+        VisionConstants.cameras[observation.camera()].poseFunction().apply(observation.timestamp());
+    if (robotToCameraOptional.isEmpty()) {
+      return;
+    }
+    Pose3d robotToCamera = robotToCameraOptional.get();
 
     // Find midpoint of width of top tx ty
     double tx = (observation.tx()[0] + observation.tx()[1]) / 2;

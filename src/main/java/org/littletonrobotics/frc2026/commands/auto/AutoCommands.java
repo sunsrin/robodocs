@@ -13,9 +13,12 @@ import choreo.trajectory.Trajectory;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.frc2026.AutoFieldConstants;
 import org.littletonrobotics.frc2026.AutoSelector.AutoQuestionResponse;
@@ -24,35 +27,78 @@ import org.littletonrobotics.frc2026.RobotState;
 import org.littletonrobotics.frc2026.commands.DriveToPose;
 import org.littletonrobotics.frc2026.commands.DriveTrajectory;
 import org.littletonrobotics.frc2026.subsystems.drive.Drive;
+import org.littletonrobotics.frc2026.subsystems.drive.DriveConstants;
 import org.littletonrobotics.frc2026.subsystems.hopper.Hopper;
 import org.littletonrobotics.frc2026.subsystems.kicker.Kicker;
+import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.flywheel.Flywheel;
 import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake;
 import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake.SlamGoal;
+import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 
 public class AutoCommands {
+  private static final LoggedTunableNumber autoDriveLaunchKp =
+      new LoggedTunableNumber("AutoCommands/Launching/kP", 8.0);
+  private static final LoggedTunableNumber autoDriveLaunchKd =
+      new LoggedTunableNumber("AutoCommands/Launching/kD", 0.5);
 
-  public static Command returnToLaunchPose(Drive drive) {
+  // Returns to the alliance zone from the closest side
+  public static Command returnToClosestLaunchPose(Drive drive) {
+    return new DriveToPose(
+        drive,
+        () -> {
+          ChassisSpeeds fieldVelocity = RobotState.getInstance().getFieldVelocity();
+          Translation2d fieldVelocityTranslation =
+              new Translation2d(fieldVelocity.vxMetersPerSecond, fieldVelocity.vyMetersPerSecond);
+          Translation2d currentTranslation =
+              RobotState.getInstance()
+                  .getEstimatedPose()
+                  .getTranslation()
+                  .plus(fieldVelocityTranslation.times(0.8));
+          Pose2d target =
+              currentTranslation.getDistance(
+                          AllianceFlipUtil.apply(
+                              AutoFieldConstants.Launch.leftBump.getTranslation()))
+                      < currentTranslation.getDistance(
+                          AllianceFlipUtil.apply(
+                              AutoFieldConstants.Launch.rightBump.getTranslation()))
+                  ? AllianceFlipUtil.apply(AutoFieldConstants.Launch.leftBump)
+                  : AllianceFlipUtil.apply(AutoFieldConstants.Launch.rightBump);
+
+          double minYOffset = 0.2;
+          double maxYOffset = 1.5;
+          double t =
+              MathUtil.clamp(
+                  (Math.cbrt(
+                      (Math.abs(RobotState.getInstance().getEstimatedPose().getY() - target.getY())
+                              - minYOffset)
+                          / (maxYOffset - minYOffset))),
+                  0.0,
+                  1.0);
+
+          return new Pose2d(
+              MathUtil.interpolate(
+                  target.getX(),
+                  AllianceFlipUtil.applyX(FieldConstants.LinesVertical.neutralZoneNear + 1.5),
+                  t),
+              target.getY(),
+              target.getRotation());
+        });
+  }
+
+  // Returns to the alliance zone from a determined side
+  public static Command returnToDeterminedLaunchPose(Drive drive, AutoQuestionResponse bumpSide) {
     return new DriveToPose(
         drive,
         () -> {
           Pose2d currentPose = RobotState.getInstance().getEstimatedPose();
           Pose2d target =
-              currentPose
-                          .getTranslation()
-                          .getDistance(
-                              AllianceFlipUtil.apply(
-                                  AutoFieldConstants.Launch.leftBump.getTranslation()))
-                      < currentPose
-                          .getTranslation()
-                          .getDistance(
-                              AllianceFlipUtil.apply(
-                                  AutoFieldConstants.Launch.rightBump.getTranslation()))
+              bumpSide.equals(AutoQuestionResponse.LEFT_BUMP)
                   ? AllianceFlipUtil.apply(AutoFieldConstants.Launch.leftBump)
                   : AllianceFlipUtil.apply(AutoFieldConstants.Launch.rightBump);
 
-          double minYOffset = 0.00;
+          double minYOffset = 0.2;
           double maxYOffset = 1.5;
           double t =
               MathUtil.clamp(
@@ -72,6 +118,20 @@ public class AutoCommands {
         });
   }
 
+  private static Double launchOnTheMoveOmega() {
+    // Run PID controller
+    final var parameters = LaunchCalculator.getInstance().getParameters();
+    return MathUtil.clamp(
+        parameters.driveVelocity()
+            + (parameters.driveAngle().minus(RobotState.getInstance().getRotation()).getRadians()
+                * autoDriveLaunchKp.get())
+            + ((parameters.driveVelocity()
+                    - RobotState.getInstance().getRobotVelocity().omegaRadiansPerSecond)
+                * autoDriveLaunchKd.get()),
+        -DriveConstants.maxAngularSpeed,
+        DriveConstants.maxAngularSpeed);
+  }
+
   public static Command followTrajectory(String name, Drive drive, boolean start) {
     Optional<Trajectory<SwerveSample>> trajectoryOptional = Choreo.loadTrajectory(name);
     if (trajectoryOptional.isPresent()) {
@@ -82,6 +142,26 @@ public class AutoCommands {
                   trajectory.getInitialSample(AllianceFlipUtil.shouldFlip()).get().getPose())
               : Commands.none(),
           new DriveTrajectory(trajectory, drive));
+    } else {
+      throw new RuntimeException("Choreo Trajectory Not Found: " + name);
+    }
+  }
+
+  public static Command followTrajectoryWhileAiming(
+      String name, Drive drive, boolean start, BooleanSupplier shouldAim) {
+    Optional<Trajectory<SwerveSample>> trajectoryOptional = Choreo.loadTrajectory(name);
+    if (trajectoryOptional.isPresent()) {
+      Trajectory<SwerveSample> trajectory = trajectoryOptional.get();
+      return Commands.sequence(
+          start
+              ? AutoCommands.resetPose(
+                  trajectory.getInitialSample(AllianceFlipUtil.shouldFlip()).get().getPose())
+              : Commands.none(),
+          new DriveTrajectory(
+              trajectory,
+              () ->
+                  shouldAim.getAsBoolean() ? Optional.of(launchOnTheMoveOmega()) : Optional.empty(),
+              drive));
     } else {
       throw new RuntimeException("Choreo Trajectory Not Found: " + name);
     }
@@ -178,6 +258,13 @@ public class AutoCommands {
 
   public static Command driveToPose(Drive drive, Supplier<Pose2d> target) {
     return new DriveToPose(drive, () -> AllianceFlipUtil.apply(target.get()));
+  }
+
+  public static Command driveToPoseWhileAiming(Drive drive, Supplier<Pose2d> target) {
+    return new DriveToPose(
+        drive,
+        () -> AllianceFlipUtil.apply(target.get()),
+        () -> Optional.of(launchOnTheMoveOmega()));
   }
 
   /**

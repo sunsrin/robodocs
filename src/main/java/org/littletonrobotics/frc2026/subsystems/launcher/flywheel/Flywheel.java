@@ -100,7 +100,7 @@ public class Flywheel extends FullSubsystem {
             && !motorFollower3ConnectedDebouncer.calculate(inputs.follower3Connected));
 
     // Record energy usage
-    EnergyLogger.recordSubsytemEnergy(
+    EnergyLogger.recordEnergyUsage(
         "Flywheel",
         inputs.supplyCurrentAmps,
         inputs.follower1SupplyCurrentAmps,

@@ -43,7 +43,10 @@ public class AutoBuilder {
 
   private final Supplier<List<AutoQuestionResponse>> responses;
 
-  private static final double outpostIntakeTime = 3.0;
+  public static final double outpostIntakeTime = 3.0;
+  public static final double neutralZoneIntakeTimeFirst = 3.0;
+  public static final double neutralZoneIntakeTimeOther = 4.0;
+  public static final double launchTime = 4.0;
 
   public Command homeDepotSalesman() {
     return Commands.sequence(
@@ -121,6 +124,7 @@ public class AutoBuilder {
                     .getEstimatedPose()
                     .getTranslation()
                     .getDistance(AllianceFlipUtil.apply(Launch.rightTower.getTranslation()));
+
     return Commands.sequence(
         // Drive to closest intaking position
         Commands.select(

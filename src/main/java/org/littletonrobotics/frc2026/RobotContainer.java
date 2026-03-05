@@ -212,7 +212,9 @@ public class RobotContainer {
     }
     if (vision == null) {
       switch (Constants.robot) {
-        case COMPBOT -> vision = new Vision(this::getSelectedAprilTagLayout, new VisionIO() {});
+        case COMPBOT ->
+            vision =
+                new Vision(this::getSelectedAprilTagLayout, new VisionIO() {}, new VisionIO() {});
         case ALPHABOT ->
             vision =
                 new Vision(this::getSelectedAprilTagLayout, new VisionIO() {}, new VisionIO() {});
@@ -677,7 +679,15 @@ public class RobotContainer {
                   secondary.setRumble(RumbleType.kBothRumble, 0);
                 }))
         .whileTrue(
-            Commands.startEnd(() -> autoWinnerNotSet.set(true), () -> autoWinnerNotSet.set(false)));
+            Commands.startEnd(
+                () -> {
+                  autoWinnerNotSet.set(true);
+                  leds.autoWinnerNotSet = true;
+                },
+                () -> {
+                  autoWinnerNotSet.set(false);
+                  leds.autoWinnerNotSet = false;
+                }));
 
     // End-of-shift warning
     for (int i = 1; i <= 5; i++) {

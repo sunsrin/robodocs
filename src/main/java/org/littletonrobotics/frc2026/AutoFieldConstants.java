@@ -125,7 +125,7 @@ public class AutoFieldConstants {
     public static final Pose2d frontIntake =
         new Pose2d(
             FieldConstants.Outpost.centerPoint.plus(
-                new Translation2d(DriveConstants.fullWidthX / 2.0 + 0.25, 0.4)),
+                new Translation2d(DriveConstants.fullWidthX / 2.0 + 0.25, 0.1)),
             Rotation2d.kPi);
   }
 

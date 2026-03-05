@@ -144,10 +144,12 @@ public class AutoSelector extends VirtualSubsystem {
     RIGHT_TRENCH(Trench.rightStart),
     LEFT(),
     RIGHT(),
+    CLOSEST(),
     CLIMB(),
     NOTHING(),
     YES(),
-    NO();
+    NO(),
+    NONE();
 
     @Getter private final Waypoint waypoint;
 

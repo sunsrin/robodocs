@@ -20,6 +20,7 @@ import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import lombok.Getter;
 import lombok.experimental.ExtensionMethod;
 import org.littletonrobotics.frc2026.Constants;
@@ -121,8 +122,8 @@ public class LaunchCalculator {
   // Passing targets
   private static final double hubPassLine =
       FieldConstants.LinesHorizontal.rightBumpStart - DriveConstants.trackWidthY / 2.0;
-  private static final double xPassTarget = Units.inchesToMeters(25);
-  private static final double yPassTarget = Units.inchesToMeters(50);
+  private static final double xPassTarget = Units.inchesToMeters(37);
+  private static final double yPassTarget = Units.inchesToMeters(80);
   // Boxes of bad
   // Under tower
   private static final Bounds towerBound =
@@ -296,8 +297,10 @@ public class LaunchCalculator {
     var robotVelocity = RobotState.getInstance().getFieldSetpointVelocity();
     var robotAngle = RobotState.getInstance().getRotation();
     ChassisSpeeds launcherVelocity =
-        GeomUtil.transformVelocity(
-            robotVelocity, robotToLauncher.getTranslation().toTranslation2d(), robotAngle);
+        DriverStation.isAutonomous()
+            ? robotVelocity
+            : GeomUtil.transformVelocity(
+                robotVelocity, robotToLauncher.getTranslation().toTranslation2d(), robotAngle);
 
     // Account for imparted velocity by robot (launcher) to offset
     double timeOfFlight =

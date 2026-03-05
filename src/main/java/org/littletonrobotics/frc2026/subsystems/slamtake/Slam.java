@@ -43,7 +43,7 @@ public class Slam {
         Robot.showHardwareAlerts() && !motorConnectedDebouncer.calculate(inputs.connected));
 
     // Record energy usage
-    EnergyLogger.recordSubsytemEnergy("Slam", inputs.supplyCurrentAmps);
+    EnergyLogger.recordEnergyUsage("Slam", inputs.supplyCurrentAmps);
 
     // Stop when disabled
     if (DriverStation.isDisabled()) {

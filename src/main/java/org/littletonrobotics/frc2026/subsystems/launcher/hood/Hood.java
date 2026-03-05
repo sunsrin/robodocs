@@ -80,7 +80,7 @@ public class Hood extends FullSubsystem {
         Robot.showHardwareAlerts() && !motorConnectedDebouncer.calculate(inputs.motorConnected));
 
     // Record energy usage
-    EnergyLogger.recordSubsytemEnergy("Hood", inputs.supplyCurrentAmps);
+    EnergyLogger.recordEnergyUsage("Hood", inputs.supplyCurrentAmps);
 
     // Stop when disabled
     if (DriverStation.isDisabled() || (!hoodZeroed && outputs.mode != HoodIOOutputMode.OPEN_LOOP)) {
