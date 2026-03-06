@@ -13,7 +13,7 @@ import queue
 import threading
 
 from config.config import ConfigStore
-from output.overlay_util import overlay_image_observation, overlay_obj_detect_observation
+from output.overlay_util import overlay_image_observation, overlay_circle_obj_detect_observation
 from vision_types import FiducialImageObservation, ObjDetectObservation
 
 FRAMERATE = 25
@@ -56,7 +56,7 @@ class FFmpegVideoWriter(VideoWriter):
         filename_raw = filename_base + "_raw" + filename_match + ".mkv"
 
         ffmpeg_args_base = [
-            "ffmpeg",
+            "/opt/homebrew/bin/ffmpeg",
             "-y",
             "-s",
             str(config.remote_config.camera_resolution_width)
@@ -121,6 +121,6 @@ class FFmpegVideoWriter(VideoWriter):
                 if not is_raw:
                     frame = frame.copy()
                     [overlay_image_observation(frame, x) for x in image_observations]
-                    [overlay_obj_detect_observation(frame, x) for x in obj_detect_observations]
+                    [overlay_circle_obj_detect_observation(frame, x) for x in obj_detect_observations]
                 ffmpeg = self._ffmpeg_raw if is_raw else self._ffmpeg
                 ffmpeg.stdin.write(frame.tobytes())

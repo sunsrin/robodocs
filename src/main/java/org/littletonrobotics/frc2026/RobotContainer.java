@@ -154,6 +154,7 @@ public class RobotContainer {
 
     // Instantiate subsystems
     if (Constants.getMode() != Constants.Mode.REPLAY) {
+      // https://www.chiefdelphi.com/t/frc-6328-mechanical-advantage-2026-build-thread/509595/616
       switch (Constants.robot) {
         case COMPBOT:
           // Not implemented
@@ -712,8 +713,26 @@ public class RobotContainer {
     // ****** ROBOT STATE *****
 
     // Automatically deploy intake on enable
-    RobotModeTriggers.disabled()
-        .onFalse(Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)));
+    RobotModeTriggers.autonomous()
+        .onTrue(
+            Commands.sequence(
+                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)),
+                Commands.waitSeconds(0.5),
+                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
+                Commands.waitSeconds(0.25),
+                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)),
+                Commands.waitSeconds(0.5),
+                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
+                Commands.waitSeconds(0.25),
+                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))));
+    RobotModeTriggers.teleop()
+        .onTrue(
+            Commands.sequence(
+                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)),
+                Commands.waitSeconds(0.5),
+                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
+                Commands.waitSeconds(0.25),
+                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))));
 
     // Automatically run intake and flywheel in auto
     RobotModeTriggers.autonomous()

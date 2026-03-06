@@ -46,7 +46,8 @@ public class AutoBuilder {
   public static final double outpostIntakeTime = 2.0;
   public static final double neutralZoneIntakeTimeFirst = 4.0;
   public static final double neutralZoneIntakeTimeOther = 4.0;
-  public static final double launchTime = 4.0;
+  public static final double launchTime = 3.5;
+  public static final double bumpCrossTime = 1.5;
 
   public Command homeDepotSalesman() {
     return Commands.sequence(

@@ -149,11 +149,6 @@ public class Leds extends VirtualSubsystem {
       }
     }
 
-    // Override with loading animation
-    if (Timer.getTimestamp() < 30.0) {
-      breath(fullSection, Color.kBlack, Color.kWhite, startupBreathDuration, Timer.getTimestamp());
-    }
-
     // Send to buffer
     if (bufferField == null) return;
     try {
@@ -188,6 +183,7 @@ public class Leds extends VirtualSubsystem {
     return solid(section, c1On ? c1 : c2);
   }
 
+  @SuppressWarnings("unused")
   private Color breath(Section section, Color c1, Color c2, double duration, double timestamp) {
     Color color = breathCalculate(section, c1, c2, duration, timestamp);
     solid(section, color);

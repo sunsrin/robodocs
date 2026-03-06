@@ -27,7 +27,7 @@ public class DriveConstants {
       5.374; // maxLinearSpeed / driveBaseRadius (0.7814886979 meters)
   public static final double compbotWheelRadiusInches = 1.99588001;
   public static final double compbotTrajectoryWheelRadiusInches = 2.0;
-  public static final double compbotMaxTrajectoryWheelTorque = 4.0; // N * m
+  public static final double compbotMaxTrajectoryWheelTorque = 3.0; // N * m
   public static final double compbotMassLbs = 150.0;
   public static final double compbotWheelCOF = 1.5;
   public static final double compbotRotationMOI = 6.0; // kg * m^2

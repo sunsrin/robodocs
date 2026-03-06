@@ -147,6 +147,7 @@ class AVFoundationCapture(Capture):
 
 class PylonCapture(Capture):
     """Reads from a Basler camera using pylon."""
+    failed_time_restart_timeout = 3
 
     def __init__(self, mode: str = "", is_flipped: bool = False) -> None:
         self._mode = mode
@@ -156,6 +157,7 @@ class PylonCapture(Capture):
     _device: Union[None, pylon.DeviceInfo] = None
     _converter: Union[None, pylon.ImageFormatConverter] = None
     _last_config: ConfigStore
+    _last_failed_time: Union[None, float] = None
 
     def get_frame(self, config_store: ConfigStore) -> Tuple[bool, cv2.Mat]:
         if self._camera != None and self._config_changed(self._last_config, config_store):
@@ -225,8 +227,9 @@ class PylonCapture(Capture):
             return False, None
         else:
             try:
-                with self._camera.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException) as grab_result:
+                with self._camera.RetrieveResult(50, pylon.TimeoutHandling_ThrowException) as grab_result:
                     if grab_result.GrabSucceeded():
+                        self._last_failed_time = None
                         if self._converter == None:
                             return True, grab_result.Array
                         else:
@@ -235,7 +238,12 @@ class PylonCapture(Capture):
                         return False, None
             except Exception:
                 print("Error when capturing frame:", traceback.format_exc())
-                sys.exit(0)
+                if self._last_failed_time == None:
+                    self._last_failed_time =  time.time()
+                elif time.time() - self._last_failed_time > PylonCapture.failed_time_restart_timeout:
+                    print("Multiple consecutive capture failures, restarting")
+                    sys.exit(0)
+                return False, None
 
 
 class GStreamerCapture(Capture):

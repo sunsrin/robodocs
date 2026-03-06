@@ -66,8 +66,8 @@ public class AutoCommands {
                   ? AllianceFlipUtil.apply(AutoFieldConstants.Launch.leftBump)
                   : AllianceFlipUtil.apply(AutoFieldConstants.Launch.rightBump);
 
-          double minYOffset = 0.2;
-          double maxYOffset = 1.5;
+          double minYOffset = 0.1;
+          double maxYOffset = 0.4;
           double t =
               MathUtil.clamp(
                   (Math.cbrt(
@@ -76,6 +76,11 @@ public class AutoCommands {
                           / (maxYOffset - minYOffset))),
                   0.0,
                   1.0);
+
+          if (AllianceFlipUtil.applyX(RobotState.getInstance().getEstimatedPose().getX())
+              < FieldConstants.LinesVertical.neutralZoneNear) {
+            t = 0.0;
+          }
 
           return new Pose2d(
               MathUtil.interpolate(
@@ -98,8 +103,8 @@ public class AutoCommands {
                   ? AllianceFlipUtil.apply(AutoFieldConstants.Launch.leftBump)
                   : AllianceFlipUtil.apply(AutoFieldConstants.Launch.rightBump);
 
-          double minYOffset = 0.2;
-          double maxYOffset = 1.5;
+          double minYOffset = 0.1;
+          double maxYOffset = 0.4;
           double t =
               MathUtil.clamp(
                   (Math.cbrt(
@@ -107,6 +112,11 @@ public class AutoCommands {
                           / (maxYOffset - minYOffset))),
                   0.0,
                   1.0);
+
+          if (AllianceFlipUtil.applyX(RobotState.getInstance().getEstimatedPose().getX())
+              < FieldConstants.LinesVertical.neutralZoneNear) {
+            t = 0.0;
+          }
 
           return new Pose2d(
               MathUtil.interpolate(
@@ -183,9 +193,9 @@ public class AutoCommands {
                     kicker)
                 .withDeadline(
                     Commands.repeatingSequence(
-                            Commands.waitSeconds(0.5),
+                            Commands.waitSeconds(0.25),
                             Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
-                            Commands.waitSeconds(0.5),
+                            Commands.waitSeconds(0.25),
                             Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)))
                         .finallyDo(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))));
   }

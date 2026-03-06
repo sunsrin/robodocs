@@ -13,6 +13,7 @@ public final class Constants {
   public static final RobotType robot = RobotType.COMPBOT;
   public static final boolean tuningMode = false;
 
+  // https://www.chiefdelphi.com/t/frc-6328-mechanical-advantage-2026-build-thread/509595/616
   public static final double loopPeriodSecs = 0.02;
   public static final double loopPeriodWatchdogSecs = 0.2;
 
