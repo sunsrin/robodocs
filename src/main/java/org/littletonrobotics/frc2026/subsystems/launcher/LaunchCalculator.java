@@ -25,9 +25,7 @@ import lombok.Getter;
 import lombok.experimental.ExtensionMethod;
 import org.littletonrobotics.frc2026.Constants;
 import org.littletonrobotics.frc2026.FieldConstants;
-import org.littletonrobotics.frc2026.FieldConstants.FieldType;
 import org.littletonrobotics.frc2026.RobotState;
-import org.littletonrobotics.frc2026.subsystems.drive.DriveConstants;
 import org.littletonrobotics.frc2026.subsystems.launcher.hood.Hood;
 import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
@@ -120,10 +118,8 @@ public class LaunchCalculator {
       LoggedTunableNumber hoodAngleDeg, LoggedTunableNumber flywheelSpeed) {}
 
   // Passing targets
-  private static final double hubPassLine =
-      FieldConstants.LinesHorizontal.rightBumpStart - DriveConstants.trackWidthY / 2.0;
   private static final double xPassTarget = Units.inchesToMeters(37);
-  private static final double yPassTarget = Units.inchesToMeters(80);
+  private static final double yPassTarget = Units.inchesToMeters(65);
   // Boxes of bad
   // Under tower
   private static final Bounds towerBound =
@@ -133,7 +129,7 @@ public class LaunchCalculator {
   private static final Bounds nearHubBound =
       new Bounds(
           FieldConstants.LinesVertical.neutralZoneNear,
-          FieldConstants.LinesVertical.neutralZoneNear + Units.inchesToMeters(65),
+          FieldConstants.LinesVertical.neutralZoneNear + Units.inchesToMeters(120),
           FieldConstants.LinesHorizontal.rightBumpStart,
           FieldConstants.LinesHorizontal.leftBumpEnd);
   private static final Bounds farHubBound =
@@ -146,76 +142,58 @@ public class LaunchCalculator {
   static {
     minDistance = 0.9;
     maxDistance = 4.9;
-    passingMinDistance = 0.0;
-    passingMaxDistance = 12.0;
+    passingMinDistance = 5.4;
+    passingMaxDistance = 17.16;
     phaseDelay = 0.03;
 
-    if (FieldConstants.fieldType.equals(FieldType.HQ)) {
-      // 6328 HQ maps
+    hoodAngleMap.put(0.96, Rotation2d.fromDegrees(10.0));
+    hoodAngleMap.put(1.16, Rotation2d.fromDegrees(12.0));
+    hoodAngleMap.put(1.58, Rotation2d.fromDegrees(14.0));
+    hoodAngleMap.put(2.07, Rotation2d.fromDegrees(18.5));
+    hoodAngleMap.put(2.37, Rotation2d.fromDegrees(22.0));
+    hoodAngleMap.put(2.47, Rotation2d.fromDegrees(23.0));
+    hoodAngleMap.put(2.70, Rotation2d.fromDegrees(24.0));
+    hoodAngleMap.put(2.94, Rotation2d.fromDegrees(25.0));
+    hoodAngleMap.put(3.48, Rotation2d.fromDegrees(27.0));
+    hoodAngleMap.put(3.92, Rotation2d.fromDegrees(32.0));
+    hoodAngleMap.put(4.35, Rotation2d.fromDegrees(34.0));
+    hoodAngleMap.put(4.84, Rotation2d.fromDegrees(38.0));
 
-      hoodAngleMap.put(0.96, Rotation2d.fromDegrees(10.0));
-      hoodAngleMap.put(1.16, Rotation2d.fromDegrees(12.0));
-      hoodAngleMap.put(1.58, Rotation2d.fromDegrees(14.0));
-      hoodAngleMap.put(2.07, Rotation2d.fromDegrees(18.5));
-      hoodAngleMap.put(2.37, Rotation2d.fromDegrees(22.0));
-      hoodAngleMap.put(2.47, Rotation2d.fromDegrees(23.0));
-      hoodAngleMap.put(2.70, Rotation2d.fromDegrees(24.0));
-      hoodAngleMap.put(2.94, Rotation2d.fromDegrees(25.0));
-      hoodAngleMap.put(3.48, Rotation2d.fromDegrees(27.0));
-      hoodAngleMap.put(3.92, Rotation2d.fromDegrees(32.0));
-      hoodAngleMap.put(4.35, Rotation2d.fromDegrees(34.0));
-      hoodAngleMap.put(4.84, Rotation2d.fromDegrees(38.0));
+    flywheelSpeedMap.put(0.96, 150.0);
+    flywheelSpeedMap.put(1.16, 155.0);
+    flywheelSpeedMap.put(1.58, 160.0);
+    flywheelSpeedMap.put(2.07, 165.0);
+    flywheelSpeedMap.put(2.37, 170.0);
+    flywheelSpeedMap.put(2.47, 170.0);
+    flywheelSpeedMap.put(2.70, 170.0);
+    flywheelSpeedMap.put(2.94, 175.0);
+    flywheelSpeedMap.put(3.48, 175.0);
+    flywheelSpeedMap.put(3.92, 180.0);
+    flywheelSpeedMap.put(4.35, 185.0);
+    flywheelSpeedMap.put(4.84, 190.0);
 
-      flywheelSpeedMap.put(0.96, 150.0);
-      flywheelSpeedMap.put(1.16, 155.0);
-      flywheelSpeedMap.put(1.58, 160.0);
-      flywheelSpeedMap.put(2.07, 165.0);
-      flywheelSpeedMap.put(2.37, 170.0);
-      flywheelSpeedMap.put(2.47, 170.0);
-      flywheelSpeedMap.put(2.70, 170.0);
-      flywheelSpeedMap.put(2.94, 175.0);
-      flywheelSpeedMap.put(3.48, 175.0);
-      flywheelSpeedMap.put(3.92, 180.0);
-      flywheelSpeedMap.put(4.35, 185.0);
-      flywheelSpeedMap.put(4.84, 190.0);
+    timeOfFlightMap.put(5.68, 1.16);
+    timeOfFlightMap.put(4.55, 1.12);
+    timeOfFlightMap.put(3.15, 1.11);
+    timeOfFlightMap.put(1.88, 1.09);
+    timeOfFlightMap.put(1.38, 0.90);
 
-      timeOfFlightMap.put(5.68, 1.16);
-      timeOfFlightMap.put(4.55, 1.12);
-      timeOfFlightMap.put(3.15, 1.11);
-      timeOfFlightMap.put(1.88, 1.09);
-      timeOfFlightMap.put(1.38, 0.90);
+    passingHoodAngleMap.put(5.46, Rotation2d.fromDegrees(38.0));
+    passingHoodAngleMap.put(6.62, Rotation2d.fromDegrees(38.0));
+    passingHoodAngleMap.put(7.80, Rotation2d.fromDegrees(38.0));
+    passingHoodAngleMap.put(17.16, Rotation2d.fromDegrees(38.0));
 
-      passingHoodAngleMap.put(5.46, Rotation2d.fromDegrees(38.0));
-      passingHoodAngleMap.put(6.62, Rotation2d.fromDegrees(38.0));
-      passingHoodAngleMap.put(7.80, Rotation2d.fromDegrees(38.0));
+    passingFlywheelSpeedMap.put(5.46, 160.0);
+    passingFlywheelSpeedMap.put(6.62, 180.0);
+    passingFlywheelSpeedMap.put(7.80, 200.0);
+    passingFlywheelSpeedMap.put(17.16, 360.0);
 
-      passingFlywheelSpeedMap.put(5.46, 160.0);
-      passingFlywheelSpeedMap.put(6.62, 180.0);
-      passingFlywheelSpeedMap.put(7.80, 200.0);
-
-      passingTimeOfFlightMap.put(passingMinDistance, 0.0);
-      passingTimeOfFlightMap.put(passingMaxDistance, 0.0);
-    } else {
-      // Full field maps
-
-      hoodAngleMap.put(minDistance, Rotation2d.fromDegrees(0.0));
-      hoodAngleMap.put(maxDistance, Rotation2d.fromDegrees(0.0));
-
-      flywheelSpeedMap.put(minDistance, 0.0);
-      flywheelSpeedMap.put(maxDistance, 0.0);
-
-      timeOfFlightMap.put(minDistance, 0.0);
-      timeOfFlightMap.put(maxDistance, 0.0);
-
-      passingHoodAngleMap.put(passingMinDistance, Rotation2d.fromDegrees(0.0));
-      passingHoodAngleMap.put(passingMaxDistance, Rotation2d.fromDegrees(0.0));
-
-      passingFlywheelSpeedMap.put(passingMinDistance, 0.0);
-      passingFlywheelSpeedMap.put(passingMaxDistance, 0.0);
-
-      passingTimeOfFlightMap.put(passingMinDistance, 0.0);
-      passingTimeOfFlightMap.put(passingMaxDistance, 0.0);
-    }
+    passingTimeOfFlightMap.put(5.46, 1.27);
+    passingTimeOfFlightMap.put(6.62, 1.39);
+    passingTimeOfFlightMap.put(7.8, 1.49);
+    passingTimeOfFlightMap.put(11.0, 1.75);
+    passingTimeOfFlightMap.put(13.0, 1.76);
+    passingTimeOfFlightMap.put(17.16, 2.16);
 
     passingPreset =
         new LaunchPreset(
@@ -409,21 +387,6 @@ public class LaunchCalculator {
   public Translation2d getPassingTarget() {
     double flippedY = AllianceFlipUtil.apply(RobotState.getInstance().getEstimatedPose()).getY();
     boolean mirror = flippedY > FieldConstants.LinesHorizontal.center;
-
-    // Check if we need to interpolate
-    if (FieldConstants.fieldWidth - hubPassLine > flippedY && flippedY > hubPassLine) {
-      double interpolateZoneAmount =
-          ((mirror ? FieldConstants.fieldWidth - flippedY : flippedY) - hubPassLine)
-              / (FieldConstants.LinesHorizontal.center - hubPassLine);
-      var unflippedPoseY =
-          mirror
-              ? FieldConstants.fieldWidth
-                  - MathUtil.interpolate(yPassTarget, passingMinDistance, interpolateZoneAmount)
-              : MathUtil.interpolate(yPassTarget, passingMinDistance, interpolateZoneAmount);
-      Translation2d flippedGoalTranslation =
-          AllianceFlipUtil.apply(new Translation2d(xPassTarget, unflippedPoseY));
-      return flippedGoalTranslation;
-    }
 
     // Fixed passing target
     Translation2d flippedGoalTranslation =

@@ -43,8 +43,8 @@ public class AutoBuilder {
 
   private final Supplier<List<AutoQuestionResponse>> responses;
 
-  public static final double outpostIntakeTime = 3.0;
-  public static final double neutralZoneIntakeTimeFirst = 3.0;
+  public static final double outpostIntakeTime = 2.0;
+  public static final double neutralZoneIntakeTimeFirst = 4.0;
   public static final double neutralZoneIntakeTimeOther = 4.0;
   public static final double launchTime = 4.0;
 
@@ -110,7 +110,7 @@ public class AutoBuilder {
                 followTrajectory("launchLeftTowerToClimbLeft", drive, false),
                 AutoQuestionResponse.NOTHING,
                 Commands.none()),
-            () -> responses.get().get(1)));
+            () -> responses.get().get(2)));
   }
 
   public Command monopolySalesman() {
@@ -160,9 +160,10 @@ public class AutoBuilder {
                 AutoQuestionResponse.NOTHING,
                 Commands.none(),
                 AutoQuestionResponse.CLIMB,
-                isLeft.getAsBoolean()
-                    ? followTrajectory("launchLeftTowerToClimbLeft", drive, false)
-                    : followTrajectory("launchRightTowerToClimbRight", drive, false)),
+                Commands.either(
+                    followTrajectory("launchLeftTowerToClimbLeft", drive, false),
+                    followTrajectory("launchRightTowerToClimbRight", drive, false),
+                    isLeft)),
             () -> responses.get().get(1)));
   }
 

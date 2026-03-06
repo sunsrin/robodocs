@@ -183,10 +183,11 @@ public class AutoCommands {
                     kicker)
                 .withDeadline(
                     Commands.repeatingSequence(
-                        Commands.waitSeconds(1.5),
-                        Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
-                        Commands.waitSeconds(0.5),
-                        Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)))));
+                            Commands.waitSeconds(0.5),
+                            Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
+                            Commands.waitSeconds(0.5),
+                            Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)))
+                        .finallyDo(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))));
   }
 
   public static boolean xCrossed(double xPosition, boolean towardsCenter) {

@@ -28,9 +28,9 @@ public class Slamtake extends FullSubsystem {
   private static final LoggedTunableNumber rollerOuttakeVolts =
       new LoggedTunableNumber("Slamtake/Roller/OuttakeVolts", -6.0);
   private static final LoggedTunableNumber deployAmps =
-      new LoggedTunableNumber("Slamtake/Slam/DeployAmps", -22.0);
+      new LoggedTunableNumber("Slamtake/Slam/DeployAmps", -28.0);
   private static final LoggedTunableNumber retractAmps =
-      new LoggedTunableNumber("Slamtake/Slam/RetractAmps", 20.0);
+      new LoggedTunableNumber("Slamtake/Slam/RetractAmps", 35.0);
   private final RollerSystem roller;
   private final Slam slam;
 

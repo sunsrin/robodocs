@@ -31,6 +31,7 @@ public class AutoSelector extends VirtualSubsystem {
 
   private AutoRoutine lastRoutine;
   private List<AutoQuestionResponse> lastResponses;
+  private boolean hasResponses = false;
 
   public AutoSelector(String key) {
     routineChooser = new LoggedDashboardChooser<>(key + "/Routine");
@@ -87,7 +88,7 @@ public class AutoSelector extends VirtualSubsystem {
 
   public void periodic() {
     // Skip updates when actively running in auto
-    if (DriverStation.isAutonomousEnabled() && lastRoutine != null && lastResponses == null) {
+    if (DriverStation.isAutonomousEnabled() && hasResponses) {
       return;
     }
 
@@ -124,6 +125,9 @@ public class AutoSelector extends VirtualSubsystem {
               ? lastRoutine.questions().get(i).responses().get(0)
               : AutoQuestionResponse.valueOf(responseString));
     }
+
+    // Mark that we have successfully read the responses at least once
+    hasResponses = true;
   }
 
   public void periodicAfterScheduler() {}

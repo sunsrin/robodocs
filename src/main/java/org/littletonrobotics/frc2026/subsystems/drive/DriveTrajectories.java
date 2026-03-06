@@ -29,10 +29,10 @@ public class DriveTrajectories {
   public static final PointTarget hubTarget =
       new PointTarget(
           FieldConstants.Hub.innerCenterPoint.toTranslation2d(), Rotation2d.fromDegrees(10), true);
-  public static final double tbdAimUntilXDepot =
+  public static final double substantialAimUntilXDepot =
       FieldConstants.Depot.rightCorner.getX() + DriveConstants.fullWidthX / 2.0 + 0.15;
 
-  public static final double tbdAimUntilXOutpost =
+  public static final double substantialAimUntilXOutpost =
       FieldConstants.Outpost.centerPoint.getX() + DriveConstants.fullWidthX / 2.0 + 0.75;
 
   static {
@@ -562,9 +562,9 @@ public class DriveTrajectories {
             .segments(depotRightToLeft.build().segments)
             .build());
 
-    // TBD Salesman trajectories
+    // Substantial Salesman trajectories
     paths.put(
-        "bumpLeftInnerThroughDepotToNeutralZone",
+        "launchLeftBumpThroughDepotAndBack",
         PathRequest.builder()
             .segments(
                 PathRequestSegment.builder()
@@ -582,12 +582,10 @@ public class DriveTrajectories {
                         // Edge of depot offset translation
                         PathWaypoint.from(
                                 new Translation2d(
-                                    tbdAimUntilXDepot,
+                                    substantialAimUntilXDepot,
                                     FieldConstants.Depot.rightCorner.getY()
                                         - DriveConstants.fullWidthX / 2.0))
                             .build())
-                    .maxVelocity(0.6)
-                    .pointAt(hubTarget)
                     .build(),
                 PathRequestSegment.builder()
                     .waypoints(
@@ -614,56 +612,26 @@ public class DriveTrajectories {
                     .build(),
                 PathRequestSegment.builder()
                     .waypoints(
-                        // Launch left bump translation
-                        PathWaypoint.from(Launch.leftBump.getTranslation()).build())
-                    .pointAt(hubTarget)
-                    .maxVelocity(0.6)
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints(
-                        // Just before bump
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.LinesVertical.starting
-                                        - DriveConstants.fullWidthX / 2.0,
-                                    FieldConstants.LinesHorizontal.leftBumpMiddle,
-                                    Rotation2d.fromDegrees(0)))
-                            .build())
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints(
-                        // Beginning of fuel pool
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.LinesVertical.neutralZoneNear + 2.0,
-                                    FieldConstants.LinesHorizontal.leftBumpMiddle,
-                                    Rotation2d.kZero))
-                            .build())
-                    .maxAngularVelocity(0.1)
+                        // Launch left bump pose
+                        PathWaypoint.from(Launch.leftBump).build())
                     .build())
-            .stopAtStart(false)
-            .stopAtEnd(false)
             .build());
 
     paths.put(
-        "substantial_bumpRightInnerToOutpost",
+        "substantial_launchRightBumpToOutpostFrontIntake",
         PathRequest.builder()
             .segments(
                 PathRequestSegment.builder()
                     .waypoints(
-                        // Starting line
+                        // Starting launch pose
                         PathWaypoint.from(
                                 new Pose2d(
-                                    Bump.rightInner.translation(),
+                                    Launch.rightBump.getTranslation(),
                                     hubTarget
                                         .target()
-                                        .minus(Bump.rightInner.translation())
+                                        .minus(Launch.rightBump.getTranslation())
                                         .getAngle()
                                         .plus(Rotation2d.kPi)))
-                            .build(),
-                        // Starting line translation
-                        PathWaypoint.from(
-                                Bump.rightInner.translation().plus(new Translation2d(-0.5, 0.0)))
                             .build())
                     .build(),
                 PathRequestSegment.builder()
@@ -671,22 +639,19 @@ public class DriveTrajectories {
                         // Outpost offset translation
                         PathWaypoint.from(
                                 new Translation2d(
-                                    tbdAimUntilXOutpost,
+                                    substantialAimUntilXOutpost,
                                     Outpost.frontIntake.getTranslation().getY()))
                             .build())
-                    .pointAt(hubTarget)
-                    .maxVelocity(0.8)
                     .build(),
                 PathRequestSegment.builder()
                     .waypoints(
                         // Outpost front intake pose
                         PathWaypoint.from(Outpost.frontIntake).build())
                     .build())
-            .stopAtStart(false)
             .build());
 
     paths.put(
-        "substantial_frontIntakeOutpostToNeutralZone",
+        "substantial_outpostFrontIntakeToLaunchRightBump",
         PathRequest.builder()
             .segments(
                 PathRequestSegment.builder()
@@ -699,7 +664,7 @@ public class DriveTrajectories {
                         // Outpost leaving offset translation
                         PathWaypoint.from(
                                 new Translation2d(
-                                    tbdAimUntilXOutpost,
+                                    substantialAimUntilXOutpost,
                                     Outpost.frontIntake.getTranslation().getY()))
                             .build())
                     .build(),
@@ -708,30 +673,7 @@ public class DriveTrajectories {
                         // Launch right bump translation
                         PathWaypoint.from(Launch.rightBump.getTranslation()).build())
                     .pointAt(hubTarget)
-                    .maxVelocity(1.0)
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints(
-                        // Just before bump
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.LinesVertical.starting
-                                        - DriveConstants.fullWidthX / 2.0,
-                                    FieldConstants.LinesHorizontal.rightBumpMiddle,
-                                    Rotation2d.kZero))
-                            .build())
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints( // Beginning of fuel pool
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.LinesVertical.neutralZoneNear + 2.0,
-                                    FieldConstants.LinesHorizontal.rightBumpMiddle,
-                                    Rotation2d.kZero))
-                            .build())
-                    .maxAngularVelocity(0.1)
                     .build())
-            .stopAtEnd(false)
             .build());
   }
 }
