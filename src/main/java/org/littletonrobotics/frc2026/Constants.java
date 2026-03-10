@@ -10,7 +10,7 @@ package org.littletonrobotics.frc2026;
 import edu.wpi.first.wpilibj.RobotBase;
 
 public final class Constants {
-  public static final RobotType robot = RobotType.COMPBOT;
+  public static final RobotType robot = RobotType.DARWIN;
   public static final boolean tuningMode = false;
 
   // https://www.chiefdelphi.com/t/frc-6328-mechanical-advantage-2026-build-thread/509595/616
@@ -19,7 +19,7 @@ public final class Constants {
 
   public static Mode getMode() {
     return switch (robot) {
-      case COMPBOT, ALPHABOT -> RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
+      case DARWIN, ALPHABOT -> RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
       case SIMBOT -> Mode.SIM;
     };
   }
@@ -36,7 +36,7 @@ public final class Constants {
   }
 
   public enum RobotType {
-    COMPBOT,
+    DARWIN,
     ALPHABOT,
     SIMBOT
   }
@@ -60,7 +60,7 @@ public final class Constants {
   /** Checks that the default robot is selected and tuning mode is disabled. */
   public static class CheckPullRequest {
     public static void main(String... args) {
-      if (robot != RobotType.COMPBOT || tuningMode) {
+      if (robot != RobotType.DARWIN || tuningMode) {
         System.err.println("Do not merge, non-default constants are configured.");
         System.exit(1);
       }

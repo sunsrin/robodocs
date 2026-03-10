@@ -10,6 +10,8 @@ package org.littletonrobotics.frc2026.subsystems.vision;
 import static org.littletonrobotics.frc2026.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -43,6 +45,7 @@ public class Vision extends VirtualSubsystem {
   private final Map<Integer, Double> lastFrameTimes = new HashMap<>();
   private final Map<Integer, Double> lastTagDetectionTimes = new HashMap<>();
 
+  private final Debouncer fmsAttachedDebouncer = new Debouncer(3.0, DebounceType.kRising);
   private final double disconnectedTimeout = 0.5;
   private final Timer[] disconnectedTimers;
   private final Alert[] disconnectedAlerts;
@@ -82,7 +85,11 @@ public class Vision extends VirtualSubsystem {
     }
 
     // Update recording state
-    boolean shouldRecord = DriverStation.isFMSAttached() || recordingRequest.get() || alwaysRecord;
+    boolean shouldRecord =
+        // Ensure that match info can be published before recording
+        fmsAttachedDebouncer.calculate(DriverStation.isFMSAttached())
+            || recordingRequest.get()
+            || alwaysRecord;
     for (var ioInst : io) {
       ioInst.setRecording(shouldRecord);
     }

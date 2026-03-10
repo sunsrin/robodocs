@@ -19,12 +19,12 @@ import org.littletonrobotics.frc2026.util.geometry.GeomUtil;
 import org.littletonrobotics.junction.Logger;
 
 @ExtensionMethod({GeomUtil.class})
-public class CompBotMechanism3d {
-  private static CompBotMechanism3d measured;
+public class DarwinMechanism3d {
+  private static DarwinMechanism3d measured;
 
-  public static CompBotMechanism3d getMeasured() {
+  public static DarwinMechanism3d getMeasured() {
     if (measured == null) {
-      measured = new CompBotMechanism3d();
+      measured = new DarwinMechanism3d();
     }
     return measured;
   }

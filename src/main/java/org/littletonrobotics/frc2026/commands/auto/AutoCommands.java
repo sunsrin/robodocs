@@ -78,7 +78,7 @@ public class AutoCommands {
                   1.0);
 
           if (AllianceFlipUtil.applyX(RobotState.getInstance().getEstimatedPose().getX())
-              < FieldConstants.LinesVertical.neutralZoneNear) {
+              < FieldConstants.LinesVertical.neutralZoneNear + 0.5) {
             t = 0.0;
           }
 
@@ -114,7 +114,7 @@ public class AutoCommands {
                   1.0);
 
           if (AllianceFlipUtil.applyX(RobotState.getInstance().getEstimatedPose().getX())
-              < FieldConstants.LinesVertical.neutralZoneNear) {
+              < FieldConstants.LinesVertical.neutralZoneNear + 0.5) {
             t = 0.0;
           }
 

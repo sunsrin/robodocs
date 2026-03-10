@@ -13,56 +13,56 @@ import org.littletonrobotics.frc2026.Constants;
 import org.littletonrobotics.frc2026.Constants.RobotType;
 
 public class DriveConstants {
-  // MARK: - COMPBOT Constants
+  // MARK: - Darwin Constants
 
-  public static final double compbotTrackWidthXInches = 21.25;
-  public static final double compbotTrackWidthYInches = 22.25;
-  public static final double compbotFrameWidthXInches = 26.5;
-  public static final double compbotFrameWidthYInches = 27.5;
-  public static final double compbotFullWidthXInches = 33.0;
-  public static final double compbotFullWidthYInches = 34.0;
-  public static final double compbotMaxLinearSpeed = 4.4; // Theoretical max is 4.54
-  public static final double compbotMaxTrajectoryLinearSpeed = 4.2;
-  public static final double compbotMaxAngularSpeed =
+  public static final double darwinTrackWidthXInches = 21.25;
+  public static final double darwinTrackWidthYInches = 22.25;
+  public static final double darwinFrameWidthXInches = 26.5;
+  public static final double darwinFrameWidthYInches = 27.5;
+  public static final double darwinFullWidthXInches = 33.0;
+  public static final double darwinFullWidthYInches = 34.0;
+  public static final double darwinMaxLinearSpeed = 4.4; // Theoretical max is 4.54
+  public static final double darwinMaxTrajectoryLinearSpeed = 4.2;
+  public static final double darwinMaxAngularSpeed =
       5.374; // maxLinearSpeed / driveBaseRadius (0.7814886979 meters)
-  public static final double compbotWheelRadiusInches = 1.99588001;
-  public static final double compbotTrajectoryWheelRadiusInches = 2.0;
-  public static final double compbotMaxTrajectoryWheelTorque = 3.0; // N * m
-  public static final double compbotMassLbs = 150.0;
-  public static final double compbotWheelCOF = 1.5;
-  public static final double compbotRotationMOI = 6.0; // kg * m^2
+  public static final double darwinWheelRadiusInches = 1.99588001;
+  public static final double darwinTrajectoryWheelRadiusInches = 2.0;
+  public static final double darwinMaxTrajectoryWheelTorque = 3.0; // N * m
+  public static final double darwinMassLbs = 150.0;
+  public static final double darwinWheelCOF = 1.5;
+  public static final double darwinRotationMOI = 6.0; // kg * m^2
 
   // SDS MK5i modules, R1 reduction
-  public static final double compbotDriveReduction = 7.03125;
-  public static final double compbotTurnReductionFL = 26.0;
-  public static final double compbotTurnReductionFR = 26.0;
-  public static final double compbotTurnReductionBL = 26.0;
-  public static final double compbotTurnReductionBR = 26.0;
-  // public static final double compbotTurnReductionBR = 26.09090909091; // MK5n
+  public static final double darwinDriveReduction = 7.03125;
+  public static final double darwinTurnReductionFL = 26.0;
+  public static final double darwinTurnReductionFR = 26.0;
+  public static final double darwinTurnReductionBL = 26.0;
+  public static final double darwinTurnReductionBR = 26.0;
+  // public static final double darwinTurnReductionBR = 26.09090909091; // MK5n
 
-  public static final String compbotCanBus = "*";
-  public static final int compbotGyroId = 30;
-  public static final int compbotDriveMotorIdFL = 11;
-  public static final int compbotDriveMotorIdFR = 13;
-  public static final int compbotDriveMotorIdBL = 0;
-  public static final int compbotDriveMotorIdBR = 23;
+  public static final String darwinCanBus = "*";
+  public static final int darwinGyroId = 30;
+  public static final int darwinDriveMotorIdFL = 11;
+  public static final int darwinDriveMotorIdFR = 13;
+  public static final int darwinDriveMotorIdBL = 0;
+  public static final int darwinDriveMotorIdBR = 23;
 
-  public static final int compbotTurnMotorIdFL = 10;
-  public static final int compbotTurnMotorIdFR = 12;
-  public static final int compbotTurnMotorIdBL = 1;
-  public static final int compbotTurnMotorIdBR = 22;
+  public static final int darwinTurnMotorIdFL = 10;
+  public static final int darwinTurnMotorIdFR = 12;
+  public static final int darwinTurnMotorIdBL = 1;
+  public static final int darwinTurnMotorIdBR = 22;
 
-  public static final int compbotEncoderIdFL = 40;
-  public static final int compbotEncoderIdFR = 41;
-  public static final int compbotEncoderIdBL = 42;
-  public static final int compbotEncoderIdBR = 43;
+  public static final int darwinEncoderIdFL = 40;
+  public static final int darwinEncoderIdFR = 41;
+  public static final int darwinEncoderIdBL = 42;
+  public static final int darwinEncoderIdBR = 43;
 
-  public static final double compbotEncoderOffsetFL = -1.530913;
-  public static final double compbotEncoderOffsetFR = 2.078544;
-  public static final double compbotEncoderOffsetBL = -2.42369;
-  public static final double compbotEncoderOffsetBR = -2.863942;
+  public static final double darwinEncoderOffsetFL = -1.530913;
+  public static final double darwinEncoderOffsetFR = 2.078544;
+  public static final double darwinEncoderOffsetBL = -2.42369;
+  public static final double darwinEncoderOffsetBR = -2.863942;
 
-  // MARK: - ALPHABOT Constants
+  // MARK: - Alpha Bot Constants
 
   public static final double alphabotTrackWidthXInches = 22.75;
   public static final double alphabotTrackWidthYInches = 22.75;
@@ -126,61 +126,60 @@ public class DriveConstants {
       Units.inchesToMeters(
           Constants.robot == RobotType.ALPHABOT
               ? alphabotTrackWidthXInches
-              : compbotTrackWidthXInches);
+              : darwinTrackWidthXInches);
   public static final double trackWidthY =
       Units.inchesToMeters(
           Constants.robot == RobotType.ALPHABOT
               ? alphabotTrackWidthYInches
-              : compbotTrackWidthYInches);
+              : darwinTrackWidthYInches);
   public static final double frameWidthX =
       Units.inchesToMeters(
           Constants.robot == RobotType.ALPHABOT
               ? alphabotFrameWidthXInches
-              : compbotFrameWidthXInches);
+              : darwinFrameWidthXInches);
   public static final double frameWidthY =
       Units.inchesToMeters(
           Constants.robot == RobotType.ALPHABOT
               ? alphabotFrameWidthYInches
-              : compbotFrameWidthYInches);
+              : darwinFrameWidthYInches);
   public static final double fullWidthX =
       Units.inchesToMeters(
           Constants.robot == RobotType.ALPHABOT
               ? alphabotFullWidthXInches
-              : compbotFullWidthXInches);
+              : darwinFullWidthXInches);
   public static final double fullWidthY =
       Units.inchesToMeters(
           Constants.robot == RobotType.ALPHABOT
               ? alphabotFullWidthYInches
-              : compbotFullWidthYInches);
+              : darwinFullWidthYInches);
   public static final double driveBaseRadius = Math.hypot(trackWidthX / 2, trackWidthY / 2);
   public static final double maxLinearSpeed =
-      Constants.robot == RobotType.ALPHABOT ? alphabotMaxLinearSpeed : compbotMaxLinearSpeed;
+      Constants.robot == RobotType.ALPHABOT ? alphabotMaxLinearSpeed : darwinMaxLinearSpeed;
   public static final double maxTrajectoryLinearSpeed =
       Constants.robot == RobotType.ALPHABOT
           ? alphabotMaxTrajectoryLinearSpeed
-          : compbotMaxTrajectoryLinearSpeed;
+          : darwinMaxTrajectoryLinearSpeed;
   public static final double maxAngularSpeed =
-      Constants.robot == RobotType.ALPHABOT ? alphabotMaxAngularSpeed : compbotMaxAngularSpeed;
+      Constants.robot == RobotType.ALPHABOT ? alphabotMaxAngularSpeed : darwinMaxAngularSpeed;
   public static final double wheelRadiusInches =
-      Constants.robot == RobotType.ALPHABOT ? alphabotWheelRadiusInches : compbotWheelRadiusInches;
+      Constants.robot == RobotType.ALPHABOT ? alphabotWheelRadiusInches : darwinWheelRadiusInches;
   public static final double trajectoryWheelRadiusInches =
       Constants.robot == RobotType.ALPHABOT
           ? alphabotTrajectoryWheelRadiusInches
-          : compbotTrajectoryWheelRadiusInches;
+          : darwinTrajectoryWheelRadiusInches;
   public static final double maxTrajectoryWheelTorque =
       Constants.robot == RobotType.ALPHABOT
           ? alphabotMaxTrajectoryWheelTorque
-          : compbotMaxTrajectoryWheelTorque;
+          : darwinMaxTrajectoryWheelTorque;
   public static final double wheelRadius = Units.inchesToMeters(wheelRadiusInches);
   public static final double trajectoryWheelRadius =
       Units.inchesToMeters(trajectoryWheelRadiusInches);
   public static final double mass =
-      Units.lbsToKilograms(
-          Constants.robot == RobotType.ALPHABOT ? alphabotMassLbs : compbotMassLbs);
+      Units.lbsToKilograms(Constants.robot == RobotType.ALPHABOT ? alphabotMassLbs : darwinMassLbs);
   public static final double wheelCOF =
-      Constants.robot == RobotType.ALPHABOT ? alphabotWheelCOF : compbotWheelCOF;
+      Constants.robot == RobotType.ALPHABOT ? alphabotWheelCOF : darwinWheelCOF;
   public static final double rotationMOI =
-      Constants.robot == RobotType.ALPHABOT ? alphabotRotationMOI : compbotRotationMOI;
+      Constants.robot == RobotType.ALPHABOT ? alphabotRotationMOI : darwinRotationMOI;
   public static final Translation2d[] moduleTranslations = {
     new Translation2d(trackWidthX / 2, trackWidthY / 2),
     new Translation2d(trackWidthX / 2, -trackWidthY / 2),
@@ -189,15 +188,15 @@ public class DriveConstants {
   };
 
   public static final double driveReduction =
-      Constants.robot == RobotType.ALPHABOT ? alphabotDriveReduction : compbotDriveReduction;
+      Constants.robot == RobotType.ALPHABOT ? alphabotDriveReduction : darwinDriveReduction;
   public static final double turnReductionFL =
-      Constants.robot == RobotType.ALPHABOT ? alphabotTurnReductionFL : compbotTurnReductionFL;
+      Constants.robot == RobotType.ALPHABOT ? alphabotTurnReductionFL : darwinTurnReductionFL;
   public static final double turnReductionFR =
-      Constants.robot == RobotType.ALPHABOT ? alphabotTurnReductionFR : compbotTurnReductionFR;
+      Constants.robot == RobotType.ALPHABOT ? alphabotTurnReductionFR : darwinTurnReductionFR;
   public static final double turnReductionBL =
-      Constants.robot == RobotType.ALPHABOT ? alphabotTurnReductionBL : compbotTurnReductionBL;
+      Constants.robot == RobotType.ALPHABOT ? alphabotTurnReductionBL : darwinTurnReductionBL;
   public static final double turnReductionBR =
-      Constants.robot == RobotType.ALPHABOT ? alphabotTurnReductionBR : compbotTurnReductionBR;
+      Constants.robot == RobotType.ALPHABOT ? alphabotTurnReductionBR : darwinTurnReductionBR;
 
   public static final double intakeNearX = fullWidthX / 2.0;
   public static final double intakeFarX = frameWidthX / 2.0 + Units.inchesToMeters(12.0);

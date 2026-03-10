@@ -12,7 +12,6 @@ import static org.littletonrobotics.frc2026.subsystems.vision.VisionConstants.*;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import java.util.function.Supplier;
 import org.littletonrobotics.frc2026.FieldConstants;
 import org.littletonrobotics.frc2026.FieldConstants.AprilTagLayoutType;
@@ -32,8 +31,6 @@ public class VisionIONorthstar implements VisionIO {
   private final IntegerPublisher timestampPublisher;
   private final BooleanPublisher isRecordingPublisher;
   private final StringPublisher tagLayoutPublisher;
-
-  private final Timer slowPeriodicTimer = new Timer();
 
   public VisionIONorthstar(Supplier<AprilTagLayoutType> aprilTagLayoutSupplier, int index) {
     this.aprilTagLayoutSupplier = aprilTagLayoutSupplier;
@@ -79,16 +76,12 @@ public class VisionIONorthstar implements VisionIO {
                 PubSubOption.periodic(0.01));
     fpsAprilTagsSubscriber = outputTable.getIntegerTopic("fps_apriltags").subscribe(0);
     fpsObjDetectSubscriber = outputTable.getIntegerTopic("fps_objdetect").subscribe(0);
-
-    slowPeriodicTimer.start();
   }
 
   public void updateInputs(
       VisionIOInputs inputs,
       AprilTagVisionIOInputs aprilTagInputs,
       ObjDetectVisionIOInputs objDetectInputs) {
-    boolean slowPeriodic = slowPeriodicTimer.advanceIfElapsed(1.0);
-
     // Update NT connection status
     inputs.ntConnected = false;
     for (var client : NetworkTableInstance.getDefault().getConnections()) {
@@ -99,12 +92,10 @@ public class VisionIONorthstar implements VisionIO {
     }
 
     // Publish timestamp
-    if (slowPeriodic) {
-      timestampPublisher.set(WPIUtilJNI.getSystemTime() / 1000000);
-      eventNamePublisher.set(DriverStation.getEventName());
-      matchTypePublisher.set(DriverStation.getMatchType().ordinal());
-      matchNumberPublisher.set(DriverStation.getMatchNumber());
-    }
+    timestampPublisher.set(WPIUtilJNI.getSystemTime() / 1000000);
+    eventNamePublisher.set(DriverStation.getEventName());
+    matchTypePublisher.set(DriverStation.getMatchType().ordinal());
+    matchNumberPublisher.set(DriverStation.getMatchNumber());
 
     // Publish tag layout
     var aprilTagType = aprilTagLayoutSupplier.get();
@@ -121,9 +112,7 @@ public class VisionIONorthstar implements VisionIO {
       aprilTagInputs.timestamps[i] = aprilTagQueue[i].timestamp / 1000000.0;
       aprilTagInputs.frames[i] = aprilTagQueue[i].value;
     }
-    if (slowPeriodic) {
-      aprilTagInputs.fps = fpsAprilTagsSubscriber.get();
-    }
+    aprilTagInputs.fps = fpsAprilTagsSubscriber.get();
 
     // Get object detection data
     var objDetectQueue = objDetectObservationSubscriber.readQueue();
@@ -137,9 +126,7 @@ public class VisionIONorthstar implements VisionIO {
         objDetectInputs.frames[i][j] = (float) doubleArray[j];
       }
     }
-    if (slowPeriodic) {
-      objDetectInputs.fps = fpsObjDetectSubscriber.get();
-    }
+    objDetectInputs.fps = fpsObjDetectSubscriber.get();
   }
 
   public void setRecording(boolean active) {

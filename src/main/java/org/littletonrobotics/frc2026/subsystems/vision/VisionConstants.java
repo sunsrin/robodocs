@@ -41,7 +41,7 @@ public class VisionConstants {
 
   public static CameraConfig[] cameras =
       switch (Constants.robot) {
-        case COMPBOT ->
+        case DARWIN ->
             new CameraConfig[] {
               CameraConfig.builder()
                   .poseFunction(
@@ -56,7 +56,7 @@ public class VisionConstants {
                                     Units.degreesToRadians(-22.5),
                                     Units.degreesToRadians(175.0))));
                       })
-                  .id("40530395")
+                  .id("40552081")
                   .width(1800)
                   .height(1200)
                   .exposure(monoExposure)

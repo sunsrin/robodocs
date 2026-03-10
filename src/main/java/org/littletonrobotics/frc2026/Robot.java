@@ -248,7 +248,7 @@ public class Robot extends LoggedRobot {
     robotContainer.updateDashboardOutputs();
 
     // Log Mechanism3d data
-    CompBotMechanism3d.getMeasured().log("Mechanism3d");
+    DarwinMechanism3d.getMeasured().log("Mechanism3d");
 
     // Update fuel sim
     if (Constants.getMode() == Mode.SIM) {

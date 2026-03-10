@@ -156,7 +156,7 @@ public class RobotContainer {
     if (Constants.getMode() != Constants.Mode.REPLAY) {
       // https://www.chiefdelphi.com/t/frc-6328-mechanical-advantage-2026-build-thread/509595/616
       switch (Constants.robot) {
-        case COMPBOT:
+        case DARWIN:
           // Not implemented
           break;
 
@@ -213,7 +213,7 @@ public class RobotContainer {
     }
     if (vision == null) {
       switch (Constants.robot) {
-        case COMPBOT ->
+        case DARWIN ->
             vision =
                 new Vision(this::getSelectedAprilTagLayout, new VisionIO() {}, new VisionIO() {});
         case ALPHABOT ->

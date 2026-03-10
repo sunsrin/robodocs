@@ -112,7 +112,7 @@ public class LaunchCalculator {
           new LoggedTunableNumber("LaunchCalculator/Presets/HoodMax/FlywheelSpeed", 50));
 
   public static final LoggedTunableNumber passingIdleSpeed =
-      new LoggedTunableNumber("LaunchCalculator/PassingIdleSpeed", 50);
+      new LoggedTunableNumber("LaunchCalculator/PassingIdleSpeed", 100);
 
   public static record LaunchPreset(
       LoggedTunableNumber hoodAngleDeg, LoggedTunableNumber flywheelSpeed) {}

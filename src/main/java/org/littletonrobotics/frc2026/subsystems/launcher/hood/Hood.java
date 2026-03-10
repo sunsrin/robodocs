@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import lombok.Setter;
-import org.littletonrobotics.frc2026.CompBotMechanism3d;
+import org.littletonrobotics.frc2026.DarwinMechanism3d;
 import org.littletonrobotics.frc2026.Robot;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.hood.HoodIO.HoodIOOutputMode;
@@ -96,7 +96,7 @@ public class Hood extends FullSubsystem {
     outputs.kD = kD.get();
 
     // Visualize launcher in 3D
-    CompBotMechanism3d.getMeasured().setHoodAngle(new Rotation2d(getMeasuredAngleRad()));
+    DarwinMechanism3d.getMeasured().setHoodAngle(new Rotation2d(getMeasuredAngleRad()));
 
     // Record cycle time
     LoggedTracer.record("Hood/Periodic");

@@ -51,7 +51,7 @@ public class Flywheel extends FullSubsystem {
   private static final LoggedTunableNumber kS = new LoggedTunableNumber("Flywheel/kS", 0.22);
   private static final LoggedTunableNumber kV = new LoggedTunableNumber("Flywheel/kV", 0.019);
   private static final LoggedTunableNumber maxAcceleration =
-      new LoggedTunableNumber("Flywheel/MaxAcceleration", 250.0);
+      new LoggedTunableNumber("Flywheel/MaxAcceleration", 50.0);
 
   private SlewRateLimiter slewRateLimiter = new SlewRateLimiter(maxAcceleration.get());
 
@@ -129,6 +129,7 @@ public class Flywheel extends FullSubsystem {
     outputs.feedforward = Math.signum(setpointRadPerSec) * kS.get() + setpointRadPerSec * kV.get();
     Logger.recordOutput("Flywheel/Setpoint", setpointRadPerSec);
     Logger.recordOutput("Flywheel/Goal", velocityRadsPerSec);
+    Logger.recordOutput("Flywheel/Feedforward", outputs.feedforward);
   }
 
   /** Stops the flywheel. */

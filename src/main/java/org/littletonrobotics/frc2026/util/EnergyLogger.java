@@ -34,7 +34,7 @@ public class EnergyLogger {
   public static void recordEnergyUsage(String key, double... amps) {
     double totalAmps = 0.0;
     for (int i = 0; i < amps.length; i++) {
-      totalAmps += Math.abs(amps[i]);
+      totalAmps += amps[i];
     }
 
     double power = totalAmps * inputs.batteryVoltage;
