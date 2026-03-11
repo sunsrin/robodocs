@@ -7,6 +7,7 @@
 
 package org.littletonrobotics.frc2026.util;
 
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,7 @@ public class EnergyLogger {
 
   public static void updateBatteryVoltage() {
     inputs.batteryVoltage = RobotController.getBatteryVoltage();
+    inputs.rioCurrent = RobotController.getInputCurrent();
     Logger.processInputs("EnergyLogger", inputs);
   }
 
@@ -66,6 +68,17 @@ public class EnergyLogger {
   }
 
   public static void recordOutputs() {
+    recordEnergyUsage(
+        "Controls/MacMini",
+        (RobotBase.isReal() ? MacPowerMonitor.getCurrentPowerWatts() : 0.0)
+            / (inputs.batteryVoltage > 0.0 ? inputs.batteryVoltage : 12.0)
+            / 0.9);
+    recordEnergyUsage("Controls/roboRIO", inputs.rioCurrent);
+    recordEnergyUsage("Controls/CANcoders", 0.05 * 4);
+    recordEnergyUsage("Controls/Pigeon", 0.04);
+    recordEnergyUsage("Controls/CANivore", 0.03);
+    recordEnergyUsage("Controls/Radio", 0.5);
+
     Logger.recordOutput("EnergyLogger/Current", totalCurrent, "amps");
     Logger.recordOutput("EnergyLogger/Power", totalPower, "watts");
     Logger.recordOutput("EnergyLogger/Energy", joulesToWattHours(totalEnergy), "watt hours");
@@ -95,6 +108,7 @@ public class EnergyLogger {
 
   @AutoLog
   public static class BatteryIOInputs {
-    public double batteryVoltage = 0.0;
+    public double batteryVoltage = 12.0;
+    public double rioCurrent = 0.0;
   }
 }
