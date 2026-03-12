@@ -7,7 +7,6 @@
 
 package org.littletonrobotics.frc2026.util;
 
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,11 +67,6 @@ public class EnergyLogger {
   }
 
   public static void recordOutputs() {
-    recordEnergyUsage(
-        "Controls/MacMini",
-        (RobotBase.isReal() ? MacPowerMonitor.getCurrentPowerWatts() : 0.0)
-            / (inputs.batteryVoltage > 0.0 ? inputs.batteryVoltage : 12.0)
-            / 0.9);
     recordEnergyUsage("Controls/roboRIO", inputs.rioCurrent);
     recordEnergyUsage("Controls/CANcoders", 0.05 * 4);
     recordEnergyUsage("Controls/Pigeon", 0.04);
