@@ -20,7 +20,6 @@ import org.littletonrobotics.frc2026.Robot;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.flywheel.FlywheelIO.FlywheelIOOutputMode;
 import org.littletonrobotics.frc2026.subsystems.launcher.flywheel.FlywheelIO.FlywheelIOOutputs;
-import org.littletonrobotics.frc2026.util.EnergyLogger;
 import org.littletonrobotics.frc2026.util.EqualsUtil;
 import org.littletonrobotics.frc2026.util.FullSubsystem;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
@@ -63,13 +62,13 @@ public class Flywheel extends FullSubsystem {
   public Flywheel(FlywheelIO io) {
     this.io = io;
 
-    disconnected = new Alert("Flywheel motor disconnected!", Alert.AlertType.kWarning);
+    disconnected = new Alert("Flywheel motor disconnected!", Alert.AlertType.kError);
     follower1Disconnected =
-        new Alert("Flywheel follower 1 motor disconnected!", Alert.AlertType.kWarning);
+        new Alert("Flywheel follower 1 motor disconnected!", Alert.AlertType.kError);
     follower2Disconnected =
-        new Alert("Flywheel follower 2 motor disconnected!", Alert.AlertType.kWarning);
+        new Alert("Flywheel follower 2 motor disconnected!", Alert.AlertType.kError);
     follower3Disconnected =
-        new Alert("Flywheel follower 3 motor disconnected!", Alert.AlertType.kWarning);
+        new Alert("Flywheel follower 3 motor disconnected!", Alert.AlertType.kError);
   }
 
   public void periodic() {
@@ -99,13 +98,13 @@ public class Flywheel extends FullSubsystem {
         Robot.showHardwareAlerts()
             && !motorFollower3ConnectedDebouncer.calculate(inputs.follower3Connected));
 
-    // Record energy usage
-    EnergyLogger.recordEnergyUsage(
+    // Report energy usage
+    Robot.batteryLogger.reportCurrentUsage(
         "Flywheel",
-        inputs.supplyCurrentAmps,
-        inputs.follower1SupplyCurrentAmps,
-        inputs.follower2SupplyCurrentAmps,
-        inputs.follower3SupplyCurrentAmps);
+        inputs.connected ? inputs.supplyCurrentAmps : 0.0,
+        inputs.follower1Connected ? inputs.follower1SupplyCurrentAmps : 0.0,
+        inputs.follower2Connected ? inputs.follower2SupplyCurrentAmps : 0.0,
+        inputs.follower3Connected ? inputs.follower3SupplyCurrentAmps : 0.0);
 
     SmartDashboard.putString("Flywheel Speed", String.format("%.0f", inputs.velocityRadsPerSec));
     SmartDashboard.putBoolean("Flywheel At Goal", atGoal);
@@ -114,6 +113,7 @@ public class Flywheel extends FullSubsystem {
 
   @Override
   public void periodicAfterScheduler() {
+
     Logger.recordOutput("Flywheel/Mode", outputs.mode);
     io.applyOutputs(outputs);
 

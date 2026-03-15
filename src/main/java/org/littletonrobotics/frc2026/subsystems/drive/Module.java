@@ -16,11 +16,13 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import org.littletonrobotics.frc2026.Robot;
 import org.littletonrobotics.frc2026.subsystems.drive.ModuleIO.ModuleIOOutputMode;
 import org.littletonrobotics.frc2026.subsystems.drive.ModuleIO.ModuleIOOutputs;
-import org.littletonrobotics.frc2026.util.EnergyLogger;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
+  private final String driveEnergyKey;
+  private final String turnEnergyKey;
+
   private final ModuleIO io;
   private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
   private final ModuleIOOutputs outputs = new ModuleIOOutputs();
@@ -36,6 +38,8 @@ public class Module {
   public Module(ModuleIO io, int index) {
     this.io = io;
     this.index = index;
+    driveEnergyKey = "FullDrive/Drive" + "/" + index;
+    turnEnergyKey = "FullDrive/Turn" + "/" + index;
     driveDisconnectedAlert =
         new Alert(
             "Disconnected drive motor on module " + Integer.toString(index) + ".",
@@ -57,15 +61,18 @@ public class Module {
     turnDisconnectedAlert.set(Robot.showHardwareAlerts() && !inputs.turnConnected);
     encoderDisconnectedAlert.set(Robot.showHardwareAlerts() && !inputs.encoderConnected);
 
-    // Record energy usage
-    EnergyLogger.recordEnergyUsage("FullDrive/Drive/" + index, inputs.driveSupplyCurrentAmps);
-    EnergyLogger.recordEnergyUsage("FullDrive/Turn/" + index, inputs.turnSupplyCurrentAmps);
+    // Report energy usage
+    Robot.batteryLogger.reportCurrentUsage(
+        driveEnergyKey, inputs.driveConnected ? inputs.driveSupplyCurrentAmps : 0.0);
+    Robot.batteryLogger.reportCurrentUsage(
+        turnEnergyKey, inputs.turnConnected ? inputs.turnSupplyCurrentAmps : 0.0);
 
     // Record cycle times
     LoggedTracer.record("Drive/Module" + index + "/Periodic");
   }
 
   public void periodicAfterScheduler() {
+
     io.applyOutputs(outputs);
     LoggedTracer.record("Drive/Module" + index + "/AfterScheduler");
   }

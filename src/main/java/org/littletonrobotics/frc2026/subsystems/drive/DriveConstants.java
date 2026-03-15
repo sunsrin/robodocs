@@ -119,7 +119,6 @@ public class DriveConstants {
   public static final double turnKd = 2.0;
   public static final double turnDeadbandDegrees = 0.3;
   public static final double driveCurrentLimitAmps = 80;
-  public static final double driveSupplyCurrentLimitAmps = 30;
   public static final double turnCurrentLimitAmps = 40;
 
   public static final double trackWidthX =

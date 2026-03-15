@@ -29,6 +29,7 @@ public class VisionConstants {
   public static final double xyStdDevCoefficient = 0.01;
   public static final double thetaStdDevCoefficient = 0.03;
   public static final double fuelDetectConfidenceThreshold = 0.0; // Enforced by Northstar
+  public static final double robotDetectConfidenceThreshold = 0.0; // Enforced by Northstar
 
   private static LoggedTunableNumber frontCameraPitchFudgeDegrees =
       new LoggedTunableNumber("Vision/FrontCameraPitchFudgeDeg", 1.6);
@@ -88,7 +89,7 @@ public class VisionConstants {
                   .height(960)
                   .exposure(colorExposure)
                   .gain(colorGain)
-                  .stdDevFactor(5.0)
+                  .stdDevFactor(1.0)
                   .fovRads(Units.degreesToRadians(90.0))
                   .build()
             };

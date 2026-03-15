@@ -15,7 +15,6 @@ import lombok.Setter;
 import org.littletonrobotics.frc2026.Robot;
 import org.littletonrobotics.frc2026.subsystems.rollers.RollerSystemIO.RollerSystemIOMode;
 import org.littletonrobotics.frc2026.subsystems.rollers.RollerSystemIO.RollerSystemIOOutputs;
-import org.littletonrobotics.frc2026.util.EnergyLogger;
 import org.littletonrobotics.junction.Logger;
 
 public class RollerSystem {
@@ -42,9 +41,9 @@ public class RollerSystem {
     this.inputsName = inputsName;
     this.io = io;
 
-    disconnected = new Alert(name + " motor disconnected!", Alert.AlertType.kWarning);
+    disconnected = new Alert(name + " motor disconnected!", Alert.AlertType.kError);
     followerDisconnected =
-        new Alert(name + " follower motor disconnected!", Alert.AlertType.kWarning);
+        new Alert(name + " follower motor disconnected!", Alert.AlertType.kError);
     outputs.kP = kP;
     outputs.kD = kD;
   }
@@ -54,9 +53,9 @@ public class RollerSystem {
     this.inputsName = inputsName;
     this.io = io;
 
-    disconnected = new Alert(name + " motor disconnected!", Alert.AlertType.kWarning);
+    disconnected = new Alert(name + " motor disconnected!", Alert.AlertType.kError);
     followerDisconnected =
-        new Alert(name + " follower motor disconnected!", Alert.AlertType.kWarning);
+        new Alert(name + " follower motor disconnected!", Alert.AlertType.kError);
   }
 
   public void periodic() {
@@ -70,10 +69,15 @@ public class RollerSystem {
             && !followerMotorConnectedDebouncer.calculate(inputs.followerConnected));
 
     // Record energy usage
-    EnergyLogger.recordEnergyUsage(
-        "Rollers/" + inputsName,
-        inputs.supplyCurrentAmps,
-        inputs.hasFollower ? inputs.followerSupplyCurrentAmps : 0.0);
+    if (inputs.hasFollower) {
+      Robot.batteryLogger.reportCurrentUsage(
+          name,
+          inputs.connected ? inputs.supplyCurrentAmps : 0.0,
+          inputs.followerConnected ? inputs.followerSupplyCurrentAmps : 0.0);
+    } else {
+      Robot.batteryLogger.reportCurrentUsage(
+          name, inputs.connected ? inputs.supplyCurrentAmps : 0.0);
+    }
 
     // Update mode
     if (DriverStation.isDisabled()) {
@@ -86,6 +90,7 @@ public class RollerSystem {
   }
 
   public void periodicAfterScheduler() {
+
     io.applyOutputs(outputs);
   }
 

@@ -9,7 +9,10 @@ package org.littletonrobotics.frc2026.subsystems.slamtake;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.function.BooleanSupplier;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,19 +30,17 @@ public class Slamtake extends FullSubsystem {
       new LoggedTunableNumber("Slamtake/Roller/IntakeVolts", 10.0);
   private static final LoggedTunableNumber rollerOuttakeVolts =
       new LoggedTunableNumber("Slamtake/Roller/OuttakeVolts", -6.0);
-  private static final LoggedTunableNumber deployAmps =
-      new LoggedTunableNumber("Slamtake/Slam/DeployAmps", -30.0);
-  private static final LoggedTunableNumber retractAmps =
-      new LoggedTunableNumber("Slamtake/Slam/RetractAmps", 35.0);
+  private static final LoggedTunableNumber deployPosition =
+      new LoggedTunableNumber("Slamtake/Slam/DeployPosition", 0.0);
+  private static final LoggedTunableNumber retractPosition =
+      new LoggedTunableNumber("Slamtake/Slam/RetractPosition", 102.0);
   private final RollerSystem roller;
   private final Slam slam;
 
-  private static final LoggedTunableNumber slamVelocityDebounceTime =
+  private static final LoggedTunableNumber slamGoalDebounceTime =
       new LoggedTunableNumber("Slamtake/Slam/DebounceTime", 0.5);
-  private Debouncer slamVelocityDebouncer =
-      new Debouncer(slamVelocityDebounceTime.get(), DebounceType.kRising);
-  private static final LoggedTunableNumber slamSettleVelocity =
-      new LoggedTunableNumber("Slamtake/Slam/SettleVelocity", 2.0);
+  private Debouncer slamGoalDebouncer =
+      new Debouncer(slamGoalDebounceTime.get(), DebounceType.kRising);
 
   @Getter @Setter @AutoLogOutput private IntakeGoal intakeGoal = IntakeGoal.STOP;
   @Getter @Setter @AutoLogOutput private SlamGoal slamGoal = SlamGoal.RETRACT;
@@ -54,8 +55,8 @@ public class Slamtake extends FullSubsystem {
     slam.periodic();
     roller.periodic();
 
-    if (slamVelocityDebounceTime.hasChanged(hashCode())) {
-      slamVelocityDebouncer = new Debouncer(slamVelocityDebounceTime.get());
+    if (slamGoalDebounceTime.hasChanged(hashCode())) {
+      slamGoalDebouncer = new Debouncer(slamGoalDebounceTime.get());
     }
 
     double rollerVolts = 0.0;
@@ -74,18 +75,14 @@ public class Slamtake extends FullSubsystem {
     roller.runOpenLoop(rollerVolts);
     switch (slamGoal) {
       case DEPLOY -> {
-        slam.runAmps(deployAmps.get());
+        slam.runPosition(Units.degreesToRadians(deployPosition.get()));
         slamState =
-            slamVelocityDebouncer.calculate(Math.abs(slam.getVelocity()) < slamSettleVelocity.get())
-                ? SlamState.DEPLOYED
-                : SlamState.MOVING;
+            slamGoalDebouncer.calculate(slam.atGoal()) ? SlamState.DEPLOYED : SlamState.MOVING;
       }
       case RETRACT -> {
-        slam.runAmps(retractAmps.get());
+        slam.runPosition(Units.degreesToRadians(retractPosition.get()));
         slamState =
-            slamVelocityDebouncer.calculate(Math.abs(slam.getVelocity()) < slamSettleVelocity.get())
-                ? SlamState.RETRACTED
-                : SlamState.MOVING;
+            slamGoalDebouncer.calculate(slam.atGoal()) ? SlamState.RETRACTED : SlamState.MOVING;
       }
       case IDLE -> {
         slam.setMode(SlamIOOutputMode.COAST);
@@ -119,6 +116,18 @@ public class Slamtake extends FullSubsystem {
   public void setCoastOverride(BooleanSupplier coast) {
     slam.setCoastOverride(coast);
     roller.setCoastOverride(coast);
+  }
+
+  public boolean isZeroed() {
+    return slam.isZeroed();
+  }
+
+  public Command homeSlam() {
+    return slam.zeroCommand();
+  }
+
+  public Command zeroMaxSlam() {
+    return Commands.runOnce(() -> slam.zeroMaxAngle(), this).ignoringDisable(true);
   }
 
   public enum IntakeGoal {

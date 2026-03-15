@@ -17,13 +17,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import lombok.Getter;
 import lombok.Setter;
 import org.littletonrobotics.frc2026.DarwinMechanism3d;
 import org.littletonrobotics.frc2026.Robot;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.hood.HoodIO.HoodIOOutputMode;
 import org.littletonrobotics.frc2026.subsystems.launcher.hood.HoodIO.HoodIOOutputs;
-import org.littletonrobotics.frc2026.util.EnergyLogger;
 import org.littletonrobotics.frc2026.util.FullSubsystem;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
 import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
@@ -58,7 +58,7 @@ public class Hood extends FullSubsystem {
   private final Debouncer motorConnectedDebouncer =
       new Debouncer(0.5, Debouncer.DebounceType.kFalling);
   private final Alert motorDisconnectedAlert =
-      new Alert("Hood motor disconnected!", Alert.AlertType.kWarning);
+      new Alert("Hood motor disconnected!", Alert.AlertType.kError);
 
   @Setter private BooleanSupplier coastOverride = () -> false;
 
@@ -66,7 +66,7 @@ public class Hood extends FullSubsystem {
   private double goalVelocity = 0.0;
 
   private static double hoodOffset = 0.0;
-  private boolean hoodZeroed = false;
+  @Getter private boolean zeroed = false;
 
   public Hood(HoodIO io) {
     this.io = io;
@@ -79,11 +79,11 @@ public class Hood extends FullSubsystem {
     motorDisconnectedAlert.set(
         Robot.showHardwareAlerts() && !motorConnectedDebouncer.calculate(inputs.motorConnected));
 
-    // Record energy usage
-    EnergyLogger.recordEnergyUsage("Hood", inputs.supplyCurrentAmps);
+    Robot.batteryLogger.reportCurrentUsage(
+        "Hood", inputs.motorConnected ? inputs.supplyCurrentAmps : 0.0);
 
     // Stop when disabled
-    if (DriverStation.isDisabled() || (!hoodZeroed && outputs.mode != HoodIOOutputMode.OPEN_LOOP)) {
+    if (DriverStation.isDisabled() || (!zeroed && outputs.mode != HoodIOOutputMode.OPEN_LOOP)) {
       outputs.mode = HoodIOOutputMode.BRAKE;
 
       if (coastOverride.getAsBoolean()) {
@@ -104,7 +104,7 @@ public class Hood extends FullSubsystem {
 
   @Override
   public void periodicAfterScheduler() {
-    if (DriverStation.isEnabled() && hoodZeroed) {
+    if (DriverStation.isEnabled() && zeroed) {
       outputs.positionRad = MathUtil.clamp(goalAngle, minAngle, maxAngle) - hoodOffset;
       outputs.velocityRadsPerSec = goalVelocity;
       outputs.mode = HoodIOOutputMode.CLOSED_LOOP;
@@ -131,21 +131,21 @@ public class Hood extends FullSubsystem {
   @AutoLogOutput
   public boolean atGoal() {
     return DriverStation.isEnabled()
-        && hoodZeroed
+        && zeroed
         && Math.abs(getMeasuredAngleRad() - goalAngle)
             <= Units.degreesToRadians(toleranceDeg.get());
   }
 
   private void zero() {
     hoodOffset = minAngle - inputs.positionRads;
-    hoodZeroed = true;
+    zeroed = true;
   }
 
   public Command zeroCommand() {
     return run(() -> {
           outputs.appliedVolts = homingVolts.get();
           outputs.mode = HoodIOOutputMode.OPEN_LOOP;
-          hoodZeroed = false;
+          zeroed = false;
         })
         .raceWith(
             Commands.waitSeconds(0.5)

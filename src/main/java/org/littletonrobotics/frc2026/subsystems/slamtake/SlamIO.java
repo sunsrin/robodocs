@@ -24,12 +24,17 @@ public interface SlamIO {
   public enum SlamIOOutputMode {
     BRAKE,
     COAST,
-    RUN_OPEN_LOOP
+    RUN_OPEN_LOOP,
+    RUN_CLOSED_LOOP
   }
 
   public static class SlamIOOutputs {
     public SlamIOOutputMode mode = SlamIOOutputMode.BRAKE;
-    public double appliedAmps = 0.0;
+    public double appliedVolts = 0.0;
+
+    public double position = 0.0;
+    public double kP = 0.0;
+    public double kD = 0.0;
   }
 
   public default void updateInputs(SlamIOInputs inputs) {}

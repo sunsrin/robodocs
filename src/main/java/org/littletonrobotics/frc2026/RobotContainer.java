@@ -592,9 +592,9 @@ public class RobotContainer {
                                 LaunchCalculator.hoodMaxPreset.hoodAngleDeg().get()),
                         () -> 0.0)));
 
-    // Hood zero commands
-    secondary.x().onTrue(hood.zeroCommand());
-    secondary.b().onTrue(hood.forceZeroCommand());
+    // Hood and slam zero commands
+    secondary.x().onTrue(hood.zeroCommand().alongWith(slamtake.homeSlam()));
+    secondary.b().onTrue(hood.forceZeroCommand().alongWith(slamtake.zeroMaxSlam()));
 
     // Hood angle offset
     secondary
@@ -734,6 +734,13 @@ public class RobotContainer {
                 Commands.waitSeconds(0.25),
                 Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))));
 
+    // Automatically zero hood and intake
+    RobotModeTriggers.teleop()
+        .onTrue(
+            hood.zeroCommand()
+                .unless(hood::isZeroed)
+                .alongWith(slamtake.homeSlam().unless(slamtake::isZeroed)));
+
     // Automatically run intake and flywheel in auto
     RobotModeTriggers.autonomous()
         .whileTrue(
@@ -762,6 +769,9 @@ public class RobotContainer {
 
     // Force zero hood when starting auto
     RobotModeTriggers.autonomous().onTrue(hood.forceZeroCommand());
+
+    // Force zero intake when starting auto
+    RobotModeTriggers.autonomous().onTrue(slamtake.zeroMaxSlam());
   }
 
   private void configureFuelSim() {

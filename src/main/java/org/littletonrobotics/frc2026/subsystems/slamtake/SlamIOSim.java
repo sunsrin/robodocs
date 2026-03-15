@@ -59,8 +59,8 @@ public class SlamIOSim implements SlamIO {
         currentControl = true;
         break;
       case RUN_OPEN_LOOP:
-        currentOutput = outputs.appliedAmps;
-        currentControl = true;
+        appliedVolts = outputs.appliedVolts;
+        currentControl = false;
         break;
     }
   }

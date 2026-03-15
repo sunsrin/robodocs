@@ -23,6 +23,7 @@ import org.littletonrobotics.frc2026.FieldConstants;
 import org.littletonrobotics.frc2026.FieldConstants.AprilTagLayoutType;
 import org.littletonrobotics.frc2026.ObjectDetection;
 import org.littletonrobotics.frc2026.ObjectDetection.FuelTxTyObservation;
+import org.littletonrobotics.frc2026.ObjectDetection.RobotTxTyObservation;
 import org.littletonrobotics.frc2026.RobotState;
 import org.littletonrobotics.frc2026.RobotState.VisionObservation;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
@@ -117,6 +118,7 @@ public class Vision extends VirtualSubsystem {
     List<VisionObservation> allVisionObservations = new ArrayList<>();
     for (int instanceIndex = 0; instanceIndex < io.length; instanceIndex++) {
       List<FuelTxTyObservation> instanceFuelTxTyObservations = new ArrayList<>();
+      List<RobotTxTyObservation> instanceRobotTxTyObservations = new ArrayList<>();
 
       // Loop over frames
       for (int frameIndex = 0;
@@ -268,6 +270,23 @@ public class Vision extends VirtualSubsystem {
                         objDetectInputs[instanceIndex].timestamps[frameIndex]));
               }
             }
+            case 1 -> {
+              // Robot
+              if (frame[i + 1] >= robotDetectConfidenceThreshold) {
+                double[] tx = new double[4];
+                double[] ty = new double[4];
+                for (int z = 0; z < 4; z++) {
+                  tx[z] = frame[i + 2 + (2 * z)];
+                  ty[z] = frame[i + 2 + (2 * z) + 1];
+                }
+                instanceRobotTxTyObservations.add(
+                    new RobotTxTyObservation(
+                        instanceIndex,
+                        tx,
+                        ty,
+                        objDetectInputs[instanceIndex].timestamps[frameIndex]));
+              }
+            }
           }
         }
       }
@@ -293,6 +312,9 @@ public class Vision extends VirtualSubsystem {
         instanceFuelTxTyObservations.stream()
             .filter(x -> x.timestamp() == mostRecentTimestamp)
             .forEach(ObjectDetection.getInstance()::addFuelTxTyObservation);
+        instanceRobotTxTyObservations.stream()
+            .filter(x -> x.timestamp() == mostRecentTimestamp)
+            .forEach(ObjectDetection.getInstance()::addRobotTxTyObservation);
       }
     }
 

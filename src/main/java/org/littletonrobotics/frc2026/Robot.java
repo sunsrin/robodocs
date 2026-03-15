@@ -11,9 +11,10 @@ import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.MathShared;
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUsageId;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobotBase;
 import edu.wpi.first.wpilibj.RobotController;
@@ -32,13 +33,13 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import org.littletonrobotics.frc2026.Constants.Mode;
 import org.littletonrobotics.frc2026.Constants.RobotType;
+import org.littletonrobotics.frc2026.energy.BatteryLogger;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
-import org.littletonrobotics.frc2026.subsystems.leds.Leds;
-import org.littletonrobotics.frc2026.util.EnergyLogger;
 import org.littletonrobotics.frc2026.util.FullSubsystem;
 import org.littletonrobotics.frc2026.util.HubShiftUtil;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
 import org.littletonrobotics.frc2026.util.VirtualSubsystem;
+import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.AutoLogOutputManager;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -48,20 +49,16 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
-  private static final double lowBatteryVoltage = 11.0;
-  private static final double lowBatteryDisabledTime = 2.0;
-
   private Command autonomousCommand;
   private double autoStart;
   private boolean autoMessagePrinted;
   private RobotContainer robotContainer;
 
+  public static final BatteryLogger batteryLogger = new BatteryLogger();
+  private final BatteryIOInputsAutoLogged batteryInputs = new BatteryIOInputsAutoLogged();
+
   private final Timer fuelLoggingTimer = new Timer();
   private final Timer disabledTimer = new Timer();
-  private final Alert lowBatteryAlert =
-      new Alert(
-          "Battery voltage is very low, turn off the robot or replace the battery to avoid damage.",
-          AlertType.kWarning);
 
   public Robot() {
     super(Constants.loopPeriodSecs);
@@ -182,7 +179,7 @@ public class Robot extends LoggedRobot {
       DriverStationSim.notifyNewData();
     }
 
-    // Reset alert timers
+    // Reset disabled timer
     disabledTimer.restart();
 
     // Set up auto logging for RobotState
@@ -199,9 +196,15 @@ public class Robot extends LoggedRobot {
     // Reset logged tracer
     LoggedTracer.reset();
 
-    // Update battery voltage for energy logging
-    EnergyLogger.updateBatteryVoltage();
-    LoggedTracer.record("EnergyLogger/UpdateBatteryVoltage");
+    // Update battery inputs
+    batteryInputs.batteryVoltage = RobotController.getBatteryVoltage();
+    batteryInputs.rioCurrent = RobotController.getInputCurrent();
+    batteryInputs.macMiniCurrent = 0.0;
+    Logger.processInputs("BatteryLogger", batteryInputs);
+    batteryLogger.setBatteryVoltage(batteryInputs.batteryVoltage);
+    batteryLogger.setRioCurrent(batteryInputs.rioCurrent);
+    batteryLogger.setMacMiniCurrent(batteryInputs.macMiniCurrent);
+    LoggedTracer.record("BatteryLogger/Periodic");
 
     // Main periodic functions
     VirtualSubsystem.runAllPeriodic();
@@ -209,11 +212,13 @@ public class Robot extends LoggedRobot {
     LoggedTracer.record("Robot/Commands");
     VirtualSubsystem.runAllPeriodicAfterScheduler();
     FullSubsystem.runAllPeriodicAfterScheduler();
+    batteryLogger.periodicAfterScheduler();
     LoggedTracer.record("Robot/AfterScheduler");
 
-    // Record energy usage
-    EnergyLogger.recordOutputs();
-    LoggedTracer.record("EnergyLogger/RecordOutput");
+    // Reset disabled timer
+    if (DriverStation.isEnabled()) {
+      disabledTimer.reset();
+    }
 
     // Clear old fuel
     ObjectDetection.getInstance().clearOldFuelPoses();
@@ -231,17 +236,6 @@ public class Robot extends LoggedRobot {
         }
         autoMessagePrinted = true;
       }
-    }
-
-    // Low battery alert
-    if (DriverStation.isEnabled()) {
-      disabledTimer.reset();
-    }
-    if (RobotController.getBatteryVoltage() > 0.0
-        && RobotController.getBatteryVoltage() <= lowBatteryVoltage
-        && disabledTimer.hasElapsed(lowBatteryDisabledTime)) {
-      lowBatteryAlert.set(true);
-      Leds.getGlobal().lowBatteryAlert = true;
     }
 
     // Update RobotContainer dashboard outputs
@@ -269,6 +263,17 @@ public class Robot extends LoggedRobot {
                           FieldConstants.fuelDiameter / 2.0))
               .toArray(Translation3d[]::new));
     }
+
+    // Log robots
+    Logger.recordOutput(
+        "ObjectDetection/RobotPoses",
+        ObjectDetection.getInstance().getRobotTranslations().stream()
+            .map(
+                (translation) ->
+                    new Pose3d(
+                        new Translation3d(translation.getX(), translation.getY(), 0.0),
+                        new Rotation3d(new Rotation2d(Timer.getTimestamp() * 5.0))))
+            .toArray(Pose3d[]::new));
 
     // Log hub state
     Logger.recordOutput("HubShift/Official", HubShiftUtil.getOfficialShiftInfo());
@@ -348,4 +353,11 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
+
+  @AutoLog
+  public static class BatteryIOInputs {
+    public double batteryVoltage = 12.0;
+    public double rioCurrent = 0.0;
+    public double macMiniCurrent = 0.0;
+  }
 }
