@@ -10,9 +10,9 @@ from typing import List, Tuple
 
 import cv2
 from config.config import ConfigStore
-from output.overlay_util import overlay_circle_obj_detect_observation
+from output.overlay_util import overlay_2026_obj_detect_observations
 from output.StreamServer import MjpegServer
-from pipeline.ObjectDetector import CoreMLSlicedObjectDetector
+from pipeline.ObjectDetector import SlicedObjectDetector
 from vision_types import ObjDetectObservation
 
 
@@ -21,7 +21,7 @@ def objdetect_worker(
     q_out: queue.Queue[Tuple[float, List[ObjDetectObservation]]],
     server_port: int,
 ):
-    object_detector = CoreMLSlicedObjectDetector()
+    object_detector = SlicedObjectDetector()
     stream_server = MjpegServer()
     stream_server.start(server_port)
 
@@ -36,19 +36,5 @@ def objdetect_worker(
         q_out.put((timestamp, observations))
         if stream_server.get_client_count() > 0:
             image = image.copy()
-            [overlay_circle_obj_detect_observation(image, x) for x in observations]
-
-            # Render count
-            count_text = str(len(observations))
-            (text_width, text_height), _ = cv2.getTextSize(count_text, cv2.FONT_HERSHEY_PLAIN, 5, 5)
-            cv2.putText(
-                image,
-                str(len(observations)),
-                (image.shape[1] - text_width - 10, text_height + 25),
-                cv2.FONT_HERSHEY_PLAIN,
-                5,
-                (255, 255, 225),
-                5
-            )
-
+            overlay_2026_obj_detect_observations(image, observations)
             stream_server.set_frame(image)

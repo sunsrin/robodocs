@@ -16,12 +16,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.frc2026.AutoFieldConstants.*;
 import org.littletonrobotics.frc2026.AutoSelector.AutoQuestionResponse;
-import org.littletonrobotics.frc2026.RobotState;
 import org.littletonrobotics.frc2026.subsystems.drive.Drive;
 import org.littletonrobotics.frc2026.subsystems.hopper.Hopper;
 import org.littletonrobotics.frc2026.subsystems.kicker.Kicker;
@@ -29,7 +27,6 @@ import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.flywheel.Flywheel;
 import org.littletonrobotics.frc2026.subsystems.launcher.hood.Hood;
 import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake;
-import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 
 @RequiredArgsConstructor
 @SuppressWarnings("unused")
@@ -115,17 +112,6 @@ public class AutoBuilder {
   }
 
   public Command monopolySalesman() {
-    final BooleanSupplier isLeft =
-        () ->
-            RobotState.getInstance()
-                    .getEstimatedPose()
-                    .getTranslation()
-                    .getDistance(AllianceFlipUtil.apply(Launch.leftTower.getTranslation()))
-                < RobotState.getInstance()
-                    .getEstimatedPose()
-                    .getTranslation()
-                    .getDistance(AllianceFlipUtil.apply(Launch.rightTower.getTranslation()));
-
     return Commands.sequence(
         // Drive to closest intaking position
         Commands.select(
@@ -146,11 +132,11 @@ public class AutoBuilder {
         Commands.either(
                 AutoCommands.driveToPose(drive, () -> Launch.leftTower),
                 AutoCommands.driveToPose(drive, () -> Launch.rightTower),
-                isLeft)
+                AutoCommands::isLeftSide)
             .raceWith(
                 Commands.sequence(
                     AutoCommands.waitUntilWithinTolerance(
-                        () -> isLeft.getAsBoolean() ? Launch.leftTower : Launch.rightTower,
+                        () -> isLeftSide() ? Launch.leftTower : Launch.rightTower,
                         0.1,
                         Rotation2d.fromDegrees(5)),
                     index(hopper, kicker, flywheel, intake))),
@@ -164,7 +150,7 @@ public class AutoBuilder {
                 Commands.either(
                     followTrajectory("launchLeftTowerToClimbLeft", drive, false),
                     followTrajectory("launchRightTowerToClimbRight", drive, false),
-                    isLeft)),
+                    AutoCommands::isLeftSide)),
             () -> responses.get().get(1)));
   }
 

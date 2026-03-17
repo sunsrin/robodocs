@@ -55,6 +55,13 @@ public class DriveCommands {
       new LoggedTunableNumber("DriveCommands/Launching/PitchToleranceDeg", 5.0);
   private static final LoggedTunableNumber driveRollLaunchToleranceDeg =
       new LoggedTunableNumber("DriveCommands/Launching/RollToleranceDeg", 5.0);
+  private static final LoggedTunableNumber driveYawPassToleranceDeg =
+      new LoggedTunableNumber("DriveCommands/Passing/YawToleranceDeg", 10.0);
+  private static final LoggedTunableNumber drivePitchPassToleranceDeg =
+      new LoggedTunableNumber("DriveCommands/Passing/PitchToleranceDeg", 5.0);
+  private static final LoggedTunableNumber driveRollPassToleranceDeg =
+      new LoggedTunableNumber("DriveCommands/Passing/RollToleranceDeg", 5.0);
+
   private static final LoggedTunableNumber driveLaunchMaxPolarVelocityRadPerSec =
       new LoggedTunableNumber("DriveCommands/Launching/MaxPolarVelocityRadPerSec", 0.6);
   private static final LoggedTunableNumber driveLauncherCORMinErrorDeg =
@@ -125,14 +132,21 @@ public class DriveCommands {
   }
 
   public static boolean atLaunchGoal() {
+    var passing = LaunchCalculator.getInstance().getParameters().passing();
     var rotation3d =
         RobotState.getInstance().getEstimatedRotation3dAtTimestamp(Timer.getTimestamp());
     boolean inPitchAndRollTolerance =
         rotation3d.isEmpty()
             || (Math.abs(rotation3d.get().getX())
-                    <= Units.degreesToRadians(driveRollLaunchToleranceDeg.get())
+                    <= Units.degreesToRadians(
+                        passing
+                            ? driveRollPassToleranceDeg.get()
+                            : driveRollLaunchToleranceDeg.get())
                 && Math.abs(rotation3d.get().getY())
-                    <= Units.degreesToRadians(drivePitchLaunchToleranceDeg.get()));
+                    <= Units.degreesToRadians(
+                        passing
+                            ? drivePitchPassToleranceDeg.get()
+                            : drivePitchLaunchToleranceDeg.get()));
 
     return DriverStation.isEnabled()
         && Math.abs(
@@ -140,7 +154,8 @@ public class DriveCommands {
                     .getRotation()
                     .minus(LaunchCalculator.getInstance().getParameters().driveAngle())
                     .getRadians())
-            <= Units.degreesToRadians(driveYawLaunchToleranceDeg.get())
+            <= Units.degreesToRadians(
+                passing ? driveYawPassToleranceDeg.get() : driveYawLaunchToleranceDeg.get())
         && inPitchAndRollTolerance;
   }
 

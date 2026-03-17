@@ -531,6 +531,7 @@ public class RobotContainer {
     // Retract intake
     primary
         .rightTrigger()
+        .or(secondary.rightTrigger())
         .onTrue(Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)))
         .onTrue(
             Commands.runEnd(
@@ -542,6 +543,7 @@ public class RobotContainer {
     // Run intake
     primary
         .leftTrigger()
+        .or(secondary.leftTrigger())
         .whileTrue(
             Commands.runEnd(
                 () -> slamtake.setIntakeGoal(IntakeGoal.INTAKE),
@@ -619,6 +621,12 @@ public class RobotContainer {
                             () -> LaunchCalculator.getInstance().incrementHoodAngleOffset(-0.2)),
                         Commands.waitSeconds(0.1)))
                 .ignoringDisable(true));
+
+    // Test flywheel spin-up
+    secondary
+        .leftBumper()
+        .whileTrue(flywheel.runFixedCommand(() -> 200.0))
+        .onFalse(flywheel.stopCommand());
 
     // ****** OVERRIDE SWITCHES *****
 

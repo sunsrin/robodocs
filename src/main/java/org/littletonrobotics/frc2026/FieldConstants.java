@@ -269,7 +269,7 @@ public class FieldConstants {
 
   @RequiredArgsConstructor
   public enum FieldType {
-    HQ("welded"),
+    HQ("hq"),
     ANDYMARK("andymark"),
     WELDED("welded");
 

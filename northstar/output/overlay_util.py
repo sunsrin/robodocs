@@ -5,6 +5,8 @@
 # license that can be found in the LICENSE file at
 # the root directory of this project.
 
+from typing import List
+
 import cv2
 import numpy
 from config.config import ConfigStore
@@ -44,7 +46,7 @@ def overlay_obj_detect_observation(image: cv2.Mat, observation: ObjDetectObserva
     )
     cv2.putText(
         image,
-        str(observation.obj_class) + " (" + str(round(observation.confidence * 100)) + "%)",
+        str(round(observation.confidence * 100)) + "%",
         (int(observation.corner_pixels[0][0]), int(observation.corner_pixels[0][1] - 5)),
         cv2.FONT_HERSHEY_PLAIN,
         2,
@@ -65,4 +67,26 @@ def overlay_circle_obj_detect_observation(image: cv2.Mat, observation: ObjDetect
         360,
         (0, 0, 225),
         2,
+    )
+
+
+def overlay_2026_obj_detect_observations(image: cv2.Mat, observations: List[ObjDetectObservation]):
+    # Render robot boxes
+    [overlay_obj_detect_observation(image, x) for x in observations if x.obj_class == 1]
+
+    # Render fuel circles
+    fuel_observations = [x for x in observations if x.obj_class == 0]
+    [overlay_circle_obj_detect_observation(image, x) for x in fuel_observations]
+
+    # Render fuel count
+    count_text = str(len(fuel_observations))
+    (text_width, text_height), _ = cv2.getTextSize(count_text, cv2.FONT_HERSHEY_PLAIN, 5, 5)
+    cv2.putText(
+        image,
+        count_text,
+        (image.shape[1] - text_width - 10, text_height + 25),
+        cv2.FONT_HERSHEY_PLAIN,
+        5,
+        (255, 255, 225),
+        5
     )

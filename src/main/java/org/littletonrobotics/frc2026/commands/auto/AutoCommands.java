@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.frc2026.AutoFieldConstants;
+import org.littletonrobotics.frc2026.AutoFieldConstants.Bump;
 import org.littletonrobotics.frc2026.AutoSelector.AutoQuestionResponse;
 import org.littletonrobotics.frc2026.FieldConstants;
 import org.littletonrobotics.frc2026.RobotState;
@@ -42,6 +43,35 @@ public class AutoCommands {
       new LoggedTunableNumber("AutoCommands/Launching/kP", 8.0);
   private static final LoggedTunableNumber autoDriveLaunchKd =
       new LoggedTunableNumber("AutoCommands/Launching/kD", 0.5);
+
+  // Drives to corner of fuel pool to set up neutral zone intaking
+  public static Command salesmanTurn(Drive drive) {
+    return driveToPose(
+            drive,
+            () -> {
+              Pose2d currentPose =
+                  AllianceFlipUtil.apply(RobotState.getInstance().getEstimatedPose());
+              double xTarget = FieldConstants.FuelPool.leftCenter.getX() - 0.8;
+              double t =
+                  MathUtil.clamp(
+                      Math.abs(currentPose.getX() - xTarget)
+                          / (xTarget - FieldConstants.LinesVertical.neutralZoneNear),
+                      -1.0,
+                      1.0);
+              return new Pose2d(
+                  xTarget,
+                  MathUtil.interpolate(
+                      isLeftSide()
+                          ? FieldConstants.FuelPool.leftCenter.getY() - 0.0
+                          : FieldConstants.FuelPool.rightCenter.getY() + 0.0,
+                      isLeftSide()
+                          ? FieldConstants.FuelPool.leftCenter.getY() + 3.5
+                          : FieldConstants.FuelPool.rightCenter.getY() - 3.5,
+                      t),
+                  isLeftSide() ? Rotation2d.kCW_90deg : Rotation2d.kCCW_90deg);
+            })
+        .withTimeout(1.0);
+  }
 
   // Returns to the alliance zone from the closest side
   public static Command returnToClosestLaunchPose(Drive drive) {
@@ -198,6 +228,17 @@ public class AutoCommands {
                             Commands.waitSeconds(0.25),
                             Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)))
                         .finallyDo(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))));
+  }
+
+  public static boolean isLeftSide() {
+    return RobotState.getInstance()
+            .getEstimatedPose()
+            .getTranslation()
+            .getDistance(AllianceFlipUtil.apply(Bump.leftInner.translation()))
+        < RobotState.getInstance()
+            .getEstimatedPose()
+            .getTranslation()
+            .getDistance(AllianceFlipUtil.apply(Bump.rightInner.translation()));
   }
 
   public static boolean xCrossed(double xPosition, boolean towardsCenter) {
