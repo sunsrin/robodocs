@@ -66,6 +66,7 @@ class NTConfigSource(ConfigSource):
     _event_name_sub: ntcore.StringSubscriber
     _match_type_sub: ntcore.IntegerSubscriber
     _match_number_sub: ntcore.IntegerSubscriber
+    _throttle_fps_sub: ntcore.DoubleSubscriber
 
     def update(self, config_store: ConfigStore) -> None:
         # Initialize subscribers on first call
@@ -97,6 +98,7 @@ class NTConfigSource(ConfigSource):
             self._event_name_sub = nt_table.getStringTopic("event_name").subscribe("")
             self._match_type_sub = nt_table.getIntegerTopic("match_type").subscribe(0)
             self._match_number_sub = nt_table.getIntegerTopic("match_number").subscribe(0)
+            self._throttle_fps_sub = nt_table.getDoubleTopic("throttle_fps").subscribe(-1)
             self._init_complete = True
 
         # Read config data
@@ -118,3 +120,4 @@ class NTConfigSource(ConfigSource):
         config_store.remote_config.event_name = self._event_name_sub.get()
         config_store.remote_config.match_type = self._match_type_sub.get()
         config_store.remote_config.match_number = self._match_number_sub.get()
+        config_store.remote_config.throttle_fps = self._throttle_fps_sub.get()

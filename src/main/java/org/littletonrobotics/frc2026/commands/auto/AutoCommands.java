@@ -23,6 +23,8 @@ import java.util.function.Supplier;
 import org.littletonrobotics.frc2026.AutoFieldConstants;
 import org.littletonrobotics.frc2026.AutoFieldConstants.Bump;
 import org.littletonrobotics.frc2026.AutoSelector.AutoQuestionResponse;
+import org.littletonrobotics.frc2026.Constants;
+import org.littletonrobotics.frc2026.Constants.Mode;
 import org.littletonrobotics.frc2026.FieldConstants;
 import org.littletonrobotics.frc2026.RobotState;
 import org.littletonrobotics.frc2026.commands.DriveToPose;
@@ -68,7 +70,7 @@ public class AutoCommands {
                           ? FieldConstants.FuelPool.leftCenter.getY() + 3.5
                           : FieldConstants.FuelPool.rightCenter.getY() - 3.5,
                       t),
-                  isLeftSide() ? Rotation2d.kCW_90deg : Rotation2d.kCCW_90deg);
+                  isLeftSide() ? Rotation2d.fromDegrees(-50.0) : Rotation2d.fromDegrees(50.0));
             })
         .withTimeout(1.0);
   }
@@ -207,6 +209,20 @@ public class AutoCommands {
     }
   }
 
+  public static Command rushToCenter(Drive drive, double time) {
+    return Commands.run(
+            () ->
+                drive.runVelocity(
+                    ChassisSpeeds.fromFieldRelativeSpeeds(
+                        AllianceFlipUtil.shouldFlip()
+                            ? -DriveConstants.maxLinearSpeed
+                            : DriveConstants.maxLinearSpeed,
+                        0.0,
+                        0.0,
+                        RobotState.getInstance().getRotation())))
+        .withTimeout(Constants.getMode().equals(Mode.SIM) ? 0.5 : time);
+  }
+
   public static Command index(Hopper hopper, Kicker kicker, Flywheel flywheel, Slamtake slamtake) {
     return Commands.waitUntil(flywheel::atGoal)
         .andThen(
@@ -286,6 +302,15 @@ public class AutoCommands {
                     .minus(AllianceFlipUtil.apply(target.getRotation()))
                     .getRadians())
             < rotationalTolerance.getRadians();
+  }
+
+  public static boolean withinLaunchingTolerance(Rotation2d rotationalTolerance) {
+    return Math.abs(
+            RobotState.getInstance()
+                .getRotation()
+                .minus(LaunchCalculator.getInstance().getParameters().driveAngle())
+                .getRadians())
+        <= rotationalTolerance.getRadians();
   }
 
   public static Command waitUntilXCrossed(double xPosition, boolean towardsCenter) {

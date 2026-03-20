@@ -58,7 +58,7 @@ public class Robot extends LoggedRobot {
   private final BatteryIOInputsAutoLogged batteryInputs = new BatteryIOInputsAutoLogged();
 
   private final Timer fuelLoggingTimer = new Timer();
-  private final Timer disabledTimer = new Timer();
+  private static final Timer disabledTimer = new Timer();
 
   public Robot() {
     super(Constants.loopPeriodSecs);
@@ -217,8 +217,11 @@ public class Robot extends LoggedRobot {
 
     // Reset disabled timer
     if (DriverStation.isEnabled()) {
-      disabledTimer.reset();
+      disabledTimer.restart();
     }
+
+    // Process throttle state
+    Logger.recordOutput("Throttled", shouldThrottle());
 
     // Clear old fuel
     ObjectDetection.getInstance().clearOldFuelPoses();
@@ -295,6 +298,11 @@ public class Robot extends LoggedRobot {
 
     // Record cycle time
     LoggedTracer.record("Robot/Periodic");
+  }
+
+  /** Returns whether performance should be throttled to conserve power. */
+  public static boolean shouldThrottle() {
+    return disabledTimer.hasElapsed(5.0);
   }
 
   /** Whether to display alerts related to hardware faults. */

@@ -35,4 +35,6 @@ public interface VisionIO {
       ObjDetectVisionIOInputs objDetectInputs) {}
 
   default void setRecording(boolean active) {}
+
+  default void setThrottleFps(double fps) {}
 }

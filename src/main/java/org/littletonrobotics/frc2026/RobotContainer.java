@@ -215,7 +215,12 @@ public class RobotContainer {
       switch (Constants.robot) {
         case DARWIN ->
             vision =
-                new Vision(this::getSelectedAprilTagLayout, new VisionIO() {}, new VisionIO() {});
+                new Vision(
+                    this::getSelectedAprilTagLayout,
+                    new VisionIO() {},
+                    new VisionIO() {},
+                    new VisionIO() {},
+                    new VisionIO() {});
         case ALPHABOT ->
             vision =
                 new Vision(this::getSelectedAprilTagLayout, new VisionIO() {}, new VisionIO() {});
@@ -299,18 +304,6 @@ public class RobotContainer {
         new AutoBuilder(
             drive, slamtake, hopper, kicker, hood, flywheel, autoSelector::getResponses);
 
-    // Home Depot Salesman
-    autoSelector.addRoutine(
-        "Home Depot Salesman",
-        List.of(
-            new AutoQuestion(
-                "Start Location?",
-                List.of(AutoQuestionResponse.LEFT_TRENCH, AutoQuestionResponse.LEFT_BUMP)),
-            new AutoQuestion(
-                "Through Tower?", List.of(AutoQuestionResponse.NO, AutoQuestionResponse.YES)),
-            new AutoQuestion("Post-Launch?", List.of(AutoQuestionResponse.NOTHING))),
-        autoBuilder.homeDepotSalesman());
-
     // Lowe's Hardware Salesman
     autoSelector.addRoutine(
         "Lowe's Hardware Salesman",
@@ -322,6 +315,18 @@ public class RobotContainer {
                 "Through Tower?", List.of(AutoQuestionResponse.NO, AutoQuestionResponse.YES)),
             new AutoQuestion("Post-Launch?", List.of(AutoQuestionResponse.NOTHING))),
         autoBuilder.lowesHardwareSalesman());
+
+    // Home Depot Salesman
+    autoSelector.addRoutine(
+        "Home Depot Salesman",
+        List.of(
+            new AutoQuestion(
+                "Start Location?",
+                List.of(AutoQuestionResponse.LEFT_TRENCH, AutoQuestionResponse.LEFT_BUMP)),
+            new AutoQuestion(
+                "Through Tower?", List.of(AutoQuestionResponse.NO, AutoQuestionResponse.YES)),
+            new AutoQuestion("Post-Launch?", List.of(AutoQuestionResponse.NOTHING))),
+        autoBuilder.homeDepotSalesman());
 
     // Monopoly Salesman
     autoSelector.addRoutine(
@@ -362,9 +367,9 @@ public class RobotContainer {
   /** Create the bindings between buttons and commands. */
   private void configureButtonBindings() {
     // Drive controls
-    DoubleSupplier driverX = () -> -primary.getLeftY();
-    DoubleSupplier driverY = () -> -primary.getLeftX();
-    DoubleSupplier driverOmega = () -> -primary.getRightX();
+    DoubleSupplier driverX = () -> -primary.getLeftY() - secondary.getLeftY();
+    DoubleSupplier driverY = () -> -primary.getLeftX() - secondary.getLeftX();
+    DoubleSupplier driverOmega = () -> -primary.getRightX() - secondary.getRightX();
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(drive, driverX, driverY, driverOmega, robotRelative));
 
@@ -727,20 +732,14 @@ public class RobotContainer {
                 Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)),
                 Commands.waitSeconds(0.5),
                 Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
-                Commands.waitSeconds(0.25),
+                Commands.waitSeconds(0.2),
                 Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)),
                 Commands.waitSeconds(0.5),
                 Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
-                Commands.waitSeconds(0.25),
+                Commands.waitSeconds(0.2),
                 Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))));
     RobotModeTriggers.teleop()
-        .onTrue(
-            Commands.sequence(
-                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)),
-                Commands.waitSeconds(0.5),
-                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
-                Commands.waitSeconds(0.25),
-                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))));
+        .onTrue(Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)));
 
     // Automatically zero hood and intake
     RobotModeTriggers.teleop()

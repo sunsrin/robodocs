@@ -104,6 +104,14 @@ public class DriveTrajectory extends Command {
         ChassisSpeeds.fromFieldRelativeSpeeds(
             new ChassisSpeeds(xOutput, yOutput, thetaOutput), currentPose.getRotation()));
 
+    RobotState.getInstance()
+        .setRobotSetpointVelocity(
+            ChassisSpeeds.discretize(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    new ChassisSpeeds(desiredState.vx, desiredState.vy, desiredState.omega),
+                    currentPose.getRotation()),
+                Constants.loopPeriodSecs));
+
     Logger.recordOutput("DriveTrajectory/Setpoint/Pose", desiredState.getPose());
     Logger.recordOutput(
         "DriveTrajectory/Setpoint/Speeds",

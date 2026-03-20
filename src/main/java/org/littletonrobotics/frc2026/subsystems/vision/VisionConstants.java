@@ -31,8 +31,13 @@ public class VisionConstants {
   public static final double fuelDetectConfidenceThreshold = 0.0; // Enforced by Northstar
   public static final double robotDetectConfidenceThreshold = 0.0; // Enforced by Northstar
 
-  private static LoggedTunableNumber frontCameraPitchFudgeDegrees =
-      new LoggedTunableNumber("Vision/FrontCameraPitchFudgeDeg", 1.6);
+  private static LoggedTunableNumber[] cameraPitchFudgeDegrees =
+      new LoggedTunableNumber[] {
+        new LoggedTunableNumber("Vision/Camera0PitchFudgeDeg", 0.0),
+        new LoggedTunableNumber("Vision/Camera1PitchFudgeDeg", 1.6),
+        new LoggedTunableNumber("Vision/Camera2PitchFudgeDeg", 0.0),
+        new LoggedTunableNumber("Vision/Camera3PitchFudgeDeg", 0.0)
+      };
 
   private static int monoExposure = 1800;
   private static double monoGain = 15.0;
@@ -54,7 +59,8 @@ public class VisionConstants {
                                 Units.inchesToMeters(20.940),
                                 new Rotation3d(
                                     0.0,
-                                    Units.degreesToRadians(-22.5),
+                                    Units.degreesToRadians(
+                                        -22.5 + cameraPitchFudgeDegrees[0].get()),
                                     Units.degreesToRadians(175.0))));
                       })
                   .id("40552081")
@@ -78,13 +84,55 @@ public class VisionConstants {
                                   new Rotation3d(
                                       0.0,
                                       Units.degreesToRadians(
-                                          20.070 + frontCameraPitchFudgeDegrees.get()),
+                                          20.070 + cameraPitchFudgeDegrees[1].get()),
                                       Units.degreesToRadians(-4.698))));
                         } else {
                           return Optional.empty();
                         }
                       })
                   .id("24736221")
+                  .width(1280)
+                  .height(960)
+                  .exposure(colorExposure)
+                  .gain(colorGain)
+                  .stdDevFactor(1.0)
+                  .fovRads(Units.degreesToRadians(90.0))
+                  .build(),
+              CameraConfig.builder()
+                  .poseFunction(
+                      (Double timestamp) -> {
+                        return Optional.of(
+                            new Pose3d(
+                                Units.inchesToMeters(1.343),
+                                Units.inchesToMeters(12.856),
+                                Units.inchesToMeters(22.512),
+                                new Rotation3d(
+                                    0.0,
+                                    Units.degreesToRadians(20.0 + cameraPitchFudgeDegrees[2].get()),
+                                    Units.degreesToRadians(70.0))));
+                      })
+                  .id("24736167")
+                  .width(1280)
+                  .height(960)
+                  .exposure(colorExposure)
+                  .gain(colorGain)
+                  .stdDevFactor(1.0)
+                  .fovRads(Units.degreesToRadians(90.0))
+                  .build(),
+              CameraConfig.builder()
+                  .poseFunction(
+                      (Double timestamp) -> {
+                        return Optional.of(
+                            new Pose3d(
+                                Units.inchesToMeters(-10.339),
+                                Units.inchesToMeters(-10.169),
+                                Units.inchesToMeters(23.261),
+                                new Rotation3d(
+                                    0.0,
+                                    Units.degreesToRadians(20.0 + cameraPitchFudgeDegrees[3].get()),
+                                    Units.degreesToRadians(-75.0))));
+                      })
+                  .id("24737133")
                   .width(1280)
                   .height(960)
                   .exposure(colorExposure)

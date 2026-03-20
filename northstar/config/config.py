@@ -44,6 +44,7 @@ class RemoteConfig:
     tag_layout: any = None
     is_recording: bool = False
     timestamp: int = 0
+    throttle_fps: float = 0.0
 
 
 @dataclass

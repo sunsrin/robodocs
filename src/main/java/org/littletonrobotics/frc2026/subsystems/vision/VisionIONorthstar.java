@@ -31,6 +31,7 @@ public class VisionIONorthstar implements VisionIO {
   private final IntegerPublisher timestampPublisher;
   private final BooleanPublisher isRecordingPublisher;
   private final StringPublisher tagLayoutPublisher;
+  final DoublePublisher throttleFpsPublisher;
 
   public VisionIONorthstar(Supplier<AprilTagLayoutType> aprilTagLayoutSupplier, int index) {
     this.aprilTagLayoutSupplier = aprilTagLayoutSupplier;
@@ -54,6 +55,7 @@ public class VisionIONorthstar implements VisionIO {
     eventNamePublisher = configTable.getStringTopic("event_name").publish();
     matchTypePublisher = configTable.getIntegerTopic("match_type").publish();
     matchNumberPublisher = configTable.getIntegerTopic("match_number").publish();
+    throttleFpsPublisher = configTable.getDoubleTopic("throttle_fps").publish();
 
     var outputTable = northstarTable.getSubTable("output");
     observationSubscriber =
@@ -131,5 +133,9 @@ public class VisionIONorthstar implements VisionIO {
 
   public void setRecording(boolean active) {
     isRecordingPublisher.set(active);
+  }
+
+  public void setThrottleFps(double fps) {
+    throttleFpsPublisher.set(fps);
   }
 }

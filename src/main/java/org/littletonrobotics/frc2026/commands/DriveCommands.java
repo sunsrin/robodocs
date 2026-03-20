@@ -50,17 +50,22 @@ public class DriveCommands {
   private static final LoggedTunableNumber driveLaunchKd =
       new LoggedTunableNumber("DriveCommands/Launching/kD", 0.5);
   private static final LoggedTunableNumber driveYawLaunchToleranceDeg =
-      new LoggedTunableNumber("DriveCommands/Launching/YawToleranceDeg", 5.0);
+      new LoggedTunableNumber("DriveCommands/Launching/YawToleranceDeg", 10.0);
   private static final LoggedTunableNumber drivePitchLaunchToleranceDeg =
       new LoggedTunableNumber("DriveCommands/Launching/PitchToleranceDeg", 5.0);
   private static final LoggedTunableNumber driveRollLaunchToleranceDeg =
       new LoggedTunableNumber("DriveCommands/Launching/RollToleranceDeg", 5.0);
   private static final LoggedTunableNumber driveYawPassToleranceDeg =
-      new LoggedTunableNumber("DriveCommands/Passing/YawToleranceDeg", 10.0);
+      new LoggedTunableNumber("DriveCommands/Passing/YawToleranceDeg", 15.0);
   private static final LoggedTunableNumber drivePitchPassToleranceDeg =
       new LoggedTunableNumber("DriveCommands/Passing/PitchToleranceDeg", 5.0);
   private static final LoggedTunableNumber driveRollPassToleranceDeg =
       new LoggedTunableNumber("DriveCommands/Passing/RollToleranceDeg", 5.0);
+
+  private static final LoggedTunableNumber lockMetersPerSecondThreshold =
+      new LoggedTunableNumber("DriveCommands/Launching/LockMetersPerSecThreshold", 0.1);
+  private static final LoggedTunableNumber lockOmegaRadsPerSecThreshold =
+      new LoggedTunableNumber("DriveCommands/Launching/LockOmegaRadsPerSecThreshold", 0.15);
 
   private static final LoggedTunableNumber driveLaunchMaxPolarVelocityRadPerSec =
       new LoggedTunableNumber("DriveCommands/Launching/MaxPolarVelocityRadPerSec", 0.6);
@@ -242,9 +247,23 @@ public class DriveCommands {
                       omegaOutput),
                   launcherToRobot.times(1.0 - corScalar),
                   RobotState.getInstance().getRotation());
-          drive.runVelocity(
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                  fieldRelativeSpeedsWithOffset, RobotState.getInstance().getRotation()));
+
+          // Apply O-lock
+          boolean oLock =
+              Math.hypot(
+                          fieldRelativeSpeedsWithOffset.vxMetersPerSecond,
+                          fieldRelativeSpeedsWithOffset.vyMetersPerSecond)
+                      < lockMetersPerSecondThreshold.get()
+                  && Math.abs(fieldRelativeSpeedsWithOffset.omegaRadiansPerSecond)
+                      < lockOmegaRadsPerSecThreshold.get();
+          Logger.recordOutput("DriveCommands/Launching/OLock", oLock);
+          if (oLock) {
+            drive.stopWithO();
+          } else {
+            drive.runVelocity(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    fieldRelativeSpeedsWithOffset, RobotState.getInstance().getRotation()));
+          }
 
           // Override robot setpoint speeds published by drive. We run our calculations using the
           // speeds that will ultimately be applied once we are using the full robot-to-launcher

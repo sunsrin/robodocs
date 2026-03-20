@@ -465,7 +465,7 @@ class SlicedObjectDetector(ObjectDetector):
                               SliceInfo((int(imgsz[0] / 2 - size / 2), imgsz[1]-size, size, size),
                                         1, (0, 0), [edge_filter_width, 0, 0, edge_filter_width], [0]),
                               SliceInfo((0, 0, imgsz[0], imgsz[1]), scale, det_offset_rc,
-                                        [0, 0, imgsz[0] * (2 / 3), 0], [0])
+                                        [0, 0, int(imgsz[0] * (0.6)), 0], [0])
                               ]
 
     slice6_plusfull_config = [SliceInfo((0, 0, size, size), 1, (0, 0), [0, edge_filter_width, 0, edge_filter_width], [0]),

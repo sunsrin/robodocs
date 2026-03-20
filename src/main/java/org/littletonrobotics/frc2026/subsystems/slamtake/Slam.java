@@ -47,8 +47,8 @@ public class Slam {
       new Alert("Slam motor disconnected!", Alert.AlertType.kError);
 
   private static final double slamMaxAngle = Units.degreesToRadians(102);
-  private static final double slamMinAngle = Units.degreesToRadians(0.0);
-  private double goalAngle = 0.0;
+  private static final double slamMinAngle = Units.degreesToRadians(4.0);
+  @AutoLogOutput private double goalAngle = 0.0;
   private static double slamOffset = 0.0;
   @Getter private boolean zeroed = false;
 

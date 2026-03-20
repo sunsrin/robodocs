@@ -24,6 +24,7 @@ import org.littletonrobotics.frc2026.FieldConstants.AprilTagLayoutType;
 import org.littletonrobotics.frc2026.ObjectDetection;
 import org.littletonrobotics.frc2026.ObjectDetection.FuelTxTyObservation;
 import org.littletonrobotics.frc2026.ObjectDetection.RobotTxTyObservation;
+import org.littletonrobotics.frc2026.Robot;
 import org.littletonrobotics.frc2026.RobotState;
 import org.littletonrobotics.frc2026.RobotState.VisionObservation;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
@@ -47,7 +48,7 @@ public class Vision extends VirtualSubsystem {
   private final Map<Integer, Double> lastTagDetectionTimes = new HashMap<>();
 
   private final Debouncer fmsAttachedDebouncer = new Debouncer(3.0, DebounceType.kRising);
-  private final double disconnectedTimeout = 0.5;
+  private final double disconnectedTimeout = 1.5;
   private final Timer[] disconnectedTimers;
   private final Alert[] disconnectedAlerts;
 
@@ -83,6 +84,12 @@ public class Vision extends VirtualSubsystem {
       Logger.processInputs("Vision/Inst" + i, inputs[i]);
       Logger.processInputs("Vision/AprilTags/Inst" + i, aprilTagInputs[i]);
       Logger.processInputs("Vision/ObjDetect/Inst" + i, objDetectInputs[i]);
+    }
+
+    // Update throttle state
+    double throttleFps = Robot.shouldThrottle() ? 1.0 : -1.0;
+    for (var ioInst : io) {
+      ioInst.setThrottleFps(throttleFps);
     }
 
     // Update recording state

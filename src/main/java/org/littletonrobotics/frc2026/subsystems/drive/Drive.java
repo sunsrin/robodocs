@@ -184,6 +184,16 @@ public class Drive extends FullSubsystem {
     stop();
   }
 
+  /** Stops the drive and turns the modules to an O arrangement to resist movement. */
+  public void stopWithO() {
+    Rotation2d[] headings = new Rotation2d[4];
+    for (int i = 0; i < 4; i++) {
+      headings[i] = DriveConstants.moduleTranslations[i].getAngle().plus(Rotation2d.kCW_90deg);
+    }
+    kinematics.resetHeadings(headings);
+    stop();
+  }
+
   /** Returns the module states (turn angles and drive velocities) for all of the modules. */
   @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {

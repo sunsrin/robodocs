@@ -7,6 +7,7 @@
 
 package org.littletonrobotics.frc2026;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
@@ -17,6 +18,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -123,8 +125,25 @@ public class RobotState {
 
   /** Adds a new odometry sample from the drive subsystem. */
   public void addOdometryObservation(OdometryObservation observation) {
+    // Logic to scale down odometry
+    var t = 1.0;
+    if (observation.pitch().isPresent() && observation.roll().isPresent()) {
+      t =
+          1
+              - (MathUtil.inverseInterpolate(
+                  0,
+                  25,
+                  Math.abs(
+                      Units.radiansToDegrees(
+                          Math.acos(
+                              observation.pitch().get().getCos()
+                                  * observation.roll().get().getCos())))));
+    }
+    t = MathUtil.clamp(t, 0.0, 1.0);
+
     // Update odometry pose
     Twist2d twist = kinematics.toTwist2d(lastWheelPositions, observation.wheelPositions());
+    twist = new Twist2d(twist.dx * t, twist.dy * t, twist.dtheta * t);
     lastWheelPositions = observation.wheelPositions();
     Pose2d lastOdometryPose = odometryPose;
     odometryPose = odometryPose.exp(twist);

@@ -27,11 +27,11 @@ import org.littletonrobotics.junction.AutoLogOutput;
 
 public class Slamtake extends FullSubsystem {
   private static final LoggedTunableNumber rollerIntakeVolts =
-      new LoggedTunableNumber("Slamtake/Roller/IntakeVolts", 10.0);
+      new LoggedTunableNumber("Slamtake/Roller/IntakeVolts", 13.0);
   private static final LoggedTunableNumber rollerOuttakeVolts =
       new LoggedTunableNumber("Slamtake/Roller/OuttakeVolts", -6.0);
   private static final LoggedTunableNumber deployPosition =
-      new LoggedTunableNumber("Slamtake/Slam/DeployPosition", 0.0);
+      new LoggedTunableNumber("Slamtake/Slam/DeployPosition", 4.0);
   private static final LoggedTunableNumber retractPosition =
       new LoggedTunableNumber("Slamtake/Slam/RetractPosition", 102.0);
   private final RollerSystem roller;
@@ -127,7 +127,7 @@ public class Slamtake extends FullSubsystem {
   }
 
   public Command zeroMaxSlam() {
-    return Commands.runOnce(() -> slam.zeroMaxAngle(), this).ignoringDisable(true);
+    return Commands.runOnce(() -> slam.zeroMaxAngle()).ignoringDisable(true);
   }
 
   public enum IntakeGoal {
