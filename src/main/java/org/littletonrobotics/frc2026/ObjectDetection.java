@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -150,6 +151,10 @@ public class ObjectDetection {
   }
 
   public void addFuelTxTyObservation(FuelTxTyObservation observation) {
+    if (!DriverStation.isAutonomous() && Constants.getMode() == Constants.Mode.REAL) {
+      return;
+    }
+
     Optional<Rotation3d> estimatedRotation3d =
         RobotState.getInstance().getEstimatedRotation3dAtTimestamp(observation.timestamp);
     if (estimatedRotation3d.isPresent()) {

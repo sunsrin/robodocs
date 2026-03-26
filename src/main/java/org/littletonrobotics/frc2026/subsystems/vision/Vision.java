@@ -229,13 +229,13 @@ public class Vision extends VirtualSubsystem {
         // Add observation to list
         double xyStdDev =
             xyStdDevCoefficient
-                * Math.pow(avgDistance, 1.2)
+                * Math.pow(avgDistance, 2.0)
                 / Math.pow(tagPoses.size(), 2.0)
                 * cameras[instanceIndex].stdDevFactor();
         double thetaStdDev =
             useVisionRotation
                 ? thetaStdDevCoefficient
-                    * Math.pow(avgDistance, 1.2)
+                    * Math.pow(avgDistance, 2.0)
                     / Math.pow(tagPoses.size(), 2.0)
                     * cameras[instanceIndex].stdDevFactor()
                 : Double.POSITIVE_INFINITY;

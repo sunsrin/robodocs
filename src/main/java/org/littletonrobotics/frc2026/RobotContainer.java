@@ -381,7 +381,12 @@ public class RobotContainer {
                 HubShiftUtil.getShiftedShiftInfo().active()
                     || LaunchCalculator.getInstance().getParameters().passing());
     Trigger inLaunchingTolerance =
-        new Trigger(() -> hood.atGoal() && flywheel.atGoal() && DriveCommands.atLaunchGoal());
+        new Trigger(
+            () ->
+                hood.atGoal()
+                    && flywheel.atGoal()
+                    && DriveCommands.atLaunchGoal()
+                    && DriveCommands.atPitchAndRollTolerance());
 
     // Align and auto-launch
     primary
@@ -548,6 +553,7 @@ public class RobotContainer {
     // Run intake
     primary
         .leftTrigger()
+        .and(() -> DriverStation.isTeleopEnabled())
         .or(secondary.leftTrigger())
         .whileTrue(
             Commands.runEnd(
@@ -824,6 +830,10 @@ public class RobotContainer {
 
   /** Update dashboard outputs. */
   public void updateDashboardOutputs() {
+    // Drive tolerance
+    SmartDashboard.putBoolean("Drive At Goal", DriveCommands.atLaunchGoal());
+    SmartDashboard.putBoolean("Drive Pitch & Roll OK", DriveCommands.atPitchAndRollTolerance());
+
     // Publish match time
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
 

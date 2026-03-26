@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.function.BooleanSupplier;
@@ -113,6 +114,8 @@ public class Hood extends FullSubsystem {
       Logger.recordOutput("Hood/Profile/GoalPositionRad", goalAngle);
       Logger.recordOutput("Hood/Profile/GoalVelocityRadPerSec", goalVelocity);
     }
+
+    SmartDashboard.putBoolean("Hood At Goal", atGoal());
 
     io.applyOutputs(outputs);
     LoggedTracer.record("Hood/AfterScheduler");

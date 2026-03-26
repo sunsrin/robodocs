@@ -205,7 +205,7 @@ class PylonCapture(Capture):
                     self._camera.BalanceRatioSelector.SetValue("Red")
                     self._camera.BalanceRatio.SetValue(1.2)
                     self._camera.BalanceRatioSelector.SetValue("Blue")
-                    self._camera.BalanceRatio.SetValue(1.2)
+                    self._camera.BalanceRatio.SetValue(1.5)
 
                 elif self._mode == "cropped":
                     self._camera.GetNodeMap().GetNode("Width").SetValue(1800)

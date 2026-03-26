@@ -9,7 +9,9 @@ package org.littletonrobotics.frc2026.subsystems.drive;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.experimental.ExtensionMethod;
@@ -266,6 +268,87 @@ public class DriveTrajectories {
                                     Rotation2d.kZero))
                             .build())
                     .build())
+            .stopAtEnd(false)
+            .build());
+
+    // Neutral Zone Trajectories
+    paths.put(
+        "salesmanTurnLeftNeutralZoneSweep",
+        PathRequest.builder()
+            .segments(
+                PathRequestSegment.builder()
+                    .waypoints(
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.FuelPool.nearLeftCorner.plus(
+                                        new Translation2d(
+                                            -DriveConstants.fullWidthX / 2.0,
+                                            DriveConstants.fullWidthX / 2.0)),
+                                    Rotation2d.fromDegrees(-50.0)))
+                            .build())
+                    .maxVelocity(1.8)
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        PathWaypoint.from(
+                                new Pose2d(
+                                        FieldConstants.FuelPool.nearLeftCorner.plus(
+                                            new Translation2d(
+                                                -DriveConstants.fullWidthX / 2.0,
+                                                DriveConstants.fullWidthX / 2.0)),
+                                        Rotation2d.fromDegrees(-50.0))
+                                    .transformBy(new Transform2d(0.6, 0, Rotation2d.kZero)))
+                            .build(),
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.fieldCenter.plus(
+                                        new Translation2d(-DriveConstants.fullWidthX / 2.0, 0.0)),
+                                    Rotation2d.fromDegrees(-115.0)))
+                            .build())
+                    .maxVelocity(1.8)
+                    .maxAngularVelocity(Units.degreesToRadians(50))
+                    .build())
+            .stopAtStart(false)
+            .stopAtEnd(false)
+            .build());
+
+    paths.put(
+        "salesmanTurnRightNeutralZoneSweep",
+        PathRequest.builder()
+            .segments(
+                PathRequestSegment.builder()
+                    .waypoints(
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.FuelPool.nearRightCorner.plus(
+                                        new Translation2d(
+                                            -DriveConstants.fullWidthX / 2.0,
+                                            -DriveConstants.fullWidthX / 2.0)),
+                                    Rotation2d.fromDegrees(50.0)))
+                            .build())
+                    .maxVelocity(1.8)
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        PathWaypoint.from(
+                                new Pose2d(
+                                        FieldConstants.FuelPool.nearRightCorner.plus(
+                                            new Translation2d(
+                                                -DriveConstants.fullWidthX / 2.0,
+                                                -DriveConstants.fullWidthX / 2.0)),
+                                        Rotation2d.fromDegrees(50.0))
+                                    .transformBy(new Transform2d(0.6, 0, Rotation2d.kZero)))
+                            .build(),
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.fieldCenter.plus(
+                                        new Translation2d(-DriveConstants.fullWidthX / 2.0, 0.0)),
+                                    Rotation2d.fromDegrees(115.0)))
+                            .build())
+                    .maxVelocity(1.8)
+                    .maxAngularVelocity(Units.degreesToRadians(50))
+                    .build())
+            .stopAtStart(false)
             .stopAtEnd(false)
             .build());
 

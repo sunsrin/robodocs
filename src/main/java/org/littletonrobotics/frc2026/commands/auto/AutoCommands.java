@@ -209,14 +209,14 @@ public class AutoCommands {
     }
   }
 
-  public static Command rushToCenter(Drive drive, double time) {
+  public static Command rushToCenter(Drive drive, double time, boolean slow) {
     return Commands.run(
             () ->
                 drive.runVelocity(
                     ChassisSpeeds.fromFieldRelativeSpeeds(
                         AllianceFlipUtil.shouldFlip()
-                            ? -DriveConstants.maxLinearSpeed
-                            : DriveConstants.maxLinearSpeed,
+                            ? -DriveConstants.maxLinearSpeed * (slow ? 0.6 : 1.0)
+                            : DriveConstants.maxLinearSpeed * (slow ? 0.6 : 1.0),
                         0.0,
                         0.0,
                         RobotState.getInstance().getRotation())))

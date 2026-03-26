@@ -136,23 +136,23 @@ public class DriveCommands {
         drive);
   }
 
-  public static boolean atLaunchGoal() {
+  public static boolean atPitchAndRollTolerance() {
     var passing = LaunchCalculator.getInstance().getParameters().passing();
     var rotation3d =
         RobotState.getInstance().getEstimatedRotation3dAtTimestamp(Timer.getTimestamp());
-    boolean inPitchAndRollTolerance =
-        rotation3d.isEmpty()
-            || (Math.abs(rotation3d.get().getX())
-                    <= Units.degreesToRadians(
-                        passing
-                            ? driveRollPassToleranceDeg.get()
-                            : driveRollLaunchToleranceDeg.get())
-                && Math.abs(rotation3d.get().getY())
-                    <= Units.degreesToRadians(
-                        passing
-                            ? drivePitchPassToleranceDeg.get()
-                            : drivePitchLaunchToleranceDeg.get()));
+    return rotation3d.isEmpty()
+        || (Math.abs(rotation3d.get().getX())
+                <= Units.degreesToRadians(
+                    passing ? driveRollPassToleranceDeg.get() : driveRollLaunchToleranceDeg.get())
+            && Math.abs(rotation3d.get().getY())
+                <= Units.degreesToRadians(
+                    passing
+                        ? drivePitchPassToleranceDeg.get()
+                        : drivePitchLaunchToleranceDeg.get()));
+  }
 
+  public static boolean atLaunchGoal() {
+    var passing = LaunchCalculator.getInstance().getParameters().passing();
     return DriverStation.isEnabled()
         && Math.abs(
                 RobotState.getInstance()
@@ -160,8 +160,7 @@ public class DriveCommands {
                     .minus(LaunchCalculator.getInstance().getParameters().driveAngle())
                     .getRadians())
             <= Units.degreesToRadians(
-                passing ? driveYawPassToleranceDeg.get() : driveYawLaunchToleranceDeg.get())
-        && inPitchAndRollTolerance;
+                passing ? driveYawPassToleranceDeg.get() : driveYawLaunchToleranceDeg.get());
   }
 
   public static Command joystickDriveWhileLaunching(
@@ -292,6 +291,8 @@ public class DriveCommands {
                   RobotState.getInstance().getEstimatedPose().getTranslation(),
                   parameters.driveAngle()));
           Logger.recordOutput("DriveCommands/Launching/AtGoalTolerance", atLaunchGoal());
+          Logger.recordOutput(
+              "DriveCommands/Launching/AtPitchAndRollTolerance", atPitchAndRollTolerance());
           Logger.recordOutput(
               "DriveCommands/Launching/ErrorPosition",
               parameters.driveAngle().minus(RobotState.getInstance().getRotation()));
