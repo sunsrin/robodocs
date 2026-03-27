@@ -443,7 +443,7 @@ public class RobotContainer {
 
     // Outtake
     primary
-        .a()
+        .b()
         .whileTrue(
             Commands.parallel(
                     Commands.startEnd(
@@ -561,6 +561,8 @@ public class RobotContainer {
                 () -> slamtake.setIntakeGoal(IntakeGoal.STOP),
                 slamtake))
         .onTrue(Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)));
+
+    primary.a().whileTrue(DriveCommands.joystickDriveUnderTower(drive, driverX, driverY));
 
     // ***** SECONDARY CONTROLLER *****
 

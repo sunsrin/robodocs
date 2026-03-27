@@ -45,6 +45,10 @@ public class DriveCommands {
   private static final double wheelRadiusMaxVelocity = 0.25; // Rad/Sec
   private static final double wheelRadiusRampRate = 0.05; // Rad/Sec^2
 
+  private static final LoggedTunableNumber driveTowerAngleKp =
+      new LoggedTunableNumber("DriveCommands/Tower/kP", 6.0);
+  private static final LoggedTunableNumber driveTowerAngleKd =
+      new LoggedTunableNumber("DriveCommands/Tower/kD", 0.05);
   private static final LoggedTunableNumber driveLaunchKp =
       new LoggedTunableNumber("DriveCommands/Launching/kP", 8.0);
   private static final LoggedTunableNumber driveLaunchKd =
@@ -132,6 +136,44 @@ public class DriveCommands {
                               && DriverStation.getAlliance().get() == Alliance.Red
                           ? RobotState.getInstance().getRotation().plus(Rotation2d.kPi)
                           : RobotState.getInstance().getRotation()));
+        },
+        drive);
+  }
+
+  public static Command joystickDriveUnderTower(
+      Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+
+    return Commands.run(
+        () -> {
+          Rotation2d nearestLockedRotation =
+              RobotState.getInstance().getRotation().getRadians() > 0
+                  ? Rotation2d.kCCW_90deg
+                  : Rotation2d.kCW_90deg;
+          var omegaOutput =
+              nearestLockedRotation.minus(RobotState.getInstance().getRotation()).getRadians()
+                      * driveTowerAngleKp.get()
+                  - RobotState.getInstance().getFieldVelocity().omegaRadiansPerSecond
+                      * driveTowerAngleKd.get();
+
+          // Calculate speeds
+          Translation2d fieldRelativeLinearVelocity =
+              getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble())
+                  .times(DriveConstants.maxLinearSpeed);
+          if (AllianceFlipUtil.shouldFlip()) {
+            fieldRelativeLinearVelocity = fieldRelativeLinearVelocity.times(-1.0);
+          }
+          ChassisSpeeds speeds =
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  fieldRelativeLinearVelocity.getX(),
+                  fieldRelativeLinearVelocity.getY(),
+                  omegaOutput,
+                  RobotState.getInstance().getRotation());
+          drive.runVelocity(speeds);
+          RobotState.getInstance()
+              .setRobotSetpointVelocity(
+                  ChassisSpeeds.discretize(
+                      new ChassisSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, 0.0),
+                      Constants.loopPeriodSecs));
         },
         drive);
   }
