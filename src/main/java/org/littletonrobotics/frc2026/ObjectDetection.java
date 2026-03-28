@@ -69,6 +69,40 @@ public class ObjectDetection {
         (int) Math.floor(translation.getX()), (int) Math.floor(translation.getY()));
   }
 
+  /** Initializes the fuel poses from assumed positions */
+  public void initializeFuelPoses() {
+    GridCoord cell;
+    Translation2d fuelPose;
+    Translation2d center = FieldConstants.fieldCenter;
+    double currentTime = Timer.getTimestamp();
+    for (int i = 0; i < 15; i++) {
+      for (int j = 0; j < 6; j++) {
+        fuelPose = center.plus(new Translation2d(0.076 + 0.152 * j, 0.0254 + 0.076 + 0.152 * i));
+        cell = getGridCoord(fuelPose);
+        spatialGrid
+            .computeIfAbsent(cell, k -> new HashSet<>())
+            .add(new FuelPoseRecord(fuelPose, currentTime));
+        fuelPose = center.plus(new Translation2d(-0.076 - 0.152 * j, 0.0254 + 0.076 + 0.152 * i));
+        cell = getGridCoord(fuelPose);
+        spatialGrid
+            .computeIfAbsent(cell, k -> new HashSet<>())
+            .add(new FuelPoseRecord(fuelPose, currentTime));
+
+        fuelPose = center.plus(new Translation2d(0.076 + 0.152 * j, -0.0254 - 0.076 - 0.152 * i));
+        cell = getGridCoord(fuelPose);
+        spatialGrid
+            .computeIfAbsent(cell, k -> new HashSet<>())
+            .add(new FuelPoseRecord(fuelPose, currentTime));
+
+        fuelPose = center.plus(new Translation2d(-0.076 - 0.152 * j, -0.0254 - 0.076 - 0.152 * i));
+        cell = getGridCoord(fuelPose);
+        spatialGrid
+            .computeIfAbsent(cell, k -> new HashSet<>())
+            .add(new FuelPoseRecord(fuelPose, currentTime));
+      }
+    }
+  }
+
   /** Clears fuel that is too old or in the robot. */
   public void clearOldFuelPoses() {
     Rectangle2d robot =

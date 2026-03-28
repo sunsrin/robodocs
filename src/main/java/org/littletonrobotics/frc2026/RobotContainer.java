@@ -782,6 +782,10 @@ public class RobotContainer {
         .onTrue(Commands.runOnce(HubShiftUtil::initialize).ignoringDisable(true));
     RobotModeTriggers.autonomous().onTrue(Commands.runOnce(hubCounter::initialize));
 
+    // Set initial fuel poses when starting auto
+    RobotModeTriggers.autonomous()
+        .onTrue(Commands.runOnce(() -> ObjectDetection.getInstance().initializeFuelPoses()));
+
     // Force zero hood when starting auto
     RobotModeTriggers.autonomous().onTrue(hood.forceZeroCommand());
 
