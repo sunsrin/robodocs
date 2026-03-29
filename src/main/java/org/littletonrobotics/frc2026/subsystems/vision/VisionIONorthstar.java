@@ -31,7 +31,7 @@ public class VisionIONorthstar implements VisionIO {
   private final IntegerPublisher timestampPublisher;
   private final BooleanPublisher isRecordingPublisher;
   private final StringPublisher tagLayoutPublisher;
-  final DoublePublisher throttleFpsPublisher;
+  private final DoublePublisher throttleFpsPublisher;
 
   public VisionIONorthstar(Supplier<AprilTagLayoutType> aprilTagLayoutSupplier, int index) {
     this.aprilTagLayoutSupplier = aprilTagLayoutSupplier;
@@ -47,6 +47,8 @@ public class VisionIONorthstar implements VisionIO {
     configTable.getIntegerTopic("camera_exposure").publish().set(camera.exposure());
     configTable.getDoubleTopic("camera_gain").publish().set(camera.gain());
     configTable.getDoubleTopic("camera_denoise").publish().set(camera.denoise());
+    configTable.getDoubleTopic("camera_balance_red").publish().set(camera.cameraBalanceRed());
+    configTable.getDoubleTopic("camera_balance_blue").publish().set(camera.cameraBalanceBlue());
     configTable.getDoubleTopic("fiducial_size_m").publish().set(FieldConstants.aprilTagWidth);
     isRecordingPublisher = configTable.getBooleanTopic("is_recording").publish();
     isRecordingPublisher.set(false);

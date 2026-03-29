@@ -33,6 +33,7 @@ class FileConfigSource(ConfigSource):
             config_store.local_config.apriltags_stream_port = config_data["apriltags_stream_port"]
             config_store.local_config.objdetect_stream_port = config_data["objdetect_stream_port"]
             config_store.local_config.capture_impl = config_data["capture_impl"]
+            config_store.local_config.apriltag_max_fps = config_data["apriltag_max_fps"]
             config_store.local_config.obj_detect_model = config_data["obj_detect_model"]
             config_store.local_config.obj_detect_max_fps = config_data["obj_detect_max_fps"]
             config_store.local_config.apriltags_enable = config_data["apriltags_enable"]
@@ -59,6 +60,8 @@ class NTConfigSource(ConfigSource):
     _camera_exposure_sub: ntcore.IntegerSubscriber
     _camera_gain_sub: ntcore.DoubleSubscriber
     _camera_denoise_sub: ntcore.DoubleSubscriber
+    _camera_balance_red_sub: ntcore.DoubleSubscriber
+    _camera_balance_blue_sub: ntcore.DoubleSubscriber 
     _fiducial_size_m_sub: ntcore.DoubleSubscriber
     _tag_layout_sub: ntcore.DoubleSubscriber
     _is_recording_sub: ntcore.BooleanSubscriber
@@ -89,6 +92,8 @@ class NTConfigSource(ConfigSource):
             )
             self._camera_gain_sub = nt_table.getDoubleTopic("camera_gain").subscribe(RemoteConfig.camera_gain)
             self._camera_denoise_sub = nt_table.getDoubleTopic("camera_denoise").subscribe(RemoteConfig.camera_denoise)
+            self._camera_balance_red_sub = nt_table.getDoubleTopic("camera_balance_red").subscribe(RemoteConfig.camera_balance_red)
+            self._camera_balance_blue_sub = nt_table.getDoubleTopic("camera_balance_blue").subscribe(RemoteConfig.camera_balance_blue)
             self._fiducial_size_m_sub = nt_table.getDoubleTopic("fiducial_size_m").subscribe(
                 RemoteConfig.fiducial_size_m
             )
@@ -109,6 +114,8 @@ class NTConfigSource(ConfigSource):
         config_store.remote_config.camera_exposure = self._camera_exposure_sub.get()
         config_store.remote_config.camera_gain = self._camera_gain_sub.get()
         config_store.remote_config.camera_denoise = self._camera_denoise_sub.get()
+        config_store.remote_config.camera_balance_red = self._camera_balance_red_sub.get()
+        config_store.remote_config.camera_balance_blue = self._camera_balance_blue_sub.get()
         config_store.remote_config.fiducial_size_m = self._fiducial_size_m_sub.get()
         try:
             config_store.remote_config.tag_layout = json.loads(self._tag_layout_sub.get())

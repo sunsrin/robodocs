@@ -121,8 +121,18 @@ if __name__ == "__main__":
         elif config.local_config.has_calibration:
             # AprilTag pipeline
             if config.local_config.apriltags_enable:
+                # Apply FPS limit for apriltag detection
                 throttle_fps = config.remote_config.throttle_fps
-                if throttle_fps < 0 or (timestamp - apriltags_last_frame_time) >= (1.0 / throttle_fps):
+                apriltag_max_fps = config.local_config.apriltag_max_fps
+                if throttle_fps < 0 and apriltag_max_fps < 0:
+                    effective_max_fps = -1
+                elif throttle_fps < 0:
+                    effective_max_fps = apriltag_max_fps
+                elif apriltag_max_fps < 0:
+                    effective_max_fps = throttle_fps
+                else:
+                    effective_max_fps = min(throttle_fps, apriltag_max_fps)
+                if effective_max_fps < 0 or (timestamp - apriltags_last_frame_time) >= (1.0 / effective_max_fps):
                     apriltags_last_frame_time = timestamp
                     try:
                         apriltag_worker_in.put((timestamp, image, config), block=False)

@@ -63,9 +63,9 @@ public class Module {
 
     // Report energy usage
     Robot.batteryLogger.reportCurrentUsage(
-        driveEnergyKey, inputs.driveConnected ? inputs.driveSupplyCurrentAmps : 0.0);
+        driveEnergyKey, true, inputs.driveConnected ? inputs.driveSupplyCurrentAmps : 0.0);
     Robot.batteryLogger.reportCurrentUsage(
-        turnEnergyKey, inputs.turnConnected ? inputs.turnSupplyCurrentAmps : 0.0);
+        turnEnergyKey, false, inputs.turnConnected ? inputs.turnSupplyCurrentAmps : 0.0);
 
     // Record cycle times
     LoggedTracer.record("Drive/Module" + index + "/Periodic");

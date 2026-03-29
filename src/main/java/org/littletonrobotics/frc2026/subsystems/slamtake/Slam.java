@@ -66,7 +66,7 @@ public class Slam {
         Robot.showHardwareAlerts() && !motorConnectedDebouncer.calculate(inputs.connected));
 
     Robot.batteryLogger.reportCurrentUsage(
-        "Slam", inputs.connected ? inputs.supplyCurrentAmps : 0.0);
+        "Slam", false, inputs.connected ? inputs.supplyCurrentAmps : 0.0);
 
     if (kP.hasChanged(hashCode()) || kD.hasChanged(hashCode())) {
       outputs.kP = kP.get();
@@ -84,7 +84,6 @@ public class Slam {
   }
 
   public void periodicAfterScheduler() {
-
     io.applyOutputs(outputs);
   }
 

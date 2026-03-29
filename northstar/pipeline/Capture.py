@@ -47,6 +47,8 @@ class Capture:
             or remote_a.camera_exposure != remote_b.camera_exposure
             or remote_a.camera_gain != remote_b.camera_gain
             or remote_a.camera_denoise != remote_b.camera_denoise
+            or remote_a.camera_balance_red != remote_b.camera_balance_red   
+            or remote_a.camera_balance_blue != remote_b.camera_balance_blue
         )
 
 
@@ -202,10 +204,14 @@ class PylonCapture(Capture):
 
                     # Disable auto white balance
                     self._camera.GetNodeMap().GetNode("BalanceWhiteAuto").SetValue("Off")
+                    
+                    
                     self._camera.BalanceRatioSelector.SetValue("Red")
-                    self._camera.BalanceRatio.SetValue(1.2)
+                    self._camera.BalanceRatio.SetValue(config_store.remote_config.camera_balance_red)
+                    
+                    
                     self._camera.BalanceRatioSelector.SetValue("Blue")
-                    self._camera.BalanceRatio.SetValue(1.5)
+                    self._camera.BalanceRatio.SetValue(config_store.remote_config.camera_balance_blue)
 
                 elif self._mode == "cropped":
                     self._camera.GetNodeMap().GetNode("Width").SetValue(1800)

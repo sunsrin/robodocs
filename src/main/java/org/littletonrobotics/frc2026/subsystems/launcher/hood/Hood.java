@@ -10,6 +10,7 @@ package org.littletonrobotics.frc2026.subsystems.launcher.hood;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -22,9 +23,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.littletonrobotics.frc2026.DarwinMechanism3d;
 import org.littletonrobotics.frc2026.Robot;
+import org.littletonrobotics.frc2026.RobotState;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.hood.HoodIO.HoodIOOutputMode;
 import org.littletonrobotics.frc2026.subsystems.launcher.hood.HoodIO.HoodIOOutputs;
+import org.littletonrobotics.frc2026.util.ContinuousConditionalCommand;
 import org.littletonrobotics.frc2026.util.FullSubsystem;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
 import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
@@ -81,7 +84,7 @@ public class Hood extends FullSubsystem {
         Robot.showHardwareAlerts() && !motorConnectedDebouncer.calculate(inputs.motorConnected));
 
     Robot.batteryLogger.reportCurrentUsage(
-        "Hood", inputs.motorConnected ? inputs.supplyCurrentAmps : 0.0);
+        "Hood", false, inputs.motorConnected ? inputs.supplyCurrentAmps : 0.0);
 
     // Stop when disabled
     if (DriverStation.isDisabled() || (!zeroed && outputs.mode != HoodIOOutputMode.OPEN_LOOP)) {
@@ -160,7 +163,20 @@ public class Hood extends FullSubsystem {
   }
 
   public Command forceZeroCommand() {
-    return runOnce(this::zero).ignoringDisable(true);
+    return Commands.runOnce(this::zero).ignoringDisable(true);
+  }
+
+  private boolean inTrenchBounds() {
+    Translation2d robotTranslation = RobotState.getInstance().getEstimatedPose().getTranslation();
+    return HoodTrenchBounds.redNearTrench.contains(robotTranslation)
+        || HoodTrenchBounds.redFarTrench.contains(robotTranslation)
+        || HoodTrenchBounds.blueNearTrench.contains(robotTranslation)
+        || HoodTrenchBounds.blueFarTrench.contains(robotTranslation);
+  }
+
+  public Command autonomousCommand() {
+    return new ContinuousConditionalCommand(
+        runFixedCommand(() -> minAngle, () -> 0.0), runTrackTargetCommand(), this::inTrenchBounds);
   }
 
   public Command runTrackTargetCommand() {

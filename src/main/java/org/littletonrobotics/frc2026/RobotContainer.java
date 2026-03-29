@@ -269,7 +269,7 @@ public class RobotContainer {
     configureButtonBindings();
 
     // Set default commands
-    hood.setDefaultCommand(hood.runTrackTargetCommand());
+    hood.setDefaultCommand(hood.runFixedCommand(() -> Hood.minAngle, () -> 0.0));
     flywheel.setDefaultCommand(
         new ContinuousConditionalCommand(
             flywheel.stopCommand(),
@@ -316,7 +316,7 @@ public class RobotContainer {
             new AutoQuestion("Post-Launch?", List.of(AutoQuestionResponse.NOTHING))),
         autoBuilder.lowesHardwareSalesman());
 
-    // Home Depot Salesman
+    // Bumpy Salesman
     autoSelector.addRoutine(
         "Home Depot Salesman",
         List.of(
@@ -393,6 +393,7 @@ public class RobotContainer {
         .leftBumper()
         .whileTrue(DriveCommands.joystickDriveWhileLaunching(drive, driverX, driverY))
         .whileTrue(flywheel.runTrackTargetCommand())
+        .whileTrue(hood.runTrackTargetCommand())
         .and(() -> LaunchCalculator.getInstance().getParameters().isValid())
         .and(() -> ignoreHubState.getAsBoolean() || hubActiveOrPassing.getAsBoolean())
         .and(inLaunchingTolerance.debounce(0.25, DebounceType.kFalling))
@@ -755,6 +756,9 @@ public class RobotContainer {
             hood.zeroCommand()
                 .unless(hood::isZeroed)
                 .alongWith(slamtake.homeSlam().unless(slamtake::isZeroed)));
+
+    // Run the autonomous command for the hood during auto
+    RobotModeTriggers.autonomous().whileTrue(hood.autonomousCommand());
 
     // Automatically run intake and flywheel in auto
     RobotModeTriggers.autonomous()

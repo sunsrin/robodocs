@@ -17,25 +17,28 @@ Usage:
 This file starts `objdetect_worker` in a daemon thread, so the process
 will exit when the main thread finishes.
 """
-
-from utils.input_utils import build_source, FrameStreamer
-from config.config import ConfigStore, LocalConfig, RemoteConfig
-from objdetect_worker import objdetect_worker
-import argparse
-
-from pathlib import Path
-import time
-import queue
-import threading
-import numpy as np
-
-import cv2
 import sys
 from pathlib import Path
 
 # -- Temporary hack until we fix project structure to a proper python package
 sys.path.append(str(Path(__file__).parent.parent.resolve()))
 # ----
+
+from utils.input_utils import build_source, FrameStreamer
+from config.config import ConfigStore, LocalConfig, RemoteConfig
+from objdetect_worker import objdetect_worker
+import argparse
+
+
+import time
+import queue
+import threading
+import numpy as np
+import cv2
+
+
+
+
 
 
 def main():

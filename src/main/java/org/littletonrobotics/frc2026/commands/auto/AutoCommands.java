@@ -39,6 +39,7 @@ import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake;
 import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake.SlamGoal;
 import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
+import org.littletonrobotics.frc2026.util.geometry.Bounds;
 
 public class AutoCommands {
   private static final LoggedTunableNumber autoDriveLaunchKp =
@@ -75,9 +76,9 @@ public class AutoCommands {
         .withTimeout(1.0);
   }
 
-  // Returns to the alliance zone from the closest side
+  /** Returns to the alliance zone from the closest side */
   public static Command returnToClosestLaunchPose(Drive drive) {
-    return new DriveToPose(
+    return returnToDeterminedLaunchPose(
         drive,
         () -> {
           ChassisSpeeds fieldVelocity = RobotState.getInstance().getFieldVelocity();
@@ -88,50 +89,28 @@ public class AutoCommands {
                   .getEstimatedPose()
                   .getTranslation()
                   .plus(fieldVelocityTranslation.times(0.8));
-          Pose2d target =
-              currentTranslation.getDistance(
-                          AllianceFlipUtil.apply(
-                              AutoFieldConstants.Launch.leftBump.getTranslation()))
-                      < currentTranslation.getDistance(
-                          AllianceFlipUtil.apply(
-                              AutoFieldConstants.Launch.rightBump.getTranslation()))
-                  ? AllianceFlipUtil.apply(AutoFieldConstants.Launch.leftBump)
-                  : AllianceFlipUtil.apply(AutoFieldConstants.Launch.rightBump);
-
-          double minYOffset = 0.1;
-          double maxYOffset = 0.4;
-          double t =
-              MathUtil.clamp(
-                  (Math.cbrt(
-                      (Math.abs(RobotState.getInstance().getEstimatedPose().getY() - target.getY())
-                              - minYOffset)
-                          / (maxYOffset - minYOffset))),
-                  0.0,
-                  1.0);
-
-          if (AllianceFlipUtil.applyX(RobotState.getInstance().getEstimatedPose().getX())
-              < FieldConstants.LinesVertical.neutralZoneNear + 0.5) {
-            t = 0.0;
-          }
-
-          return new Pose2d(
-              MathUtil.interpolate(
-                  target.getX(),
-                  AllianceFlipUtil.applyX(FieldConstants.LinesVertical.neutralZoneNear + 1.5),
-                  t),
-              target.getY(),
-              target.getRotation());
+          return currentTranslation.getDistance(
+                  AllianceFlipUtil.apply(AutoFieldConstants.Launch.leftBump.getTranslation()))
+              < currentTranslation.getDistance(
+                  AllianceFlipUtil.apply(AutoFieldConstants.Launch.rightBump.getTranslation()));
         });
   }
 
-  // Returns to the alliance zone from a determined side
-  public static Command returnToDeterminedLaunchPose(Drive drive, AutoQuestionResponse bumpSide) {
+  /** Returns to launch pose from neutral zone given {@link AutoQuestionResponse}. */
+  public static Command returnToDeterminedLaunchPose(
+      Drive drive, Supplier<AutoQuestionResponse> returnResponse) {
+    return returnToDeterminedLaunchPose(
+        drive, () -> returnResponse.get() == AutoQuestionResponse.LEFT_BUMP);
+  }
+
+  /** Returns to launch pose from neutral zone. */
+  public static Command returnToDeterminedLaunchPose(Drive drive, BooleanSupplier leftBump) {
     return new DriveToPose(
         drive,
         () -> {
           Pose2d currentPose = RobotState.getInstance().getEstimatedPose();
           Pose2d target =
-              bumpSide.equals(AutoQuestionResponse.LEFT_BUMP)
+              leftBump.getAsBoolean()
                   ? AllianceFlipUtil.apply(AutoFieldConstants.Launch.leftBump)
                   : AllianceFlipUtil.apply(AutoFieldConstants.Launch.rightBump);
 
@@ -145,18 +124,23 @@ public class AutoCommands {
                   0.0,
                   1.0);
 
-          if (AllianceFlipUtil.applyX(RobotState.getInstance().getEstimatedPose().getX())
-              < FieldConstants.LinesVertical.neutralZoneNear + 0.5) {
+          double xPosition = AllianceFlipUtil.applyX(currentPose.getX());
+          if (xPosition < FieldConstants.LinesVertical.neutralZoneNear + 0.5) {
             t = 0.0;
           }
 
-          return new Pose2d(
-              MathUtil.interpolate(
-                  target.getX(),
-                  AllianceFlipUtil.applyX(FieldConstants.LinesVertical.neutralZoneNear + 1.5),
-                  t),
-              target.getY(),
-              target.getRotation());
+          var targetTranslation =
+              new Translation2d(
+                  MathUtil.interpolate(
+                      target.getX(),
+                      AllianceFlipUtil.applyX(FieldConstants.LinesVertical.neutralZoneNear + 1.5),
+                      t),
+                  target.getY());
+          var targetRotation =
+              xPosition < FieldConstants.LinesVertical.neutralZoneNear - 0.3
+                  ? target.getRotation()
+                  : targetTranslation.minus(currentPose.getTranslation()).getAngle();
+          return new Pose2d(targetTranslation, targetRotation);
         });
   }
 
@@ -239,11 +223,51 @@ public class AutoCommands {
                     kicker)
                 .withDeadline(
                     Commands.repeatingSequence(
-                            Commands.waitSeconds(0.25),
-                            Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
-                            Commands.waitSeconds(0.25),
-                            Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)))
-                        .finallyDo(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))));
+                        Commands.waitSeconds(1.5),
+                        Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
+                        Commands.waitSeconds(0.5),
+                        Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))))
+                .finallyDo(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)));
+  }
+
+  public static Translation2d keepOutX(Bounds bounds, Translation2d translation) {
+    return new Translation2d(
+        translation.getX() <= bounds.minX() || translation.getX() >= bounds.maxX()
+            ? translation.getX()
+            : Math.abs(translation.getX() - bounds.minX())
+                    < Math.abs(translation.getX() - bounds.maxX())
+                ? bounds.minX()
+                : bounds.maxX(),
+        translation.getY());
+  }
+
+  public static Translation2d keepOutY(Bounds bounds, Translation2d translation) {
+    return new Translation2d(
+        translation.getX(),
+        translation.getY() <= bounds.minY() || translation.getY() >= bounds.maxY()
+            ? translation.getY()
+            : Math.abs(translation.getY() - bounds.minY())
+                    < Math.abs(translation.getY() - bounds.maxY())
+                ? bounds.minY()
+                : bounds.maxY());
+  }
+
+  public static Command passingCommand(
+      Drive drive, Hopper hopper, Kicker kicker, Flywheel flywheel, Slamtake slamtake) {
+    Supplier<Pose2d> targetSupplier =
+        () ->
+            LaunchCalculator.getStationaryAimedPose(
+                keepOutY(
+                    AllianceFlipUtil.apply(LaunchCalculator.nearHubBound),
+                    RobotState.getInstance().getEstimatedPose().getTranslation()),
+                false);
+
+    return new DriveToPose(drive, targetSupplier)
+        .raceWith(
+            Commands.sequence(
+                AutoCommands.waitUntilWithinTolerance(
+                    targetSupplier, 0.5, Rotation2d.fromDegrees(15)),
+                index(hopper, kicker, flywheel, slamtake)));
   }
 
   public static boolean isLeftSide() {

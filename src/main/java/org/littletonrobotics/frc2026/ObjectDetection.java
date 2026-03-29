@@ -30,6 +30,7 @@ import org.littletonrobotics.frc2026.subsystems.vision.VisionConstants;
 import org.littletonrobotics.frc2026.util.EqualsUtil;
 import org.littletonrobotics.frc2026.util.FuelSim;
 import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
+import org.littletonrobotics.frc2026.util.geometry.Bounds;
 import org.littletonrobotics.frc2026.util.geometry.GeomUtil;
 
 @ExtensionMethod({GeomUtil.class})
@@ -50,6 +51,9 @@ public class ObjectDetection {
       new LoggedTunableNumber("ObjectDetection/RobotPersistanceTime", 2.0);
   private static final LoggedTunableNumber robotOverlap =
       new LoggedTunableNumber("ObjectDetection/RobotOverlap", Units.inchesToMeters(35.0));
+
+  private static final Bounds fieldBounds =
+      new Bounds(0, FieldConstants.fieldLength, 0, FieldConstants.fieldWidth);
 
   // Spatial hash grid for fuel
   private Map<GridCoord, Set<FuelPoseRecord>> spatialGrid = new HashMap<>();
@@ -245,8 +249,11 @@ public class ObjectDetection {
         fieldToCamera
             .transformBy(new Transform2d(Translation2d.kZero, new Rotation2d(-tx)))
             .transformBy(new Transform2d(new Translation2d(cameraToFuelNorm, 0), Rotation2d.kZero));
-
     Translation2d fieldToFuelTranslation2d = fieldToFuel.getTranslation();
+
+    // No fuel outside the field
+    if (!fieldBounds.contains(fieldToFuelTranslation2d)) return;
+
     FuelPoseRecord fuelPoseRecord =
         new FuelPoseRecord(fieldToFuelTranslation2d, observation.timestamp());
 

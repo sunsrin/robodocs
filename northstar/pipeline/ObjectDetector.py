@@ -491,6 +491,8 @@ class SlicedObjectDetector(ObjectDetector):
 
     # -- Model
     _model: Optional[Detector] = None
+    _tmp_robot_model : Optional[Detector] = None
+    _robot_model_path = Path(__file__).resolve().parents[1] / "robots_v2_batch1.mlpackage"
 
     def __init__(self, model_path: Optional[Path] = None):
         """ Constructor
@@ -516,6 +518,9 @@ class SlicedObjectDetector(ObjectDetector):
             self._model = InferenceModelBuilder.build(model_path)
             self._model_path_str = str(model_path)
 
+        if self._robot_model_path is not None:
+            self._tmp_robot_model = InferenceModelBuilder.build(self._robot_model_path)
+ 	
         self.slices = SlicedObjectDetector.slice3_plusfull_config
 
         # -- Statistics
@@ -524,15 +529,18 @@ class SlicedObjectDetector(ObjectDetector):
         self.last_print_time = -1
         self.num_frames = 0
 
-    def _slice_image(self, image: cv2.Mat) -> np.ndarray:
+    def _slice_image(self, slices : List[SliceInfo], image: cv2.Mat) -> np.ndarray:
         """Split an RGB image into the configured overlapping tiles.
 
         The detector operates on fixed-size tiles; this helper extracts the
-        tiles defined in ``self.slices`` and returns both the slice
+        tiles defined in ``slices`` and returns both the slice
         bounding boxes and a batch array formatted for model input.
 
         Parameters
         ----------
+        slices : List[SliceInfo]
+            Meta data about each slice
+
         image : cv2.Mat
             Input image (RGB). Expected shape matches ``self.imgsz``.
 
@@ -549,8 +557,8 @@ class SlicedObjectDetector(ObjectDetector):
 
         assert image.shape == self.imgsz, "Unsupported image size"
 
-        img_batch = np.zeros((len(self.slices), 3, self.size, self.size), dtype=np.float32)
-        for idx, slice_info in enumerate(self.slices):
+        img_batch = np.zeros((len(slices), 3, self.size, self.size), dtype=np.float32)
+        for idx, slice_info in enumerate(slices):
             (r, c, h, w) = slice_info.img_slice_pos_rchw
 
             if h == w and h == self.size:
@@ -821,7 +829,7 @@ class SlicedObjectDetector(ObjectDetector):
 
         # -- Slice image
         start_time = time.time()
-        img_batch = self._slice_image(image)
+        img_batch = self._slice_image(self.slices, image)
         img_batch /= 255.0
         nbatches = len(self.slices)
         self.timing["slice"] = time.time() - start_time
@@ -831,6 +839,18 @@ class SlicedObjectDetector(ObjectDetector):
         dets = self._model(img_batch)
         self.timing["infer"] = time.time() - start_time
 
+        #-- Robot model     
+        if self._tmp_robot_model is not None: 
+            robot_slice_conf = SlicedObjectDetector.full_config
+            robot_img = self._slice_image(robot_slice_conf, image)
+            robot_img /= 255.0
+            robot_dets = self._tmp_robot_model(robot_img)
+            robot_dets = self._merge_dets(robot_slice_conf, robot_dets)
+            robot_dets[:,5] = 1 # override class id
+            #_visualize_detections(image, robot_dets,  title=f"Robot Annotations", wait=True, out_path=f"tmp/output/robot.png")
+        else:
+            robot_dets = np.zeros((0,6), dtype=np.float32)
+
         if self.visualize_slice_intermediates:
             for i in range(nbatches):
                 slice_img = (np.transpose(img_batch[i], (1, 2, 0))*255).astype(np.uint8)
@@ -839,6 +859,8 @@ class SlicedObjectDetector(ObjectDetector):
 
         start_time = time.time()
         merged_dets = self._merge_dets(self.slices, dets)
+        if len(robot_dets)>0:
+            merged_dets = np.concatenate((merged_dets, robot_dets), axis=0)
         self.timing["merge"] = time.time() - start_time
 
         if self.visualize_combined_dets:

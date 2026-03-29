@@ -72,11 +72,12 @@ public class RollerSystem {
     if (inputs.hasFollower) {
       Robot.batteryLogger.reportCurrentUsage(
           name,
+          false,
           inputs.connected ? inputs.supplyCurrentAmps : 0.0,
           inputs.followerConnected ? inputs.followerSupplyCurrentAmps : 0.0);
     } else {
       Robot.batteryLogger.reportCurrentUsage(
-          name, inputs.connected ? inputs.supplyCurrentAmps : 0.0);
+          name, false, inputs.connected ? inputs.supplyCurrentAmps : 0.0);
     }
 
     // Update mode
@@ -90,7 +91,6 @@ public class RollerSystem {
   }
 
   public void periodicAfterScheduler() {
-
     io.applyOutputs(outputs);
   }
 

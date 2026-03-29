@@ -126,7 +126,7 @@ public class LaunchCalculator {
       new Bounds(0, Units.inchesToMeters(46), Units.inchesToMeters(129), Units.inchesToMeters(168));
 
   // Behind the hubs
-  private static final Bounds nearHubBound =
+  public static final Bounds nearHubBound =
       new Bounds(
           FieldConstants.LinesVertical.neutralZoneNear,
           FieldConstants.LinesVertical.neutralZoneNear + Units.inchesToMeters(120),
@@ -266,7 +266,7 @@ public class LaunchCalculator {
     // Calculate target
     Translation2d target =
         passing
-            ? getPassingTarget()
+            ? AllianceFlipUtil.apply(getPassingTarget())
             : AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
     Pose2d launcherPosition = estimatedPose.transformBy(robotToLauncher.toTransform2d());
     double launcherToTargetDistance = target.getDistance(launcherPosition.getTranslation());
@@ -384,15 +384,14 @@ public class LaunchCalculator {
     latestParameters = null;
   }
 
-  public Translation2d getPassingTarget() {
+  public static Translation2d getPassingTarget() {
     double flippedY = AllianceFlipUtil.apply(RobotState.getInstance().getEstimatedPose()).getY();
     boolean mirror = flippedY > FieldConstants.LinesHorizontal.center;
 
     // Fixed passing target
     Translation2d flippedGoalTranslation =
-        AllianceFlipUtil.apply(
-            new Translation2d(
-                xPassTarget, mirror ? FieldConstants.fieldWidth - yPassTarget : yPassTarget));
+        new Translation2d(
+            xPassTarget, mirror ? FieldConstants.fieldWidth - yPassTarget : yPassTarget);
 
     return flippedGoalTranslation;
   }
@@ -406,7 +405,11 @@ public class LaunchCalculator {
    */
   public static Pose2d getStationaryAimedPose(Translation2d robotTranslation, boolean forceBlue) {
     // Calculate target
-    Translation2d target = FieldConstants.Hub.topCenterPoint.toTranslation2d();
+    boolean passing =
+        !Constants.disableHAL && LaunchCalculator.getInstance().getParameters().passing();
+
+    Translation2d target =
+        passing ? getPassingTarget() : FieldConstants.Hub.topCenterPoint.toTranslation2d();
     if (!forceBlue) {
       target = AllianceFlipUtil.apply(target);
     }

@@ -44,6 +44,8 @@ public class VisionConstants {
   private static double monoDenoise = 1.0;
   private static int colorExposure = 4500;
   private static double colorGain = 5.0;
+  private static double cameraBalanceRed = 1.2;
+  private static double cameraBalanceBlue = 1.2;
 
   public static CameraConfig[] cameras =
       switch (Constants.robot) {
@@ -97,6 +99,8 @@ public class VisionConstants {
                   .gain(colorGain)
                   .stdDevFactor(1.0)
                   .fovRads(Units.degreesToRadians(90.0))
+                  .cameraBalanceRed(cameraBalanceRed)
+                  .cameraBalanceBlue(cameraBalanceBlue)
                   .build(),
               CameraConfig.builder()
                   .poseFunction(
@@ -118,6 +122,8 @@ public class VisionConstants {
                   .gain(colorGain)
                   .stdDevFactor(1.0)
                   .fovRads(Units.degreesToRadians(90.0))
+                  .cameraBalanceRed(cameraBalanceRed)
+                  .cameraBalanceBlue(cameraBalanceBlue)
                   .build(),
               CameraConfig.builder()
                   .poseFunction(
@@ -139,6 +145,8 @@ public class VisionConstants {
                   .gain(colorGain)
                   .stdDevFactor(1.0)
                   .fovRads(Units.degreesToRadians(90.0))
+                  .cameraBalanceRed(cameraBalanceRed)
+                  .cameraBalanceBlue(cameraBalanceBlue)
                   .build()
             };
         case ALPHABOT ->
@@ -186,6 +194,8 @@ public class VisionConstants {
                   .denoise(monoDenoise)
                   .stdDevFactor(1.0)
                   .fovRads(Units.degreesToRadians(90.0))
+                  .cameraBalanceRed(cameraBalanceRed)
+                  .cameraBalanceBlue(cameraBalanceBlue)
                   .build()
             };
         default -> new CameraConfig[] {};
@@ -202,7 +212,9 @@ public class VisionConstants {
       double gain,
       double denoise,
       double stdDevFactor,
-      double fovRads) {}
+      double fovRads,
+      double cameraBalanceRed,
+      double cameraBalanceBlue) {}
 
   private VisionConstants() {}
 }

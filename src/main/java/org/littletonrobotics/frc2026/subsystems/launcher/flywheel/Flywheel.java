@@ -101,6 +101,7 @@ public class Flywheel extends FullSubsystem {
     // Report energy usage
     Robot.batteryLogger.reportCurrentUsage(
         "Flywheel",
+        false,
         inputs.connected ? inputs.supplyCurrentAmps : 0.0,
         inputs.follower1Connected ? inputs.follower1SupplyCurrentAmps : 0.0,
         inputs.follower2Connected ? inputs.follower2SupplyCurrentAmps : 0.0,
@@ -113,7 +114,6 @@ public class Flywheel extends FullSubsystem {
 
   @Override
   public void periodicAfterScheduler() {
-
     Logger.recordOutput("Flywheel/Mode", outputs.mode);
     io.applyOutputs(outputs);
 
