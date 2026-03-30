@@ -40,6 +40,7 @@ import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake.SlamGoal;
 import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 import org.littletonrobotics.frc2026.util.geometry.Bounds;
+import org.littletonrobotics.frc2026.util.geometry.VerticalFlipUtil;
 
 public class AutoCommands {
   private static final LoggedTunableNumber autoDriveLaunchKp =
@@ -159,15 +160,25 @@ public class AutoCommands {
   }
 
   public static Command followTrajectory(String name, Drive drive, boolean start) {
+    return followTrajectory(name, drive, start, false);
+  }
+
+  public static Command followTrajectory(String name, Drive drive, boolean start, boolean mirror) {
     Optional<Trajectory<SwerveSample>> trajectoryOptional = Choreo.loadTrajectory(name);
     if (trajectoryOptional.isPresent()) {
       Trajectory<SwerveSample> trajectory = trajectoryOptional.get();
       return Commands.sequence(
           start
               ? AutoCommands.resetPose(
-                  trajectory.getInitialSample(AllianceFlipUtil.shouldFlip()).get().getPose())
+                  mirror
+                      ? VerticalFlipUtil.apply(
+                          trajectory
+                              .getInitialSample(AllianceFlipUtil.shouldFlip())
+                              .get()
+                              .getPose())
+                      : trajectory.getInitialSample(AllianceFlipUtil.shouldFlip()).get().getPose())
               : Commands.none(),
-          new DriveTrajectory(trajectory, drive));
+          new DriveTrajectory(trajectory, drive, mirror));
     } else {
       throw new RuntimeException("Choreo Trajectory Not Found: " + name);
     }

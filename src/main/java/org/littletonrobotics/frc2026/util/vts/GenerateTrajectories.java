@@ -142,7 +142,7 @@ public class GenerateTrajectories {
       System.out.print("\r" + " ".repeat(120) + "\rSearching for " + name + " 🔎");
 
       // Check hashcodes
-      File trajFile = Path.of("src", "main", "deploy", "vts", entry.getKey() + ".traj").toFile();
+      File trajFile = Path.of("src", "main", "deploy", "vts", name + ".traj").toFile();
       try {
         if (trajFile.exists()
             && trajFile.getCanonicalFile().getName().equals(trajFile.getName())
@@ -288,18 +288,19 @@ public class GenerateTrajectories {
                           "props",
                           Map.of(
                               "x",
-                                  new ExpVal(
-                                      segment.pointAt.target().getX() + "m",
-                                      segment.pointAt.target().getX()),
+                              new ExpVal(
+                                  segment.pointAt.target().getX() + "m",
+                                  segment.pointAt.target().getX()),
                               "y",
-                                  new ExpVal(
-                                      segment.pointAt.target().getY() + "m",
-                                      segment.pointAt.target().getY()),
+                              new ExpVal(
+                                  segment.pointAt.target().getY() + "m",
+                                  segment.pointAt.target().getY()),
                               "tolerance",
-                                  new ExpVal(
-                                      segment.pointAt.tolerance().getRadians() + " rad",
-                                      segment.pointAt.tolerance().getRadians()),
-                              "flip", segment.pointAt.flip())))
+                              new ExpVal(
+                                  segment.pointAt.tolerance().getRadians() + " rad",
+                                  segment.pointAt.tolerance().getRadians()),
+                              "flip",
+                              segment.pointAt.flip())))
                   .enabled(true)
                   .build());
         }

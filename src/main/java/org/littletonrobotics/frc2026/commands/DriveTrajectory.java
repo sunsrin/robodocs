@@ -22,6 +22,7 @@ import org.littletonrobotics.frc2026.RobotState;
 import org.littletonrobotics.frc2026.subsystems.drive.Drive;
 import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
+import org.littletonrobotics.frc2026.util.geometry.VerticalFlipUtil;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -39,16 +40,21 @@ public class DriveTrajectory extends Command {
   private final Trajectory<SwerveSample> trajectory;
   private final Supplier<Optional<Double>> omegaOverride;
   private final Drive drive;
+  private final Boolean mirror;
 
   private final PIDController xController;
   private final PIDController yController;
   private final PIDController thetaController;
 
   public DriveTrajectory(
-      Trajectory<SwerveSample> trajectory, Supplier<Optional<Double>> omegaOverride, Drive drive) {
+      Trajectory<SwerveSample> trajectory,
+      Supplier<Optional<Double>> omegaOverride,
+      Drive drive,
+      Boolean mirror) {
     this.drive = drive;
     this.trajectory = trajectory;
     this.omegaOverride = omegaOverride;
+    this.mirror = mirror;
     xController = new PIDController(linearkP.get(), 0, linearkD.get(), Constants.loopPeriodSecs);
     yController = new PIDController(linearkP.get(), 0, linearkD.get(), Constants.loopPeriodSecs);
     thetaController = new PIDController(thetakP.get(), 0, thetakD.get(), Constants.loopPeriodSecs);
@@ -56,8 +62,17 @@ public class DriveTrajectory extends Command {
     addRequirements(drive);
   }
 
+  public DriveTrajectory(
+      Trajectory<SwerveSample> trajectory, Supplier<Optional<Double>> omegaOverride, Drive drive) {
+    this(trajectory, omegaOverride, drive, false);
+  }
+
+  public DriveTrajectory(Trajectory<SwerveSample> trajectory, Drive drive, Boolean mirror) {
+    this(trajectory, () -> Optional.empty(), drive, mirror);
+  }
+
   public DriveTrajectory(Trajectory<SwerveSample> trajectory, Drive drive) {
-    this(trajectory, () -> Optional.empty(), drive);
+    this(trajectory, () -> Optional.empty(), drive, false);
   }
 
   @Override
@@ -69,7 +84,11 @@ public class DriveTrajectory extends Command {
 
     Logger.recordOutput(
         "DriveTrajectory/Trajectory",
-        Arrays.stream(trajectory.getPoses()).map(AllianceFlipUtil::apply).toArray(Pose2d[]::new));
+        Arrays.stream(trajectory.getPoses())
+            .map(AllianceFlipUtil::apply)
+            .map(pose -> mirror ? VerticalFlipUtil.apply(pose) : pose)
+            .toArray(Pose2d[]::new));
+    Logger.recordOutput("DriveTrajectory/Mirror", mirror);
   }
 
   @Override
@@ -84,7 +103,10 @@ public class DriveTrajectory extends Command {
     }
 
     Pose2d currentPose = RobotState.getInstance().getEstimatedPose();
-    var desiredState = trajectory.sampleAt(timer.get(), AllianceFlipUtil.shouldFlip()).get();
+    SwerveSample trajectoryState =
+        trajectory.sampleAt(timer.get(), AllianceFlipUtil.shouldFlip()).get();
+
+    SwerveSample desiredState = mirror ? VerticalFlipUtil.apply(trajectoryState) : trajectoryState;
 
     double xOutput =
         xController.calculate(currentPose.getX(), desiredState.getPose().getX()) + desiredState.vx;
