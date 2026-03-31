@@ -742,10 +742,6 @@ public class RobotContainer {
                 Commands.waitSeconds(0.5),
                 Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
                 Commands.waitSeconds(0.2),
-                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)),
-                Commands.waitSeconds(0.5),
-                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
-                Commands.waitSeconds(0.2),
                 Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))));
     RobotModeTriggers.teleop()
         .onTrue(Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)));

@@ -96,6 +96,26 @@ public class DriveTrajectories {
             .build());
 
     // Start --> Neutral Zone
+    PathRequestBuilder trenchLeftStartToNeutralZone =
+        PathRequest.builder()
+            .segments(
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Starting in trench
+                        PathWaypoint.from(
+                                new Pose2d(Trench.leftStart.translation(), Rotation2d.kZero))
+                            .build(),
+                        PathWaypoint.from(Trench.leftClear).build())
+                    .build());
+
+    paths.put(
+        "trenchLeftStartToNeutralZone",
+        PathRequest.builder()
+            .segments(trenchLeftStartToNeutralZone.build().segments)
+            .stopAtStart(true)
+            .stopAtEnd(false)
+            .build());
+
     paths.put(
         "bumpLeftInnerToNeutralZone",
         PathRequest.builder()
@@ -271,119 +291,69 @@ public class DriveTrajectories {
             .stopAtEnd(false)
             .build());
 
-    // Neutral Zone Trajectories
-    paths.put(
-        "leftNeutralZoneSweepConservative",
+    // Neutral Zone Sweeps
+    PathRequestBuilder neutralZoneSweepConservative =
         PathRequest.builder()
             .segments(
                 PathRequestSegment.builder()
                     .waypoints(
-                        // Just after bump
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    Bump.leftOuter.translation().plus(new Translation2d(0.4, 0)),
-                                    Rotation2d.kZero))
-                            .build())
-                    .maxVelocity(3.2)
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints(
-                        // Just before fuel pool corner
-                        PathWaypoint.from(
-                                new Pose2d(
-                                        FieldConstants.FuelPool.nearLeftCorner,
-                                        Rotation2d.fromDegrees(-66.0))
-                                    .transformBy(new Transform2d(-0.65, 0.0, Rotation2d.kZero)))
-                            .build())
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints(
-                        // Fuel pool corner
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.FuelPool.nearLeftCorner,
-                                    Rotation2d.fromDegrees(-66.0)))
+                        // Magical intermediate
+                        PathWaypoint.from(new Pose2d(7.87, 5.96, Rotation2d.fromRadians(-1.1)))
                             .build(),
+                        // Fuel pool interior intermediate
                         PathWaypoint.from(
                                 new Pose2d(
                                     FieldConstants.fieldCenter.plus(
                                         new Translation2d(
                                                 -FieldConstants.FuelPool.depth / 4.0,
                                                 FieldConstants.FuelPool.width / 4.0)
-                                            .plus(new Translation2d(-0.1, 0.0))),
-                                    Rotation2d.fromDegrees(-75)))
+                                            .plus(new Translation2d(0.1, 0.0))),
+                                    Rotation2d.fromDegrees(-93)))
                             .build(),
                         PathWaypoint.from(
                                 new Pose2d(
                                     FieldConstants.fieldCenter.plus(
                                         new Translation2d(-DriveConstants.fullWidthX / 2.0, 0.0)),
-                                    Rotation2d.fromDegrees(-90)))
+                                    Rotation2d.fromDegrees(-95)))
                             .build())
                     .maxVelocity(1.8)
-                    .maxAngularVelocity(Units.degreesToRadians(50))
+                    .build());
+
+    paths.put(
+        "leftTrenchNeutralZoneSweepConservative",
+        PathRequest.builder()
+            .segments(trenchLeftStartToNeutralZone.build().segments)
+            .segments(
+                PathRequestSegment.builder()
+                    .waypoints(
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.FuelPool.nearLeftCorner.plus(
+                                        new Translation2d(-0.1, DriveConstants.fullWidthX / 2.0)),
+                                    Rotation2d.fromDegrees(-45)))
+                            .build())
                     .build())
+            .segments(neutralZoneSweepConservative.build().segments)
             .stopAtStart(false)
             .stopAtEnd(false)
             .build());
 
     paths.put(
-        "rightNeutralZoneSweepConservative",
+        "leftBumpNeutralZoneSweepConservative",
         PathRequest.builder()
             .segments(
-                PathRequestSegment.builder()
-                    .waypoints(
-                        // Just after bump
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    Bump.rightOuter.translation().plus(new Translation2d(0.4, 0)),
-                                    Rotation2d.kZero))
-                            .build())
-                    .maxVelocity(3.2)
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints(
-                        // Just before fuel pool corner
-                        PathWaypoint.from(
-                                new Pose2d(
-                                        FieldConstants.FuelPool.nearRightCorner,
-                                        Rotation2d.fromDegrees(66.0))
-                                    .transformBy(new Transform2d(-0.65, 0.0, Rotation2d.kZero)))
-                            .build())
-                    .build(),
                 PathRequestSegment.builder()
                     .waypoints(
                         // Fuel pool corner
                         PathWaypoint.from(
                                 new Pose2d(
-                                    FieldConstants.FuelPool.nearRightCorner,
-                                    Rotation2d.fromDegrees(66.0)))
-                            .build(),
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.fieldCenter.plus(
+                                    FieldConstants.FuelPool.nearLeftCorner.plus(
                                         new Translation2d(
-                                                -FieldConstants.FuelPool.depth / 4.0,
-                                                -FieldConstants.FuelPool.width / 4.0)
-                                            .plus(new Translation2d(-0.1, 0.0))),
-                                    Rotation2d.fromDegrees(75)))
-                            .build(),
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.fieldCenter.plus(
-                                        new Translation2d(-DriveConstants.fullWidthX / 2.0, 0.0)),
-                                    Rotation2d.fromDegrees(90)))
+                                            -DriveConstants.fullWidthX / 2.0,
+                                            -DriveConstants.fullWidthX / 2.0 + 0.1)),
+                                    Rotation2d.kZero))
                             .build())
-                    .maxVelocity(1.8)
-                    .maxAngularVelocity(Units.degreesToRadians(50))
-                    .build())
-            .stopAtStart(false)
-            .stopAtEnd(false)
-            .build());
-
-    paths.put(
-        "leftNeutralZoneSweepNeutral",
-        PathRequest.builder()
-            .segments(
+                    .build(),
                 PathRequestSegment.builder()
                     .waypoints(
                         // Just after bump
@@ -393,17 +363,17 @@ public class DriveTrajectories {
                                     Rotation2d.kZero))
                             .build())
                     .maxVelocity(3.2)
-                    .build(),
+                    .build())
+            .segments(neutralZoneSweepConservative.build().segments)
+            .stopAtStart(false)
+            .stopAtEnd(false)
+            .build());
+
+    PathRequestBuilder neutralZoneSweepNeutral =
+        PathRequest.builder()
+            .segments(
                 PathRequestSegment.builder()
                     .waypoints(
-                        // Just before fuel pool corner
-                        PathWaypoint.from(
-                                new Pose2d(
-                                        FieldConstants.FuelPool.nearLeftCorner,
-                                        Rotation2d.fromDegrees(-66.0))
-                                    .transformBy(new Transform2d(-0.65, 0.0, Rotation2d.kZero))
-                                    .getTranslation())
-                            .build(),
                         // Robot width away from middle of fuel pool
                         PathWaypoint.from(
                                 new Pose2d(
@@ -437,79 +407,24 @@ public class DriveTrajectories {
                                     Rotation2d.fromDegrees(-130)))
                             .build())
                     .maxVelocity(1.8)
-                    .build())
+                    .build());
+
+    paths.put(
+        "leftTrenchNeutralZoneSweepNeutral",
+        PathRequest.builder()
+            .segments(trenchLeftStartToNeutralZone.build().segments)
+            .segments(neutralZoneSweepNeutral.build().segments)
             .stopAtStart(false)
             .stopAtEnd(false)
             .build());
 
     paths.put(
-        "rightNeutralZoneSweepNeutral",
+        "leftBumpNeutralZoneSweepNeutral",
         PathRequest.builder()
             .segments(
                 PathRequestSegment.builder()
                     .waypoints(
                         // Just after bump
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    Bump.rightOuter.translation().plus(new Translation2d(0.4, 0)),
-                                    Rotation2d.kZero))
-                            .build())
-                    .maxVelocity(3.2)
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints(
-                        // Just before fuel pool corner
-                        PathWaypoint.from(
-                                new Pose2d(
-                                        FieldConstants.FuelPool.nearRightCorner,
-                                        Rotation2d.fromDegrees(66.0))
-                                    .transformBy(new Transform2d(-0.65, 0.0, Rotation2d.kZero))
-                                    .getTranslation())
-                            .build(),
-                        // Robot width away from middle of fuel pool
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.FuelPool.rightCenter.plus(
-                                        new Translation2d(-0.2, -DriveConstants.fullWidthX / 2.0)),
-                                    Rotation2d.fromDegrees(61)))
-                            .build())
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints(
-                        // Intermediate point in fuel pool
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.fieldCenter.plus(
-                                        new Translation2d(
-                                            0.0, -FieldConstants.FuelPool.width * 3.0 / 8.0)),
-                                    Rotation2d.fromDegrees(106)))
-                            .build(),
-                        // Through fuel pool
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.fieldCenter.plus(
-                                        new Translation2d(
-                                            -0.2, -FieldConstants.FuelPool.width / 4.0)),
-                                    Rotation2d.fromDegrees(107)))
-                            .build(),
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.fieldCenter.plus(
-                                        new Translation2d(-DriveConstants.fullWidthX / 2.0, 0.0)),
-                                    Rotation2d.fromDegrees(130)))
-                            .build())
-                    .maxVelocity(1.8)
-                    .build())
-            .stopAtStart(false)
-            .stopAtEnd(false)
-            .build());
-
-    paths.put(
-        "leftNeutralZoneSweepCheesy",
-        PathRequest.builder()
-            .segments(
-                PathRequestSegment.builder()
-                    .waypoints(
                         // Just after bump
                         PathWaypoint.from(
                                 new Pose2d(
@@ -527,7 +442,18 @@ public class DriveTrajectories {
                                         Rotation2d.fromDegrees(-66.0))
                                     .transformBy(new Transform2d(-0.65, 0.0, Rotation2d.kZero))
                                     .getTranslation())
-                            .build(),
+                            .build())
+                    .build())
+            .segments(neutralZoneSweepNeutral.build().segments)
+            .stopAtStart(false)
+            .stopAtEnd(false)
+            .build());
+
+    PathRequestBuilder neutralZoneSweepCheesy =
+        PathRequest.builder()
+            .segments(
+                PathRequestSegment.builder()
+                    .waypoints(
                         // On the edge of the centerline
                         PathWaypoint.from(
                                 new Pose2d(
@@ -578,13 +504,33 @@ public class DriveTrajectories {
                                     Rotation2d.fromDegrees(-195)))
                             .build())
                     .maxVelocity(1.8)
+                    .build());
+
+    paths.put(
+        "leftTrenchNeutralZoneSweepCheesy",
+        PathRequest.builder()
+            .segments(trenchLeftStartToNeutralZone.build().segments)
+            .segments(
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // On the edge of the centerline
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.FuelPool.leftCenter.plus(
+                                        new Translation2d(
+                                            DriveConstants.fullWidthX / 2.0 - 0.1,
+                                            DriveConstants.fullWidthX / 2.0 + 0.1)),
+                                    Rotation2d.fromDegrees(-110)))
+                            .build())
+                    .keepInLaneWidth(0.3)
                     .build())
+            .segments(neutralZoneSweepCheesy.build().segments)
             .stopAtStart(false)
             .stopAtEnd(false)
             .build());
 
     paths.put(
-        "rightNeutralZoneSweepCheesy",
+        "leftBumpNeutralZoneSweepCheesy",
         PathRequest.builder()
             .segments(
                 PathRequestSegment.builder()
@@ -592,7 +538,7 @@ public class DriveTrajectories {
                         // Just after bump
                         PathWaypoint.from(
                                 new Pose2d(
-                                    Bump.rightOuter.translation().plus(new Translation2d(0.4, 0)),
+                                    Bump.leftOuter.translation().plus(new Translation2d(0.4, 0)),
                                     Rotation2d.kZero))
                             .build())
                     .maxVelocity(3.2)
@@ -602,62 +548,13 @@ public class DriveTrajectories {
                         // Just before fuel pool corner
                         PathWaypoint.from(
                                 new Pose2d(
-                                        FieldConstants.FuelPool.nearRightCorner,
-                                        Rotation2d.fromDegrees(66.0))
+                                        FieldConstants.FuelPool.nearLeftCorner,
+                                        Rotation2d.fromDegrees(-66.0))
                                     .transformBy(new Transform2d(-0.65, 0.0, Rotation2d.kZero))
                                     .getTranslation())
-                            .build(),
-                        // On the edge of the centerline
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.FuelPool.rightCenter.plus(
-                                        new Translation2d(
-                                            DriveConstants.fullWidthX / 2.0 - 0.1,
-                                            -(DriveConstants.fullWidthX / 2.0 + 0.1))),
-                                    Rotation2d.fromDegrees(110)))
                             .build())
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints(
-                        // Dive into fuel pool
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.FuelPool.rightCenter
-                                        .plus(
-                                            new Translation2d(
-                                                DriveConstants.fullWidthX / 2.0 - 0.1,
-                                                -(DriveConstants.fullWidthX / 2.0 + 0.1)))
-                                        .plus(new Translation2d(0.0, 1.5)),
-                                    Rotation2d.fromDegrees(110)))
-                            .build())
-                    .keepInLaneWidth(0.05)
-                    .maxVelocity(1.8)
-                    .maxAngularVelocity(Units.degreesToRadians(5))
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints(
-                        // Turn intermediate
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.fieldCenter.plus(
-                                        new Translation2d(0.0, -DriveConstants.fullWidthX / 2.0)),
-                                    Rotation2d.fromDegrees(160)))
-                            .build())
-                    .maxVelocity(1.8)
-                    .build(),
-                PathRequestSegment.builder()
-                    .waypoints(
-                        // Return
-                        PathWaypoint.from(
-                                new Pose2d(
-                                    FieldConstants.fieldCenter.plus(
-                                        new Translation2d(
-                                            -FieldConstants.FuelPool.depth / 2.0,
-                                            -DriveConstants.fullWidthX / 2.0)),
-                                    Rotation2d.fromDegrees(195)))
-                            .build())
-                    .maxVelocity(1.8)
                     .build())
+            .segments(neutralZoneSweepCheesy.build().segments)
             .stopAtStart(false)
             .stopAtEnd(false)
             .build());

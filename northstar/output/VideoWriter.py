@@ -80,7 +80,7 @@ class FFmpegVideoWriter(VideoWriter):
             "-q:v",
         ]
         self._ffmpeg = subprocess.Popen(ffmpeg_args_base + ["50", filename], stdin=subprocess.PIPE)
-        self._ffmpeg_raw = subprocess.Popen(ffmpeg_args_base + ["75", filename_raw], stdin=subprocess.PIPE)
+        self._ffmpeg_raw = subprocess.Popen(ffmpeg_args_base + ["65", filename_raw], stdin=subprocess.PIPE)
 
         self._running = True
         self._queue = queue.Queue(maxsize=1)

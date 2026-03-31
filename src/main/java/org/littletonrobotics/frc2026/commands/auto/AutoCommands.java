@@ -18,6 +18,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.frc2026.AutoFieldConstants;
@@ -26,6 +27,7 @@ import org.littletonrobotics.frc2026.AutoSelector.AutoQuestionResponse;
 import org.littletonrobotics.frc2026.Constants;
 import org.littletonrobotics.frc2026.Constants.Mode;
 import org.littletonrobotics.frc2026.FieldConstants;
+import org.littletonrobotics.frc2026.ObjectDetection;
 import org.littletonrobotics.frc2026.RobotState;
 import org.littletonrobotics.frc2026.commands.DriveToPose;
 import org.littletonrobotics.frc2026.commands.DriveTrajectory;
@@ -41,6 +43,7 @@ import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 import org.littletonrobotics.frc2026.util.geometry.Bounds;
 import org.littletonrobotics.frc2026.util.geometry.VerticalFlipUtil;
+import org.littletonrobotics.junction.Logger;
 
 public class AutoCommands {
   private static final LoggedTunableNumber autoDriveLaunchKp =
@@ -138,7 +141,7 @@ public class AutoCommands {
                       t),
                   target.getY());
           var targetRotation =
-              xPosition < FieldConstants.LinesVertical.neutralZoneNear - 0.3
+              xPosition < FieldConstants.LinesVertical.neutralZoneNear - 0.05
                   ? target.getRotation()
                   : targetTranslation.minus(currentPose.getTranslation()).getAngle();
           return new Pose2d(targetTranslation, targetRotation);
@@ -279,6 +282,72 @@ public class AutoCommands {
                 AutoCommands.waitUntilWithinTolerance(
                     targetSupplier, 0.5, Rotation2d.fromDegrees(15)),
                 index(hopper, kicker, flywheel, slamtake)));
+  }
+
+  public static Bounds expandBounds(Bounds a, Bounds b) {
+    return new Bounds(
+        Math.min(a.minX(), b.minX()),
+        Math.max(a.maxX(), b.maxX()),
+        Math.min(a.minY(), b.minY()),
+        Math.max(a.maxY(), b.maxY()));
+  }
+
+  public static Supplier<Bounds> getDynamicBounds(Supplier<AutoQuestionResponse> returnSide) {
+    return () -> {
+      Set<Translation2d> otherRobots = ObjectDetection.getInstance().getRobotTranslations();
+
+      // Define quadrants of the neutral zone
+      double minX = FieldConstants.LinesVertical.neutralZoneNear;
+      double maxX = FieldConstants.LinesVertical.neutralZoneFar;
+      double midX = (minX + maxX) / 2.0;
+      double minY = 0.0;
+      double maxY = FieldConstants.fieldWidth;
+      double midY = (minY + maxY) / 2.0;
+      Bounds[] quadrants = {
+        new Bounds(minX, midX, minY, midY),
+        new Bounds(minX, midX, midY, maxY),
+        new Bounds(midX, maxX, minY, midY),
+        new Bounds(midX, maxX, midY, maxY)
+      };
+
+      // Create dynamic names for quadrants based on alliance color and return side
+      int homeIndex =
+          AllianceFlipUtil.shouldFlip()
+              ? (returnSide.get().equals(AutoQuestionResponse.LEFT_BUMP) ? 2 : 3)
+              : (returnSide.get().equals(AutoQuestionResponse.LEFT_BUMP) ? 1 : 0);
+      Logger.recordOutput("AutoCommands/DynamicBounds/HomeIndex", homeIndex);
+
+      Bounds homeBounds = quadrants[homeIndex];
+      Bounds allyAdjacent = quadrants[homeIndex ^ 1];
+      Bounds opponentAdjacent = quadrants[homeIndex ^ 2];
+      Bounds opponentFar = quadrants[homeIndex ^ 3];
+
+      // Expand into other side of near neutral zone if empty
+      Logger.recordOutput("AutoCommands/DynamicBounds/Expanded", 0);
+      if (!otherRobots.stream().anyMatch(robot -> allyAdjacent.contains(robot))) {
+        homeBounds = expandBounds(homeBounds, allyAdjacent);
+        Logger.recordOutput("AutoCommands/DynamicBounds/Expanded", 1);
+        if (!otherRobots.stream().anyMatch(robot -> opponentAdjacent.contains(robot))
+            && !otherRobots.stream().anyMatch(robot -> opponentFar.contains(robot))) {
+          homeBounds = expandBounds(homeBounds, opponentFar);
+          Logger.recordOutput("AutoCommands/DynamicBounds/Expanded", 3);
+        }
+      } else {
+        if (!otherRobots.stream().anyMatch(robot -> opponentAdjacent.contains(robot))) {
+          Logger.recordOutput("AutoCommands/DynamicBounds/Expanded", 2);
+          homeBounds = expandBounds(homeBounds, opponentAdjacent);
+        }
+      }
+
+      Logger.recordOutput(
+          "AutoCommands/DynamicBounds/leftBottom",
+          new Pose2d(homeBounds.minX(), homeBounds.minY(), Rotation2d.kZero));
+      Logger.recordOutput(
+          "AutoCommands/DynamicBounds/rightTop",
+          new Pose2d(homeBounds.maxX(), homeBounds.maxY(), Rotation2d.kZero));
+
+      return homeBounds;
+    };
   }
 
   public static boolean isLeftSide() {
