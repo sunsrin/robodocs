@@ -1,0 +1,19 @@
+// Copyright (c) 2025-2026 Littleton Robotics
+// http://github.com/Mechanical-Advantage
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file at
+// the root directory of this project.
+
+package org.littletonrobotics.frc2026.energy;
+
+public class CurrentLimits {
+  public static final double driveLimitAmps = 30;
+  public static final double turnLimitAmps = 25;
+  public static final double hopperLimitAmps = 30;
+  public static final double kickerLimitAmps = 30;
+  public static final double flywheelLimitAmps = 30;
+  public static final double hoodLimitAmps = 12;
+  public static final double slamLimitAmps = 20;
+  public static final double intakeLimitAmps = 70;
+}
