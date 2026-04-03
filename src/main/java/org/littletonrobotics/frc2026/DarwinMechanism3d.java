@@ -11,10 +11,13 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
 import org.littletonrobotics.frc2026.subsystems.launcher.LauncherConstants;
+import org.littletonrobotics.frc2026.subsystems.vision.VisionConstants;
 import org.littletonrobotics.frc2026.util.geometry.GeomUtil;
 import org.littletonrobotics.junction.Logger;
 
@@ -29,22 +32,44 @@ public class DarwinMechanism3d {
     return measured;
   }
 
-  @Getter @Setter private Rotation2d hoodAngle = Rotation2d.kZero; // Relative to the ground
-  @Getter @Setter private Rotation2d intakeAngle = Rotation2d.kZero; // Relative to the ground
-  @Getter @Setter private double climberHeight = 0.5; // Ground to the hooks of the innter carriage
+  @Getter @Setter private Rotation2d hoodAngle = Rotation2d.kZero;
+  @Getter @Setter private Rotation2d intakeAngle = Rotation2d.kZero;
+  @Getter @Setter private double trashCompactorHeight = 0.5;
+
+  // These values may differ from VisionConstants as they are calibrated for the version of
+  // the CAD exported for use in AdvantageScope, which may differ slightly from the actual robot.
+  public static final double robotToPivotX = Units.inchesToMeters(12.480);
+  public static final double pivotToSlotYOffset = Units.inchesToMeters(2.393);
+  public static final double pivotToWasherNorm = Units.inchesToMeters(7.204);
+  public static final double slotStartToHopperX = Units.inchesToMeters(6.789);
+  public static final double slotAngle = Units.degreesToRadians(70.0);
 
   /** Log the component poses and camera pose. */
   public void log(String key) {
+    var pivotToWasherX = pivotToWasherNorm * intakeAngle.getCos();
+    var slotToWasherY = pivotToWasherNorm * intakeAngle.getSin() - pivotToSlotYOffset;
+    var washerToSlotX = slotToWasherY / Math.tan(slotAngle);
+    var robotToHopperX = robotToPivotX + pivotToWasherX + washerToSlotX + slotStartToHopperX;
+
     var hoodPose =
         LauncherConstants.robotToLauncher
             .toPose3d()
             .transformBy(
                 new Transform3d(
-                    0.0, 0.0, 0.0, new Rotation3d(0.0, -hoodAngle.getRadians(), Math.PI)));
+                    -0.122, 0.0, 0.0, new Rotation3d(0.0, -hoodAngle.getRadians(), Math.PI)));
     var intakePose =
-        new Pose3d(0.266, 0.0, 0.2, new Rotation3d(0.0, -intakeAngle.getRadians(), 0.0));
-    var climberPose =
-        new Pose3d(-0.024, -0.273, climberHeight, new Rotation3d(0.0, 0.0, -Math.PI / 2.0));
-    Logger.recordOutput(key + "/Components", hoodPose, intakePose, climberPose);
+        new Pose3d(
+            VisionConstants.robotToPivotX,
+            0.0,
+            0.186,
+            new Rotation3d(0.0, -intakeAngle.getRadians(), 0.0));
+    var frontHopperPose = new Pose3d(robotToHopperX, 0.0, 0.37, Rotation3d.kZero);
+    var trashCompactorPose = new Pose3d(0.01, 0.0, trashCompactorHeight + 0.555, Rotation3d.kZero);
+    var cameraPose = VisionConstants.cameras[1].poseFunction().apply(Timer.getTimestamp());
+    Logger.recordOutput(
+        key + "/Components", hoodPose, intakePose, frontHopperPose, trashCompactorPose);
+    if (cameraPose.isPresent()) {
+      Logger.recordOutput(key + "/Camera", cameraPose.get());
+    }
   }
 }

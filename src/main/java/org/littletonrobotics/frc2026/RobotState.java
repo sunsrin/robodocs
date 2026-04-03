@@ -31,6 +31,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 public class RobotState {
   // Constants
   private static final double poseBufferSizeSec = 2.0;
+  private static final double slamBufferSizeSec = 2.0;
   private static final Matrix<N3, N1> odometryStateStdDevs =
       new Matrix<>(VecBuilder.fill(0.003, 0.003, 0.002));
 
@@ -42,6 +43,8 @@ public class RobotState {
 
   private final TimeInterpolatableBuffer<Pose2d> poseBuffer =
       TimeInterpolatableBuffer.createBuffer(poseBufferSizeSec);
+  private final TimeInterpolatableBuffer<Rotation2d> slamBuffer =
+      TimeInterpolatableBuffer.createBuffer(slamBufferSizeSec);
   private final TimeInterpolatableBuffer<Rotation3d> rotationBuffer =
       TimeInterpolatableBuffer.createBuffer(poseBufferSizeSec);
   private final Matrix<N3, N1> qStdDevs = new Matrix<>(Nat.N3(), Nat.N1());
@@ -59,7 +62,6 @@ public class RobotState {
 
   @Getter @Setter private ChassisSpeeds robotVelocity = new ChassisSpeeds();
   @Getter @Setter private ChassisSpeeds robotSetpointVelocity = new ChassisSpeeds();
-  @Getter @Setter private boolean hopperExtended = false;
 
   // MARK: - Initialization
 
@@ -100,6 +102,11 @@ public class RobotState {
 
   public ChassisSpeeds getFieldSetpointVelocity() {
     return ChassisSpeeds.fromRobotRelativeSpeeds(robotSetpointVelocity, getRotation());
+  }
+
+  @AutoLogOutput
+  public Optional<Rotation2d> getSlamAngle(double timestamp) {
+    return slamBuffer.getSample(timestamp);
   }
 
   /** Returns the estimated pose of the near part of the intake. */
@@ -171,6 +178,10 @@ public class RobotState {
     // Apply odometry delta to vision pose estimate
     Twist2d finalTwist = lastOdometryPose.log(odometryPose);
     estimatedPose = estimatedPose.exp(finalTwist);
+  }
+
+  public void addSlamObservation(SlamObservation observation) {
+    slamBuffer.addSample(observation.timestamp(), observation.slamAngle);
   }
 
   /** Adds a new vision pose observation from the vision subsystem. */
@@ -263,4 +274,6 @@ public class RobotState {
       Optional<Rotation2d> yaw) {}
 
   public record VisionObservation(double timestamp, Pose3d visionPose, Matrix<N3, N1> stdDevs) {}
+
+  public record SlamObservation(double timestamp, Rotation2d slamAngle) {}
 }

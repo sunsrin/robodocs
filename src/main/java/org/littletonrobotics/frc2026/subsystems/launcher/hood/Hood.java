@@ -100,7 +100,11 @@ public class Hood extends FullSubsystem {
     outputs.kD = kD.get();
 
     // Visualize launcher in 3D
-    DarwinMechanism3d.getMeasured().setHoodAngle(new Rotation2d(getMeasuredAngleRad()));
+    if (isZeroed()) {
+      DarwinMechanism3d.getMeasured().setHoodAngle(new Rotation2d(getMeasuredAngleRad()));
+    } else {
+      DarwinMechanism3d.getMeasured().setHoodAngle(new Rotation2d(minAngle));
+    }
 
     // Record cycle time
     LoggedTracer.record("Hood/Periodic");

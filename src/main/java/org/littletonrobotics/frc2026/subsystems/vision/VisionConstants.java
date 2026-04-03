@@ -31,6 +31,17 @@ public class VisionConstants {
   public static final double fuelDetectConfidenceThreshold = 0.0; // Enforced by Northstar
   public static final double robotDetectConfidenceThreshold = 0.0; // Enforced by Northstar
 
+  // Moving camera constants
+  public static final double robotToPivotX = Units.inchesToMeters(12.480);
+  public static final double pivotToSlotYOffset = Units.inchesToMeters(2.188);
+  public static final double pivotToWasherNorm =
+      Units.inchesToMeters(7.359); // Measured center to center
+  public static final double slotStartToHopperX =
+      Units.inchesToMeters(6.345); // Measured from bottom "center"
+  public static final double hopperWallToCameraX =
+      0.0; // Need to determine actual distance once mounted/cadded
+  public static final double slotAngle = Units.degreesToRadians(70.0);
+
   private static LoggedTunableNumber[] cameraPitchFudgeDegrees =
       new LoggedTunableNumber[] {
         new LoggedTunableNumber("Vision/Camera0PitchFudgeDeg", 0.0),
@@ -77,18 +88,34 @@ public class VisionConstants {
               CameraConfig.builder()
                   .poseFunction(
                       (Double timestamp) -> {
-                        // TODO: See PR #347
-                        if (RobotState.getInstance().isHopperExtended()) {
+                        if (RobotState.getInstance().getSlamAngle(timestamp).isPresent()) {
+                          var pivotToWasherX =
+                              pivotToWasherNorm
+                                  * RobotState.getInstance().getSlamAngle(timestamp).get().getCos();
+                          var slotToWasherY =
+                              pivotToWasherNorm
+                                      * RobotState.getInstance()
+                                          .getSlamAngle(timestamp)
+                                          .get()
+                                          .getSin()
+                                  - pivotToSlotYOffset; // equivalent to height on slot
+                          var washerToSlotX = slotToWasherY / Math.tan(slotAngle);
+                          var cameraPosition =
+                              robotToPivotX
+                                  + pivotToWasherX
+                                  + washerToSlotX
+                                  + slotStartToHopperX
+                                  + hopperWallToCameraX;
                           return Optional.of(
                               new Pose3d(
-                                  Units.inchesToMeters(24.099),
-                                  Units.inchesToMeters(8.947),
-                                  Units.inchesToMeters(24.529),
+                                  Units.inchesToMeters(cameraPosition),
+                                  0.0,
+                                  0.0,
                                   new Rotation3d(
                                       0.0,
                                       Units.degreesToRadians(
-                                          20.070 + cameraPitchFudgeDegrees[1].get()),
-                                      Units.degreesToRadians(-4.698))));
+                                          12.0 + cameraPitchFudgeDegrees[1].get()),
+                                      0.0)));
                         } else {
                           return Optional.empty();
                         }

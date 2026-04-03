@@ -9,13 +9,16 @@ package org.littletonrobotics.frc2026.subsystems.slamtake;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.function.BooleanSupplier;
 import lombok.Getter;
 import lombok.Setter;
+import org.littletonrobotics.frc2026.DarwinMechanism3d;
 import org.littletonrobotics.frc2026.RobotState;
 import org.littletonrobotics.frc2026.subsystems.rollers.RollerSystem;
 import org.littletonrobotics.frc2026.subsystems.rollers.RollerSystemIO;
@@ -92,13 +95,19 @@ public class Slamtake extends FullSubsystem {
 
     // Send hopper extension data to RobotState
     if (DriverStation.isEnabled()) {
-      if (slamState == SlamState.DEPLOYED) {
-        // Hopper is pushed forward when first deployed, then stays extended
-        RobotState.getInstance().setHopperExtended(true);
+      if (slam.isZeroed()) {
+        RobotState.getInstance()
+            .addSlamObservation(
+                new RobotState.SlamObservation(
+                    Timer.getTimestamp(), new Rotation2d(slam.getMeasuredAngleRad())));
       }
+    }
+
+    // Visualize intake in 3D
+    if (slam.isZeroed()) {
+      DarwinMechanism3d.getMeasured().setIntakeAngle(new Rotation2d(slam.getMeasuredAngleRad()));
     } else {
-      // State is always unknown when disabled, disable vision
-      RobotState.getInstance().setHopperExtended(false);
+      DarwinMechanism3d.getMeasured().setIntakeAngle(new Rotation2d(Slam.slamMaxAngle));
     }
 
     // Record cycle time
