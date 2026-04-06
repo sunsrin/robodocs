@@ -7,6 +7,7 @@
 
 package org.littletonrobotics.frc2026.subsystems.kicker;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -20,36 +21,32 @@ import org.littletonrobotics.frc2026.util.FullSubsystem;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
 import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class Kicker extends FullSubsystem {
-  private static final LoggedTunableNumber rollerFrontIntakeSpeed =
-      new LoggedTunableNumber(
-          "Kicker/RollerFront/IntakeSetpointSpeed", 200); // Higher than max speed
-  private static final LoggedTunableNumber rollerFrontOuttakeSetpoint =
-      new LoggedTunableNumber("Kicker/RollerFront/OuttakeSetpointSpeed", -200);
-  private static final LoggedTunableNumber rollerBackIntakeSpeed =
-      new LoggedTunableNumber(
-          "Kicker/RollerBack/IntakeSetpointSpeed", 200); // Higher than max speed
-  private static final LoggedTunableNumber rollerBackOuttakeSetpoint =
-      new LoggedTunableNumber("Kicker/RollerBack/OuttakeSetpointSpeed", -200);
+  private static final double frontRollerRadius = Units.inchesToMeters(1.25);
+  private static final double backRollerRadius = Units.inchesToMeters(0.79);
+
+  private static final LoggedTunableNumber surfaceSetpointSpeed =
+      new LoggedTunableNumber("Kicker/SurfaceSetpointSpeed", 3.0);
 
   private static final LoggedTunableNumber frontkP =
-      new LoggedTunableNumber("Kicker/RollerFront/Profile/kP", 3.0);
+      new LoggedTunableNumber("Kicker/RollerFront/kP", 1.5);
   private static final LoggedTunableNumber frontkD =
-      new LoggedTunableNumber("Kicker/RollerFront/Profile/kD", 0.0);
+      new LoggedTunableNumber("Kicker/RollerFront/kD", 0.0);
   private static final LoggedTunableNumber frontkS =
-      new LoggedTunableNumber("Kicker/RollerFront/Profile/kS", 0.5);
+      new LoggedTunableNumber("Kicker/RollerFront/kS", 0.48);
   private static final LoggedTunableNumber frontkV =
-      new LoggedTunableNumber("Kicker/RollerFront/Profile/kV", 0.09);
+      new LoggedTunableNumber("Kicker/RollerFront/kV", 0.056);
 
   private static final LoggedTunableNumber backkP =
-      new LoggedTunableNumber("Kicker/RollerBack/Profile/kP", 3.0);
+      new LoggedTunableNumber("Kicker/RollerBack/kP", 3.0);
   private static final LoggedTunableNumber backkD =
-      new LoggedTunableNumber("Kicker/RollerBack/Profile/kD", 0.0);
+      new LoggedTunableNumber("Kicker/RollerBack/kD", 0.0);
   private static final LoggedTunableNumber backkS =
-      new LoggedTunableNumber("Kicker/RollerBack/Profile/kS", 0.5);
+      new LoggedTunableNumber("Kicker/RollerBack/kS", 0.4);
   private static final LoggedTunableNumber backkV =
-      new LoggedTunableNumber("Kicker/RollerBack/Profile/kV", 0.09);
+      new LoggedTunableNumber("Kicker/RollerBack/kV", 0.0575);
 
   private final RollerSystem rollerFront;
   private final RollerSystem rollerBack;
@@ -90,14 +87,19 @@ public class Kicker extends FullSubsystem {
       rollerBack.setFeedforward(backkS.get(), backkV.get());
     }
 
+    double frontSetpointSpeed = surfaceSetpointSpeed.get() / frontRollerRadius;
+    double backSetpointSpeed = surfaceSetpointSpeed.get() / backRollerRadius;
+    Logger.recordOutput("Kicker/FrontSetpointRadPerSec", frontSetpointSpeed);
+    Logger.recordOutput("Kicker/BackSetpointRadPerSec", backSetpointSpeed);
+
     switch (goal) {
       case LAUNCH -> {
-        rollerFront.runClosedLoop(rollerFrontIntakeSpeed.get());
-        rollerBack.runClosedLoop(rollerBackIntakeSpeed.get());
+        rollerFront.runClosedLoop(frontSetpointSpeed);
+        rollerBack.runClosedLoop(backSetpointSpeed);
       }
       case OUTTAKE -> {
-        rollerFront.runClosedLoop(rollerFrontOuttakeSetpoint.get());
-        rollerBack.runClosedLoop(rollerBackOuttakeSetpoint.get());
+        rollerFront.runClosedLoop(frontSetpointSpeed * -1.0);
+        rollerBack.runClosedLoop(backSetpointSpeed * -1.0);
       }
       case STOP -> {
         rollerFront.runOpenLoop(0.0);

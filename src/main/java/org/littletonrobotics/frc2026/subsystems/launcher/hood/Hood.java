@@ -35,8 +35,9 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Hood extends FullSubsystem {
+  public static final double homeAngle = Units.degreesToRadians(9.5);
   public static final double minAngle = Units.degreesToRadians(10);
-  public static final double maxAngle = Units.degreesToRadians(38);
+  public static final double maxAngle = Units.degreesToRadians(41.2);
 
   private static final LoggedTunableNumber kP = new LoggedTunableNumber("Hood/kP");
   private static final LoggedTunableNumber kD = new LoggedTunableNumber("Hood/kD");
@@ -146,11 +147,6 @@ public class Hood extends FullSubsystem {
             <= Units.degreesToRadians(toleranceDeg.get());
   }
 
-  private void zero() {
-    hoodOffset = minAngle - inputs.positionRads;
-    zeroed = true;
-  }
-
   public Command zeroCommand() {
     return run(() -> {
           outputs.appliedVolts = homingVolts.get();
@@ -163,11 +159,20 @@ public class Hood extends FullSubsystem {
                     Commands.waitUntil(
                         () ->
                             Math.abs(inputs.velocityRadsPerSec) <= homingVelocityThreshold.get())))
-        .andThen(this::zero);
+        .andThen(
+            () -> {
+              hoodOffset = homeAngle - inputs.positionRads;
+              zeroed = true;
+            });
   }
 
   public Command forceZeroCommand() {
-    return Commands.runOnce(this::zero).ignoringDisable(true);
+    return Commands.runOnce(
+            () -> {
+              hoodOffset = minAngle - inputs.positionRads;
+              zeroed = true;
+            })
+        .ignoringDisable(true);
   }
 
   private boolean inTrenchBounds() {

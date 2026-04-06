@@ -36,31 +36,30 @@ public class DriveConstants {
   public static final double darwinDriveReduction = 7.03125;
   public static final double darwinTurnReductionFL = 26.0;
   public static final double darwinTurnReductionFR = 26.0;
-  public static final double darwinTurnReductionBL = 26.0;
-  public static final double darwinTurnReductionBR = 26.0;
-  // public static final double darwinTurnReductionBR = 26.09090909091; // MK5n
+  public static final double darwinTurnReductionBL = 26.09090909091; // MK5n
+  public static final double darwinTurnReductionBR = 26.09090909091; // MK5n
 
   public static final String darwinCanBus = "*";
   public static final int darwinGyroId = 30;
-  public static final int darwinDriveMotorIdFL = 11;
-  public static final int darwinDriveMotorIdFR = 13;
-  public static final int darwinDriveMotorIdBL = 0;
-  public static final int darwinDriveMotorIdBR = 23;
+  public static final int darwinDriveMotorIdFL = 0;
+  public static final int darwinDriveMotorIdFR = 11;
+  public static final int darwinDriveMotorIdBL = 23;
+  public static final int darwinDriveMotorIdBR = 13;
 
-  public static final int darwinTurnMotorIdFL = 10;
-  public static final int darwinTurnMotorIdFR = 12;
-  public static final int darwinTurnMotorIdBL = 1;
-  public static final int darwinTurnMotorIdBR = 22;
+  public static final int darwinTurnMotorIdFL = 1;
+  public static final int darwinTurnMotorIdFR = 10;
+  public static final int darwinTurnMotorIdBL = 22;
+  public static final int darwinTurnMotorIdBR = 12;
 
-  public static final int darwinEncoderIdFL = 40;
-  public static final int darwinEncoderIdFR = 41;
-  public static final int darwinEncoderIdBL = 42;
-  public static final int darwinEncoderIdBR = 43;
+  public static final int darwinEncoderIdFL = 42;
+  public static final int darwinEncoderIdFR = 40;
+  public static final int darwinEncoderIdBL = 43;
+  public static final int darwinEncoderIdBR = 41;
 
-  public static final double darwinEncoderOffsetFL = -1.530913;
-  public static final double darwinEncoderOffsetFR = 2.078544;
-  public static final double darwinEncoderOffsetBL = -2.42369;
-  public static final double darwinEncoderOffsetBR = -2.863942;
+  public static final double darwinEncoderOffsetFL = 2.285631;
+  public static final double darwinEncoderOffsetFR = -3.097107;
+  public static final double darwinEncoderOffsetBL = -2.865476;
+  public static final double darwinEncoderOffsetBR = 0.520019;
 
   // MARK: - Alpha Bot Constants
 
