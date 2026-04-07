@@ -26,7 +26,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class ChoreoLauncher {
-  public static final String choreoVersion = "v2026.0.2";
+  public static final String choreoVersion = "v2026.0.3";
 
   private static final String baseURL =
       "https://github.com/SleipnirGroup/Choreo/releases/download/";

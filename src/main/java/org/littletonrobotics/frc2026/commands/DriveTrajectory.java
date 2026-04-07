@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.frc2026.Constants;
 import org.littletonrobotics.frc2026.RobotState;
@@ -40,7 +41,7 @@ public class DriveTrajectory extends Command {
   private final Trajectory<SwerveSample> trajectory;
   private final Supplier<Optional<Double>> omegaOverride;
   private final Drive drive;
-  private final Boolean mirror;
+  private final BooleanSupplier mirror;
 
   private final PIDController xController;
   private final PIDController yController;
@@ -50,7 +51,7 @@ public class DriveTrajectory extends Command {
       Trajectory<SwerveSample> trajectory,
       Supplier<Optional<Double>> omegaOverride,
       Drive drive,
-      Boolean mirror) {
+      BooleanSupplier mirror) {
     this.drive = drive;
     this.trajectory = trajectory;
     this.omegaOverride = omegaOverride;
@@ -64,15 +65,15 @@ public class DriveTrajectory extends Command {
 
   public DriveTrajectory(
       Trajectory<SwerveSample> trajectory, Supplier<Optional<Double>> omegaOverride, Drive drive) {
-    this(trajectory, omegaOverride, drive, false);
+    this(trajectory, omegaOverride, drive, () -> false);
   }
 
-  public DriveTrajectory(Trajectory<SwerveSample> trajectory, Drive drive, Boolean mirror) {
+  public DriveTrajectory(Trajectory<SwerveSample> trajectory, Drive drive, BooleanSupplier mirror) {
     this(trajectory, () -> Optional.empty(), drive, mirror);
   }
 
   public DriveTrajectory(Trajectory<SwerveSample> trajectory, Drive drive) {
-    this(trajectory, () -> Optional.empty(), drive, false);
+    this(trajectory, () -> Optional.empty(), drive, () -> false);
   }
 
   @Override
@@ -86,9 +87,9 @@ public class DriveTrajectory extends Command {
         "DriveTrajectory/Trajectory",
         Arrays.stream(trajectory.getPoses())
             .map(AllianceFlipUtil::apply)
-            .map(pose -> mirror ? VerticalFlipUtil.apply(pose) : pose)
+            .map(pose -> mirror.getAsBoolean() ? VerticalFlipUtil.apply(pose) : pose)
             .toArray(Pose2d[]::new));
-    Logger.recordOutput("DriveTrajectory/Mirror", mirror);
+    Logger.recordOutput("DriveTrajectory/Mirror", mirror.getAsBoolean());
   }
 
   @Override
@@ -106,7 +107,8 @@ public class DriveTrajectory extends Command {
     SwerveSample trajectoryState =
         trajectory.sampleAt(timer.get(), AllianceFlipUtil.shouldFlip()).get();
 
-    SwerveSample desiredState = mirror ? VerticalFlipUtil.apply(trajectoryState) : trajectoryState;
+    SwerveSample desiredState =
+        mirror.getAsBoolean() ? VerticalFlipUtil.apply(trajectoryState) : trajectoryState;
 
     double xOutput =
         xController.calculate(currentPose.getX(), desiredState.getPose().getX()) + desiredState.vx;

@@ -146,14 +146,17 @@ public class AutoSelector extends VirtualSubsystem {
     CENTER(Hub.centerStart),
     RIGHT_BUMP(Bump.rightInner),
     RIGHT_TRENCH(Trench.rightStart),
-    LEFT(),
-    RIGHT(),
+    LEFT_CLOSE(),
+    RIGHT_CLOSE(),
+    DYNAMIC_ETHICAL(),
+    DYNAMIC_UNETHICAL(),
     CLOSEST(),
     CLIMB(),
     NOTHING(),
     YES(),
     NO(),
-    NONE();
+    NONE(),
+    FULL_CLOSE();
 
     @Getter private final Waypoint waypoint;
 

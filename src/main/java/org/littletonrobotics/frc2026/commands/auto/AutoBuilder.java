@@ -18,9 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
+import org.littletonrobotics.frc2026.AutoFieldConstants;
 import org.littletonrobotics.frc2026.AutoFieldConstants.*;
 import org.littletonrobotics.frc2026.AutoSelector.AutoQuestionResponse;
 import org.littletonrobotics.frc2026.subsystems.drive.Drive;
+import org.littletonrobotics.frc2026.subsystems.drive.DriveConstants;
 import org.littletonrobotics.frc2026.subsystems.hopper.Hopper;
 import org.littletonrobotics.frc2026.subsystems.kicker.Kicker;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
@@ -44,8 +46,8 @@ public class AutoBuilder {
   public static final double neutralZoneIntakeTimeFirst = 2.5;
   public static final double neutralZoneIntakeTimeOther = 3.0;
   public static final double launchTime = 3.5;
-  public static final double bumpCrossTime = 1.5;
 
+  // MARK: Home Depot
   public Command homeDepotSalesman() {
     return Commands.sequence(
         Commands.select(
@@ -69,14 +71,10 @@ public class AutoBuilder {
                         Launch.rightTower, 0.1, Rotation2d.fromDegrees(5)),
                     index(hopper, kicker, flywheel, intake).withTimeout(6))),
         Commands.select(
-            Map.of(
-                AutoQuestionResponse.NOTHING,
-                Commands.none(),
-                AutoQuestionResponse.CLIMB,
-                followTrajectory("launchRightTowerToClimbRight", drive, false)),
-            () -> responses.get().get(2)));
+            Map.of(AutoQuestionResponse.NOTHING, Commands.none()), () -> responses.get().get(2)));
   }
 
+  // MARK: Lowe's Hardware
   public Command lowesHardwareSalesman() {
     return Commands.sequence(
         // Intake from outpost
@@ -103,23 +101,19 @@ public class AutoBuilder {
                         Launch.leftTower, 0.1, Rotation2d.fromDegrees(5)),
                     index(hopper, kicker, flywheel, intake).withTimeout(6))),
         Commands.select(
-            Map.of(
-                AutoQuestionResponse.CLIMB,
-                followTrajectory("launchLeftTowerToClimbLeft", drive, false),
-                AutoQuestionResponse.NOTHING,
-                Commands.none()),
-            () -> responses.get().get(2)));
+            Map.of(AutoQuestionResponse.NOTHING, Commands.none()), () -> responses.get().get(2)));
   }
 
+  // MARK: Monopoly
   public Command monopolySalesman() {
     return Commands.sequence(
         // Drive to closest intaking position
         Commands.select(
             Map.of(
                 AutoQuestionResponse.LEFT_TRENCH,
-                followTrajectory("trenchLeftStartToTower", drive, true),
+                followTrajectory("trenchLeftStartThroughDepot", drive, true),
                 AutoQuestionResponse.LEFT_BUMP,
-                followTrajectory("bumpLeftInnerToTower", drive, true),
+                followTrajectory("bumpLeftInnerThroughDepot", drive, true),
                 AutoQuestionResponse.RIGHT_BUMP,
                 followTrajectory("bumpRightInnerToOutpostFrontIntake", drive, true)
                     .andThen(Commands.waitSeconds(outpostIntakeTime)),
@@ -143,17 +137,10 @@ public class AutoBuilder {
 
         // Initiate chosen end behavior
         Commands.select(
-            Map.of(
-                AutoQuestionResponse.NOTHING,
-                Commands.none(),
-                AutoQuestionResponse.CLIMB,
-                Commands.either(
-                    followTrajectory("launchLeftTowerToClimbLeft", drive, false),
-                    followTrajectory("launchRightTowerToClimbRight", drive, false),
-                    AutoCommands::isLeftSide)),
-            () -> responses.get().get(1)));
+            Map.of(AutoQuestionResponse.NOTHING, Commands.none()), () -> responses.get().get(1)));
   }
 
+  // MARK: Timid
   public Command timidSalesman() {
     Supplier<Pose2d> target =
         () -> {
@@ -179,7 +166,36 @@ public class AutoBuilder {
         };
 
     return Commands.sequence(
-        AutoCommands.resetStartingPose(() -> responses.get().get(0)),
+        // Reset pose
+        Commands.select(
+            Map.of(
+                AutoQuestionResponse.LEFT_TRENCH,
+                resetPose(
+                    new Pose2d(
+                        AutoFieldConstants.Trench.leftStart
+                            .translation()
+                            .minus(new Translation2d(DriveConstants.fullWidthX, 0.0)),
+                        Rotation2d.kPi)),
+                AutoQuestionResponse.LEFT_BUMP,
+                resetPose(
+                    new Pose2d(AutoFieldConstants.Bump.leftInner.translation(), Rotation2d.kPi)),
+                AutoQuestionResponse.CENTER,
+                resetPose(
+                    new Pose2d(AutoFieldConstants.Hub.centerStart.translation(), Rotation2d.kPi)),
+                AutoQuestionResponse.RIGHT_BUMP,
+                resetPose(
+                    new Pose2d(
+                        AutoFieldConstants.Bump.rightInner
+                            .translation()
+                            .minus(new Translation2d(DriveConstants.fullWidthX, 0.0)),
+                        Rotation2d.kPi)),
+                AutoQuestionResponse.RIGHT_TRENCH,
+                resetPose(
+                    new Pose2d(
+                        AutoFieldConstants.Trench.rightStart.translation(), Rotation2d.kPi))),
+            () -> responses.get().get(0)),
+
+        // Drive backwards a little bit and launch
         Commands.parallel(
             AutoCommands.driveToPose(drive, target),
             Commands.sequence(
@@ -187,15 +203,8 @@ public class AutoBuilder {
                 index(hopper, kicker, flywheel, intake))));
   }
 
-  public Command driveForward1m() {
+  // MARK: Drive Forward 1m
+  public Command driveForward1mSalesman() {
     return followTrajectory("DriveForward1m", drive, true);
-  }
-
-  public Command driveForward1mWhileTurn90() {
-    return followTrajectory("DriveForward1mWhileTurn90", drive, true);
-  }
-
-  public Command driveForward1mWhileTurn90VelLim() {
-    return followTrajectory("DriveForward1mWhileTurn90VelLim", drive, true);
   }
 }

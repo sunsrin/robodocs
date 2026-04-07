@@ -174,7 +174,7 @@ public class Robot extends LoggedRobot {
 
     // Configure Driver Station for sim
     RoboRioSim.setTeamNumber(6328);
-    if (Constants.robot == RobotType.SIMBOT) {
+    if (Constants.getRobot() == RobotType.SIMBOT) {
       DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
       DriverStationSim.notifyNewData();
     }

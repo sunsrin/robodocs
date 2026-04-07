@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import lombok.Builder;
 import org.littletonrobotics.frc2026.subsystems.drive.DriveConstants;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
+import org.littletonrobotics.frc2026.util.geometry.VerticalFlipUtil;
 
 public class AutoFieldConstants {
   public enum Area {
@@ -42,7 +43,7 @@ public class AutoFieldConstants {
         Waypoint.builder()
             .translation(
                 new Translation2d(
-                    FieldConstants.LinesVertical.starting - DriveConstants.fullWidthX / 2.0,
+                    FieldConstants.LinesVertical.starting + DriveConstants.fullWidthX / 2.0,
                     (FieldConstants.LinesHorizontal.rightTrenchOpenStart
                             + FieldConstants.LinesHorizontal.rightTrenchOpenEnd)
                         / 2.0))
@@ -50,16 +51,13 @@ public class AutoFieldConstants {
             .build();
     public static final Translation2d leftClear =
         new Translation2d(
-            FieldConstants.LinesVertical.starting + FieldConstants.LeftTrench.depth,
+            FieldConstants.LinesVertical.starting
+                + FieldConstants.LeftTrench.depth
+                + DriveConstants.fullWidthX / 2.0,
             (FieldConstants.LinesHorizontal.leftTrenchOpenStart
                     + FieldConstants.LinesHorizontal.leftTrenchOpenEnd)
                 / 2.0);
-    public static final Translation2d rightClear =
-        new Translation2d(
-            FieldConstants.LinesVertical.starting + FieldConstants.RightTrench.depth,
-            (FieldConstants.LinesHorizontal.rightTrenchOpenStart
-                    + FieldConstants.LinesHorizontal.rightTrenchOpenEnd)
-                / 2.0);
+    public static final Translation2d rightClear = VerticalFlipUtil.apply(leftClear);
   }
 
   public static class Bump {

@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
+import org.littletonrobotics.frc2026.Constants.RobotType;
 import org.littletonrobotics.frc2026.subsystems.launcher.LauncherConstants;
 import org.littletonrobotics.frc2026.subsystems.vision.VisionConstants;
 import org.littletonrobotics.frc2026.util.geometry.GeomUtil;
@@ -65,11 +66,14 @@ public class DarwinMechanism3d {
             new Rotation3d(0.0, -intakeAngle.getRadians(), 0.0));
     var frontHopperPose = new Pose3d(robotToHopperX, 0.0, 0.37, Rotation3d.kZero);
     var trashCompactorPose = new Pose3d(0.01, 0.0, trashCompactorHeight + 0.555, Rotation3d.kZero);
-    var cameraPose = VisionConstants.cameras[1].poseFunction().apply(Timer.getTimestamp());
     Logger.recordOutput(
         key + "/Components", hoodPose, intakePose, frontHopperPose, trashCompactorPose);
-    if (cameraPose.isPresent()) {
-      Logger.recordOutput(key + "/Camera", cameraPose.get());
+
+    if (Constants.getRobot() == RobotType.DARWIN) {
+      var cameraPose = VisionConstants.cameras[1].poseFunction().apply(Timer.getTimestamp());
+      if (cameraPose.isPresent()) {
+        Logger.recordOutput(key + "/Camera", cameraPose.get());
+      }
     }
   }
 }

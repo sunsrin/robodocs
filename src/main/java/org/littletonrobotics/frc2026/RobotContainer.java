@@ -147,7 +147,7 @@ public class RobotContainer {
     // Instantiate subsystems
     if (Constants.getMode() != Constants.Mode.REPLAY) {
       // https://www.chiefdelphi.com/t/frc-6328-mechanical-advantage-2026-build-thread/509595/616
-      switch (Constants.robot) {
+      switch (Constants.getRobot()) {
         case DARWIN:
           // Not implemented
           break;
@@ -206,7 +206,7 @@ public class RobotContainer {
       kicker = new Kicker(new RollerSystemIO() {}, new RollerSystemIO() {}, Optional.empty());
     }
     if (vision == null) {
-      switch (Constants.robot) {
+      switch (Constants.getRobot()) {
         case DARWIN ->
             vision =
                 new Vision(
@@ -300,7 +300,7 @@ public class RobotContainer {
             new AutoQuestion("Post-Launch?", List.of(AutoQuestionResponse.NOTHING))),
         autoBuilder.lowesHardwareSalesman());
 
-    // Bumpy Salesman
+    // Home Depot Salesman
     autoSelector.addRoutine(
         "Home Depot Salesman",
         List.of(
@@ -323,8 +323,7 @@ public class RobotContainer {
                     AutoQuestionResponse.LEFT_BUMP,
                     AutoQuestionResponse.RIGHT_BUMP,
                     AutoQuestionResponse.RIGHT_TRENCH)),
-            new AutoQuestion(
-                "Post-Launch?", List.of(AutoQuestionResponse.NOTHING, AutoQuestionResponse.CLIMB))),
+            new AutoQuestion("Post-Launch?", List.of(AutoQuestionResponse.NOTHING))),
         autoBuilder.monopolySalesman());
 
     // Timid Salesman

@@ -10,7 +10,7 @@ package org.littletonrobotics.frc2026;
 import edu.wpi.first.wpilibj.RobotBase;
 
 public final class Constants {
-  public static final RobotType robot = RobotType.DARWIN;
+  private static final RobotType robot = RobotType.DARWIN;
   public static final boolean tuningMode = false;
 
   // https://www.chiefdelphi.com/t/frc-6328-mechanical-advantage-2026-build-thread/509595/616
@@ -18,10 +18,15 @@ public final class Constants {
   public static final double loopPeriodWatchdogSecs = 0.2;
 
   public static Mode getMode() {
-    return switch (robot) {
+    return switch (getRobot()) {
       case DARWIN, ALPHABOT -> RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
       case SIMBOT -> Mode.SIM;
     };
+  }
+
+  public static RobotType getRobot() {
+    boolean isDesktop = Constants.disableHAL || RobotBase.isSimulation();
+    return isDesktop && System.getenv("SIMBOT") != null ? RobotType.SIMBOT : robot;
   }
 
   public enum Mode {

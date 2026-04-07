@@ -59,7 +59,7 @@ public class VisionConstants {
   private static double cameraBalanceBlue = 1.2;
 
   public static CameraConfig[] cameras =
-      switch (Constants.robot) {
+      switch (Constants.getRobot()) {
         case DARWIN ->
             new CameraConfig[] {
               CameraConfig.builder()

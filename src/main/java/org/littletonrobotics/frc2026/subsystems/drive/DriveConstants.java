@@ -122,62 +122,65 @@ public class DriveConstants {
 
   public static final double trackWidthX =
       Units.inchesToMeters(
-          Constants.robot == RobotType.ALPHABOT
+          Constants.getRobot() == RobotType.ALPHABOT
               ? alphabotTrackWidthXInches
               : darwinTrackWidthXInches);
   public static final double trackWidthY =
       Units.inchesToMeters(
-          Constants.robot == RobotType.ALPHABOT
+          Constants.getRobot() == RobotType.ALPHABOT
               ? alphabotTrackWidthYInches
               : darwinTrackWidthYInches);
   public static final double frameWidthX =
       Units.inchesToMeters(
-          Constants.robot == RobotType.ALPHABOT
+          Constants.getRobot() == RobotType.ALPHABOT
               ? alphabotFrameWidthXInches
               : darwinFrameWidthXInches);
   public static final double frameWidthY =
       Units.inchesToMeters(
-          Constants.robot == RobotType.ALPHABOT
+          Constants.getRobot() == RobotType.ALPHABOT
               ? alphabotFrameWidthYInches
               : darwinFrameWidthYInches);
   public static final double fullWidthX =
       Units.inchesToMeters(
-          Constants.robot == RobotType.ALPHABOT
+          Constants.getRobot() == RobotType.ALPHABOT
               ? alphabotFullWidthXInches
               : darwinFullWidthXInches);
   public static final double fullWidthY =
       Units.inchesToMeters(
-          Constants.robot == RobotType.ALPHABOT
+          Constants.getRobot() == RobotType.ALPHABOT
               ? alphabotFullWidthYInches
               : darwinFullWidthYInches);
   public static final double driveBaseRadius = Math.hypot(trackWidthX / 2, trackWidthY / 2);
   public static final double maxLinearSpeed =
-      Constants.robot == RobotType.ALPHABOT ? alphabotMaxLinearSpeed : darwinMaxLinearSpeed;
+      Constants.getRobot() == RobotType.ALPHABOT ? alphabotMaxLinearSpeed : darwinMaxLinearSpeed;
   public static final double maxTrajectoryLinearSpeed =
-      Constants.robot == RobotType.ALPHABOT
+      Constants.getRobot() == RobotType.ALPHABOT
           ? alphabotMaxTrajectoryLinearSpeed
           : darwinMaxTrajectoryLinearSpeed;
   public static final double maxAngularSpeed =
-      Constants.robot == RobotType.ALPHABOT ? alphabotMaxAngularSpeed : darwinMaxAngularSpeed;
+      Constants.getRobot() == RobotType.ALPHABOT ? alphabotMaxAngularSpeed : darwinMaxAngularSpeed;
   public static final double wheelRadiusInches =
-      Constants.robot == RobotType.ALPHABOT ? alphabotWheelRadiusInches : darwinWheelRadiusInches;
+      Constants.getRobot() == RobotType.ALPHABOT
+          ? alphabotWheelRadiusInches
+          : darwinWheelRadiusInches;
   public static final double trajectoryWheelRadiusInches =
-      Constants.robot == RobotType.ALPHABOT
+      Constants.getRobot() == RobotType.ALPHABOT
           ? alphabotTrajectoryWheelRadiusInches
           : darwinTrajectoryWheelRadiusInches;
   public static final double maxTrajectoryWheelTorque =
-      Constants.robot == RobotType.ALPHABOT
+      Constants.getRobot() == RobotType.ALPHABOT
           ? alphabotMaxTrajectoryWheelTorque
           : darwinMaxTrajectoryWheelTorque;
   public static final double wheelRadius = Units.inchesToMeters(wheelRadiusInches);
   public static final double trajectoryWheelRadius =
       Units.inchesToMeters(trajectoryWheelRadiusInches);
   public static final double mass =
-      Units.lbsToKilograms(Constants.robot == RobotType.ALPHABOT ? alphabotMassLbs : darwinMassLbs);
+      Units.lbsToKilograms(
+          Constants.getRobot() == RobotType.ALPHABOT ? alphabotMassLbs : darwinMassLbs);
   public static final double wheelCOF =
-      Constants.robot == RobotType.ALPHABOT ? alphabotWheelCOF : darwinWheelCOF;
+      Constants.getRobot() == RobotType.ALPHABOT ? alphabotWheelCOF : darwinWheelCOF;
   public static final double rotationMOI =
-      Constants.robot == RobotType.ALPHABOT ? alphabotRotationMOI : darwinRotationMOI;
+      Constants.getRobot() == RobotType.ALPHABOT ? alphabotRotationMOI : darwinRotationMOI;
   public static final Translation2d[] moduleTranslations = {
     new Translation2d(trackWidthX / 2, trackWidthY / 2),
     new Translation2d(trackWidthX / 2, -trackWidthY / 2),
@@ -186,15 +189,15 @@ public class DriveConstants {
   };
 
   public static final double driveReduction =
-      Constants.robot == RobotType.ALPHABOT ? alphabotDriveReduction : darwinDriveReduction;
+      Constants.getRobot() == RobotType.ALPHABOT ? alphabotDriveReduction : darwinDriveReduction;
   public static final double turnReductionFL =
-      Constants.robot == RobotType.ALPHABOT ? alphabotTurnReductionFL : darwinTurnReductionFL;
+      Constants.getRobot() == RobotType.ALPHABOT ? alphabotTurnReductionFL : darwinTurnReductionFL;
   public static final double turnReductionFR =
-      Constants.robot == RobotType.ALPHABOT ? alphabotTurnReductionFR : darwinTurnReductionFR;
+      Constants.getRobot() == RobotType.ALPHABOT ? alphabotTurnReductionFR : darwinTurnReductionFR;
   public static final double turnReductionBL =
-      Constants.robot == RobotType.ALPHABOT ? alphabotTurnReductionBL : darwinTurnReductionBL;
+      Constants.getRobot() == RobotType.ALPHABOT ? alphabotTurnReductionBL : darwinTurnReductionBL;
   public static final double turnReductionBR =
-      Constants.robot == RobotType.ALPHABOT ? alphabotTurnReductionBR : darwinTurnReductionBR;
+      Constants.getRobot() == RobotType.ALPHABOT ? alphabotTurnReductionBR : darwinTurnReductionBR;
 
   public static final double intakeNearX = fullWidthX / 2.0;
   public static final double intakeFarX = frameWidthX / 2.0 + Units.inchesToMeters(12.0);
