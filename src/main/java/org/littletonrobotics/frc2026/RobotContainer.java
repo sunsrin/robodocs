@@ -102,6 +102,7 @@ public class RobotContainer {
   // Operator overrides
   private final Trigger disableAutoSpinup = overrides.operatorSwitch(0);
   private final Trigger ignoreHubState = overrides.operatorSwitch(1);
+  private final Trigger noTiltCheck = overrides.operatorSwitch(2);
 
   // Alerts
   private final Alert primaryDisconnected =
@@ -367,9 +368,10 @@ public class RobotContainer {
         new Trigger(
             () ->
                 hood.atGoal()
-                    && flywheel.atGoal()
-                    && DriveCommands.atLaunchGoal()
-                    && DriveCommands.atPitchAndRollTolerance());
+                        && flywheel.atGoal()
+                        && DriveCommands.atLaunchGoal()
+                        && DriveCommands.atPitchAndRollTolerance()
+                    || noTiltCheck.getAsBoolean());
 
     // Align and auto-launch
     primary

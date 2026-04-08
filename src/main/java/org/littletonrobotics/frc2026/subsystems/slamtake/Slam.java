@@ -46,9 +46,10 @@ public class Slam {
   private final Alert motorDisconnectedAlert =
       new Alert("Slam motor disconnected!", Alert.AlertType.kError);
 
-  public static final double slamMaxAngle = Units.degreesToRadians(102); // Needs to be redefined
+  public static final double slamMaxAngle =
+      Units.degreesToRadians(73.3073007799); // Needs to be redefined
   public static final double slamMinAngle =
-      Units.degreesToRadians(17.4115205); // Determined from CAD defined as angle to washer
+      Units.degreesToRadians(17.4088627799); // Determined from CAD defined as angle to washer
   @AutoLogOutput private double goalAngle = 0.0;
   private static double slamOffset = 0.0;
   @Getter private boolean zeroed = false;

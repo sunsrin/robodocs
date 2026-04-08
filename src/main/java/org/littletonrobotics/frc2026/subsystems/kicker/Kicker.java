@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.littletonrobotics.frc2026.Constants;
 import org.littletonrobotics.frc2026.RobotContainer.SimFuelCount;
+import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.rollers.RollerSystem;
 import org.littletonrobotics.frc2026.subsystems.rollers.RollerSystemIO;
 import org.littletonrobotics.frc2026.util.FullSubsystem;
@@ -26,9 +27,6 @@ import org.littletonrobotics.junction.Logger;
 public class Kicker extends FullSubsystem {
   private static final double frontRollerRadius = Units.inchesToMeters(1.25);
   private static final double backRollerRadius = Units.inchesToMeters(0.79);
-
-  private static final LoggedTunableNumber surfaceSetpointSpeed =
-      new LoggedTunableNumber("Kicker/SurfaceSetpointSpeed", 3.0);
 
   private static final LoggedTunableNumber frontkP =
       new LoggedTunableNumber("Kicker/RollerFront/kP", 1.5);
@@ -87,8 +85,15 @@ public class Kicker extends FullSubsystem {
       rollerBack.setFeedforward(backkS.get(), backkV.get());
     }
 
-    double frontSetpointSpeed = surfaceSetpointSpeed.get() / frontRollerRadius;
-    double backSetpointSpeed = surfaceSetpointSpeed.get() / backRollerRadius;
+    LoggedTracer.record("Kicker/Periodic");
+  }
+
+  @Override
+  public void periodicAfterScheduler() {
+    double frontSetpointSpeed =
+        LaunchCalculator.getInstance().getParameters().kickerSurfaceSpeed() / frontRollerRadius;
+    double backSetpointSpeed =
+        LaunchCalculator.getInstance().getParameters().kickerSurfaceSpeed() / backRollerRadius;
     Logger.recordOutput("Kicker/FrontSetpointRadPerSec", frontSetpointSpeed);
     Logger.recordOutput("Kicker/BackSetpointRadPerSec", backSetpointSpeed);
 
@@ -120,13 +125,9 @@ public class Kicker extends FullSubsystem {
 
     lastGoal = goal;
 
-    LoggedTracer.record("Kicker/Periodic");
-  }
-
-  @Override
-  public void periodicAfterScheduler() {
     rollerFront.periodicAfterScheduler();
     rollerBack.periodicAfterScheduler();
+
     LoggedTracer.record("Kicker/AfterScheduler");
   }
 

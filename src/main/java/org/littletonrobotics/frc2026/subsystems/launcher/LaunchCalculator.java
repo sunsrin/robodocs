@@ -59,6 +59,7 @@ public class LaunchCalculator {
       double hoodAngle,
       double hoodVelocity,
       double flywheelSpeed,
+      double kickerSurfaceSpeed,
       double distance,
       double distanceNoLookahead,
       double timeOfFlight,
@@ -80,6 +81,8 @@ public class LaunchCalculator {
       new InterpolatingDoubleTreeMap();
   private static final InterpolatingDoubleTreeMap timeOfFlightMap =
       new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap kickerSurfaceSpeedMap =
+      new InterpolatingDoubleTreeMap();
 
   // Passing Maps
   private static final InterpolatingTreeMap<Double, Rotation2d> passingHoodAngleMap =
@@ -87,6 +90,8 @@ public class LaunchCalculator {
   private static final InterpolatingDoubleTreeMap passingFlywheelSpeedMap =
       new InterpolatingDoubleTreeMap();
   private static final InterpolatingDoubleTreeMap passingTimeOfFlightMap =
+      new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap passingKickerSurfaceSpeedMap =
       new InterpolatingDoubleTreeMap();
 
   // Presets
@@ -172,6 +177,11 @@ public class LaunchCalculator {
     flywheelSpeedMap.put(4.35, 185.0);
     flywheelSpeedMap.put(4.84, 190.0);
 
+    kickerSurfaceSpeedMap.put(0.0, 6.0);
+    kickerSurfaceSpeedMap.put(3.0, 6.0);
+    kickerSurfaceSpeedMap.put(4.0, 3.0);
+    kickerSurfaceSpeedMap.put(5.0, 3.0);
+
     timeOfFlightMap.put(5.68, 1.16);
     timeOfFlightMap.put(4.55, 1.12);
     timeOfFlightMap.put(3.15, 1.11);
@@ -187,6 +197,8 @@ public class LaunchCalculator {
     passingFlywheelSpeedMap.put(6.62, 180.0);
     passingFlywheelSpeedMap.put(7.80, 200.0);
     passingFlywheelSpeedMap.put(17.16, 360.0);
+
+    passingKickerSurfaceSpeedMap.put(0.0, 6.0);
 
     passingTimeOfFlightMap.put(5.46, 1.27);
     passingTimeOfFlightMap.put(6.62, 1.39);
@@ -334,6 +346,11 @@ public class LaunchCalculator {
             ? passingFlywheelSpeedMap.get(lookaheadLauncherToTargetDistance)
             : flywheelSpeedMap.get(lookaheadLauncherToTargetDistance);
 
+    double kickerSurfaceSpeed =
+        passing
+            ? passingKickerSurfaceSpeedMap.get(lookaheadLauncherToTargetDistance)
+            : kickerSurfaceSpeedMap.get(lookaheadLauncherToTargetDistance);
+
     // Constructor parameters
     latestParameters =
         new LaunchingParameters(
@@ -346,6 +363,7 @@ public class LaunchCalculator {
             hoodAngle + Units.degreesToRadians(hoodAngleOffsetDeg),
             hoodVelocity,
             flywheelVelocity,
+            kickerSurfaceSpeed,
             lookaheadLauncherToTargetDistance,
             launcherToTargetDistance,
             timeOfFlight,

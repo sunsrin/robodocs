@@ -38,14 +38,13 @@ public class VisionConstants {
       Units.inchesToMeters(7.359); // Measured center to center
   public static final double slotStartToHopperX =
       Units.inchesToMeters(6.345); // Measured from bottom "center"
-  public static final double hopperWallToCameraX =
-      0.0; // Need to determine actual distance once mounted/cadded
+  public static final double hopperWallToCameraX = Units.inchesToMeters(-0.885);
   public static final double slotAngle = Units.degreesToRadians(70.0);
 
   private static LoggedTunableNumber[] cameraPitchFudgeDegrees =
       new LoggedTunableNumber[] {
         new LoggedTunableNumber("Vision/Camera0PitchFudgeDeg", 0.0),
-        new LoggedTunableNumber("Vision/Camera1PitchFudgeDeg", 1.6),
+        new LoggedTunableNumber("Vision/Camera1PitchFudgeDeg", 0.0),
         new LoggedTunableNumber("Vision/Camera2PitchFudgeDeg", 0.0),
         new LoggedTunableNumber("Vision/Camera3PitchFudgeDeg", 0.0)
       };
@@ -109,13 +108,13 @@ public class VisionConstants {
                           return Optional.of(
                               new Pose3d(
                                   Units.inchesToMeters(cameraPosition),
-                                  0.0,
-                                  0.0,
+                                  Units.inchesToMeters(8.476),
+                                  Units.inchesToMeters(19.096),
                                   new Rotation3d(
                                       0.0,
                                       Units.degreesToRadians(
                                           12.0 + cameraPitchFudgeDegrees[1].get()),
-                                      0.0)));
+                                      Units.degreesToRadians(-5.0))));
                         } else {
                           return Optional.empty();
                         }
