@@ -29,7 +29,7 @@ public class Slam {
   private final SlamIOInputsAutoLogged inputs = new SlamIOInputsAutoLogged();
   private final SlamIOOutputs outputs = new SlamIOOutputs();
 
-  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Slam/kP", 50.0);
+  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Slam/kP", 80.0);
   private static final LoggedTunableNumber kD = new LoggedTunableNumber("Slam/kD", 0.0);
 
   private static final LoggedTunableNumber toleranceDeg =
@@ -46,8 +46,7 @@ public class Slam {
   private final Alert motorDisconnectedAlert =
       new Alert("Slam motor disconnected!", Alert.AlertType.kError);
 
-  public static final double slamMaxAngle =
-      Units.degreesToRadians(73.3073007799); // Needs to be redefined
+  public static final double slamMaxAngle = Units.degreesToRadians(145.8170667799);
   public static final double slamMinAngle =
       Units.degreesToRadians(17.4088627799); // Determined from CAD defined as angle to washer
   @AutoLogOutput private double goalAngle = 0.0;

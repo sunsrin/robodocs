@@ -25,4 +25,15 @@ public record Bounds(double minX, double maxX, double minY, double maxY) {
         MathUtil.clamp(translation.getX(), minX(), maxX()),
         MathUtil.clamp(translation.getY(), minY(), maxY()));
   }
+
+  /** Returns an array of translations to represent sides of the bounds */
+  public Translation2d[] sides() {
+    return new Translation2d[] {
+      new Translation2d(minX(), minY()),
+      new Translation2d(minX(), maxY()),
+      new Translation2d(maxX(), maxY()),
+      new Translation2d(maxX(), minY()),
+      new Translation2d(minX(), minY())
+    };
+  }
 }

@@ -95,13 +95,11 @@ public class LaunchCalculator {
       new InterpolatingDoubleTreeMap();
 
   // Presets
-  public static final double hubPresetDistance = 0.96;
   public static final double towerPresetDistance = 2.5;
   public static final double trenchPresetDistance = 3.03;
   public static final double outpostPresetDistance = 4.84;
   public static final double passingPresetDistance = 7.0;
   public static final LaunchPreset passingPreset;
-  public static final LaunchPreset hubPreset;
   public static final LaunchPreset towerPreset;
   public static final LaunchPreset trenchPreset;
   public static final LaunchPreset outpostPreset;
@@ -145,48 +143,40 @@ public class LaunchCalculator {
           FieldConstants.LinesHorizontal.leftBumpEnd);
 
   static {
-    minDistance = 0.9;
+    minDistance = 1.0;
     maxDistance = 4.9;
     passingMinDistance = 5.4;
     passingMaxDistance = 17.16;
     phaseDelay = 0.03;
 
-    hoodAngleMap.put(0.96, Rotation2d.fromDegrees(10.0));
-    hoodAngleMap.put(1.16, Rotation2d.fromDegrees(12.0));
-    hoodAngleMap.put(1.58, Rotation2d.fromDegrees(14.0));
-    hoodAngleMap.put(2.07, Rotation2d.fromDegrees(18.5));
-    hoodAngleMap.put(2.37, Rotation2d.fromDegrees(22.0));
-    hoodAngleMap.put(2.47, Rotation2d.fromDegrees(23.0));
-    hoodAngleMap.put(2.70, Rotation2d.fromDegrees(24.0));
-    hoodAngleMap.put(2.94, Rotation2d.fromDegrees(25.0));
-    hoodAngleMap.put(3.48, Rotation2d.fromDegrees(27.0));
-    hoodAngleMap.put(3.92, Rotation2d.fromDegrees(32.0));
-    hoodAngleMap.put(4.35, Rotation2d.fromDegrees(34.0));
-    hoodAngleMap.put(4.84, Rotation2d.fromDegrees(38.0));
+    hoodAngleMap.put(1.15, Rotation2d.fromDegrees(10.0));
+    hoodAngleMap.put(1.41, Rotation2d.fromDegrees(14.0));
+    hoodAngleMap.put(1.81, Rotation2d.fromDegrees(17.0));
+    hoodAngleMap.put(2.32, Rotation2d.fromDegrees(21.0));
+    hoodAngleMap.put(2.71, Rotation2d.fromDegrees(24.0));
+    hoodAngleMap.put(3.38, Rotation2d.fromDegrees(29.0));
+    hoodAngleMap.put(4.04, Rotation2d.fromDegrees(33.0));
+    hoodAngleMap.put(4.83, Rotation2d.fromDegrees(38.0));
 
-    flywheelSpeedMap.put(0.96, 150.0);
-    flywheelSpeedMap.put(1.16, 155.0);
-    flywheelSpeedMap.put(1.58, 160.0);
-    flywheelSpeedMap.put(2.07, 165.0);
-    flywheelSpeedMap.put(2.37, 170.0);
-    flywheelSpeedMap.put(2.47, 170.0);
-    flywheelSpeedMap.put(2.70, 170.0);
-    flywheelSpeedMap.put(2.94, 175.0);
-    flywheelSpeedMap.put(3.48, 175.0);
-    flywheelSpeedMap.put(3.92, 180.0);
-    flywheelSpeedMap.put(4.35, 185.0);
-    flywheelSpeedMap.put(4.84, 190.0);
+    flywheelSpeedMap.put(1.15, 170.0);
+    flywheelSpeedMap.put(1.41, 160.0);
+    flywheelSpeedMap.put(1.81, 165.0);
+    flywheelSpeedMap.put(2.32, 165.0);
+    flywheelSpeedMap.put(2.71, 175.0);
+    flywheelSpeedMap.put(3.38, 175.0);
+    flywheelSpeedMap.put(4.04, 185.0);
+    flywheelSpeedMap.put(4.83, 195.0);
 
     kickerSurfaceSpeedMap.put(0.0, 6.0);
     kickerSurfaceSpeedMap.put(3.0, 6.0);
     kickerSurfaceSpeedMap.put(4.0, 3.0);
     kickerSurfaceSpeedMap.put(5.0, 3.0);
 
-    timeOfFlightMap.put(5.68, 1.16);
-    timeOfFlightMap.put(4.55, 1.12);
-    timeOfFlightMap.put(3.15, 1.11);
-    timeOfFlightMap.put(1.88, 1.09);
-    timeOfFlightMap.put(1.38, 0.90);
+    timeOfFlightMap.put(4.83, 1.14);
+    timeOfFlightMap.put(3.75, 1.14);
+    timeOfFlightMap.put(3.04, 1.09);
+    timeOfFlightMap.put(2.43, 1.0);
+    timeOfFlightMap.put(1.64, 1.0);
 
     passingHoodAngleMap.put(5.46, Rotation2d.fromDegrees(38.0));
     passingHoodAngleMap.put(6.62, Rotation2d.fromDegrees(38.0));
@@ -215,14 +205,6 @@ public class LaunchCalculator {
             new LoggedTunableNumber(
                 "LaunchCalculator/Presets/Passing/FlywheelSpeed",
                 flywheelSpeedMap.get(passingPresetDistance)));
-    hubPreset =
-        new LaunchPreset(
-            new LoggedTunableNumber(
-                "LaunchCalculator/Presets/Hub/HoodAngle",
-                hoodAngleMap.get(hubPresetDistance).getDegrees()),
-            new LoggedTunableNumber(
-                "LaunchCalculator/Presets/Hub/FlywheelSpeed",
-                flywheelSpeedMap.get(hubPresetDistance)));
     towerPreset =
         new LaunchPreset(
             new LoggedTunableNumber(

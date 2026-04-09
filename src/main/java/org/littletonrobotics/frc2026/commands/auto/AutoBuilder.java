@@ -29,6 +29,7 @@ import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.flywheel.Flywheel;
 import org.littletonrobotics.frc2026.subsystems.launcher.hood.Hood;
 import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake;
+import org.littletonrobotics.frc2026.subsystems.trashcompactor.TrashCompactor;
 
 @RequiredArgsConstructor
 @SuppressWarnings("unused")
@@ -39,6 +40,7 @@ public class AutoBuilder {
   private final Kicker kicker;
   private final Hood hood;
   private final Flywheel flywheel;
+  private final TrashCompactor trashCompactor;
 
   private final Supplier<List<AutoQuestionResponse>> responses;
 
@@ -69,7 +71,7 @@ public class AutoBuilder {
                 Commands.sequence(
                     AutoCommands.waitUntilWithinTolerance(
                         Launch.rightTower, 0.1, Rotation2d.fromDegrees(5)),
-                    index(hopper, kicker, flywheel, intake).withTimeout(6))),
+                    index(hopper, kicker, flywheel, intake, trashCompactor).withTimeout(6))),
         Commands.select(
             Map.of(AutoQuestionResponse.NOTHING, Commands.none()), () -> responses.get().get(2)));
   }
@@ -99,7 +101,7 @@ public class AutoBuilder {
                 Commands.sequence(
                     AutoCommands.waitUntilWithinTolerance(
                         Launch.leftTower, 0.1, Rotation2d.fromDegrees(5)),
-                    index(hopper, kicker, flywheel, intake).withTimeout(6))),
+                    index(hopper, kicker, flywheel, intake, trashCompactor).withTimeout(6))),
         Commands.select(
             Map.of(AutoQuestionResponse.NOTHING, Commands.none()), () -> responses.get().get(2)));
   }
@@ -133,7 +135,7 @@ public class AutoBuilder {
                         () -> isLeftSide() ? Launch.leftTower : Launch.rightTower,
                         0.1,
                         Rotation2d.fromDegrees(5)),
-                    index(hopper, kicker, flywheel, intake))),
+                    index(hopper, kicker, flywheel, intake, trashCompactor))),
 
         // Initiate chosen end behavior
         Commands.select(
@@ -200,7 +202,7 @@ public class AutoBuilder {
             AutoCommands.driveToPose(drive, target),
             Commands.sequence(
                 waitUntilWithinTolerance(target, 0.1, Rotation2d.fromDegrees(5)),
-                index(hopper, kicker, flywheel, intake))));
+                index(hopper, kicker, flywheel, intake, trashCompactor))));
   }
 
   // MARK: Drive Forward 1m

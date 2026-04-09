@@ -33,13 +33,11 @@ public class Slamtake extends FullSubsystem {
       new LoggedTunableNumber("Slamtake/Roller/IntakeVolts", 13.0);
   private static final LoggedTunableNumber rollerOuttakeVolts =
       new LoggedTunableNumber("Slamtake/Roller/OuttakeVolts", -6.0);
-  private static final LoggedTunableNumber deployPosition =
-      new LoggedTunableNumber("Slamtake/Slam/DeployPosition", 4.0);
-  private static final LoggedTunableNumber retractPosition =
-      new LoggedTunableNumber("Slamtake/Slam/RetractPosition", 102.0);
   private final RollerSystem roller;
   private final Slam slam;
 
+  private static final LoggedTunableNumber slamRampPositionDeg =
+      new LoggedTunableNumber("Slamtake/Slam/RampPositionDeg", 75.0);
   private static final LoggedTunableNumber slamGoalDebounceTime =
       new LoggedTunableNumber("Slamtake/Slam/DebounceTime", 0.5);
   private Debouncer slamGoalDebouncer =
@@ -78,12 +76,17 @@ public class Slamtake extends FullSubsystem {
     roller.runOpenLoop(rollerVolts);
     switch (slamGoal) {
       case DEPLOY -> {
-        slam.runPosition(Units.degreesToRadians(deployPosition.get()));
+        slam.runPosition(Slam.slamMinAngle);
         slamState =
             slamGoalDebouncer.calculate(slam.atGoal()) ? SlamState.DEPLOYED : SlamState.MOVING;
       }
+      case RAMP -> {
+        slam.runPosition(Units.degreesToRadians(slamRampPositionDeg.get()));
+        slamState =
+            slamGoalDebouncer.calculate(slam.atGoal()) ? SlamState.RAMPED : SlamState.MOVING;
+      }
       case RETRACT -> {
-        slam.runPosition(Units.degreesToRadians(retractPosition.get()));
+        slam.runPosition(Slam.slamMaxAngle);
         slamState =
             slamGoalDebouncer.calculate(slam.atGoal()) ? SlamState.RETRACTED : SlamState.MOVING;
       }
@@ -132,7 +135,7 @@ public class Slamtake extends FullSubsystem {
   }
 
   public Command homeSlam() {
-    return slam.zeroCommand();
+    return slam.zeroCommand().deadlineFor(Commands.idle(this)); // Require slamtake
   }
 
   public Command zeroMaxSlam() {
@@ -147,12 +150,14 @@ public class Slamtake extends FullSubsystem {
 
   public enum SlamGoal {
     DEPLOY,
+    RAMP,
     RETRACT,
     IDLE
   }
 
   public enum SlamState {
     DEPLOYED,
+    RAMPED,
     RETRACTED,
     MOVING
   }

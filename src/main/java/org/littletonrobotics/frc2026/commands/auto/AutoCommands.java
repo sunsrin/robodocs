@@ -39,6 +39,8 @@ import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.flywheel.Flywheel;
 import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake;
 import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake.SlamGoal;
+import org.littletonrobotics.frc2026.subsystems.trashcompactor.TrashCompactor;
+import org.littletonrobotics.frc2026.subsystems.trashcompactor.TrashCompactor.TrashCompactorCompactingMode;
 import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 import org.littletonrobotics.frc2026.util.geometry.Bounds;
@@ -227,20 +229,28 @@ public class AutoCommands {
         .withTimeout(Constants.getMode().equals(Mode.SIM) ? 0.7 : time);
   }
 
-  public static Command index(Hopper hopper, Kicker kicker, Flywheel flywheel, Slamtake slamtake) {
+  public static Command index(
+      Hopper hopper,
+      Kicker kicker,
+      Flywheel flywheel,
+      Slamtake slamtake,
+      TrashCompactor trashCompactor) {
     return Commands.waitUntil(flywheel::atGoal)
         .andThen(
             Commands.startEnd(
                     () -> {
                       hopper.setGoal(Hopper.Goal.LAUNCH);
                       kicker.setGoal(Kicker.Goal.LAUNCH);
+                      trashCompactor.setCompactingMode(TrashCompactorCompactingMode.FORCE_MIN);
                     },
                     () -> {
                       hopper.setGoal(Hopper.Goal.STOP);
                       kicker.setGoal(Kicker.Goal.STOP);
+                      trashCompactor.setCompactingMode(TrashCompactorCompactingMode.PASSIVE_DOWN);
                     },
                     hopper,
-                    kicker)
+                    kicker,
+                    trashCompactor)
                 .withDeadline(
                     Commands.repeatingSequence(
                         Commands.waitSeconds(1.5),
@@ -273,7 +283,12 @@ public class AutoCommands {
   }
 
   public static Command passingCommand(
-      Drive drive, Hopper hopper, Kicker kicker, Flywheel flywheel, Slamtake slamtake) {
+      Drive drive,
+      Hopper hopper,
+      Kicker kicker,
+      Flywheel flywheel,
+      Slamtake slamtake,
+      TrashCompactor trashCompactor) {
     Supplier<Pose2d> targetSupplier =
         () ->
             LaunchCalculator.getStationaryAimedPose(
@@ -287,7 +302,7 @@ public class AutoCommands {
             Commands.sequence(
                 AutoCommands.waitUntilWithinTolerance(
                     targetSupplier, 0.5, Rotation2d.fromDegrees(15)),
-                index(hopper, kicker, flywheel, slamtake)));
+                index(hopper, kicker, flywheel, slamtake, trashCompactor)));
   }
 
   public static Bounds expandBounds(Bounds a, Bounds b) {
@@ -348,13 +363,7 @@ public class AutoCommands {
       }
     }
 
-    Logger.recordOutput(
-        "AutoCommands/DynamicBounds/Outline",
-        new Translation2d(homeBounds.minX(), homeBounds.minY()),
-        new Translation2d(homeBounds.minX(), homeBounds.maxY()),
-        new Translation2d(homeBounds.maxX(), homeBounds.maxY()),
-        new Translation2d(homeBounds.maxX(), homeBounds.minY()),
-        new Translation2d(homeBounds.minX(), homeBounds.minY()));
+    Logger.recordOutput("AutoCommands/DynamicBounds/Outline", homeBounds.sides());
 
     // Shift bounds past centerline
     return new Bounds(

@@ -28,6 +28,7 @@ import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.hood.HoodIO.HoodIOOutputMode;
 import org.littletonrobotics.frc2026.subsystems.launcher.hood.HoodIO.HoodIOOutputs;
 import org.littletonrobotics.frc2026.util.ContinuousConditionalCommand;
+import org.littletonrobotics.frc2026.util.EqualsUtil;
 import org.littletonrobotics.frc2026.util.FullSubsystem;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
 import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
@@ -124,6 +125,8 @@ public class Hood extends FullSubsystem {
     }
 
     SmartDashboard.putBoolean("Hood At Goal", atGoal());
+    SmartDashboard.putBoolean(
+        "Hood At Min Angle", EqualsUtil.epsilonEquals(inputs.positionRads, minAngle));
 
     io.applyOutputs(outputs);
     LoggedTracer.record("Hood/AfterScheduler");
