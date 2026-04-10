@@ -241,7 +241,7 @@ public class AutoCommands {
                     () -> {
                       hopper.setGoal(Hopper.Goal.LAUNCH);
                       kicker.setGoal(Kicker.Goal.LAUNCH);
-                      trashCompactor.setCompactingMode(TrashCompactorCompactingMode.FORCE_MIN);
+                      trashCompactor.setCompactingMode(TrashCompactorCompactingMode.LAUNCHING);
                     },
                     () -> {
                       hopper.setGoal(Hopper.Goal.STOP);
@@ -251,12 +251,12 @@ public class AutoCommands {
                     hopper,
                     kicker,
                     trashCompactor)
-                .withDeadline(
-                    Commands.repeatingSequence(
-                        Commands.waitSeconds(1.5),
-                        Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
-                        Commands.waitSeconds(0.5),
-                        Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))))
+                // .withDeadline(
+                //     Commands.repeatingSequence(
+                //         Commands.waitSeconds(1.5),
+                //         Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
+                //         Commands.waitSeconds(0.5),
+                //         Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))))
                 .finallyDo(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)));
   }
 

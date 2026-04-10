@@ -33,7 +33,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class TrashCompactor extends FullSubsystem {
   private static final double sprocketRadius = Units.inchesToMeters(0.654195);
-  private static final double tolerance = 0.002;
+  private static final double tolerance = 0.003;
   public static final double minHeight = 0.554692;
   public static final double maxHeight = 0.764242;
 
@@ -56,8 +56,10 @@ public class TrashCompactor extends FullSubsystem {
   private static final LoggedTunableNumber homingVelocityThreshold =
       new LoggedTunableNumber("TrashCompactor/Homing/VelocityThreshold", 0.02);
 
+  private static final LoggedTunableNumber compactLaunchingOffset =
+      new LoggedTunableNumber("TrashCompactor/LaunchingOffsetMeters", 0.15);
   private static final LoggedTunableNumber compactPassiveAmpsDown =
-      new LoggedTunableNumber("TrashCompactor/PassiveAmpsDown", -25.0);
+      new LoggedTunableNumber("TrashCompactor/PassiveAmpsDown", -20.0);
   private static final LoggedTunableNumber compactPassiveHelperAmpsDown =
       new LoggedTunableNumber("TrashCompactor/PassiveHelperAmpsDown", 0.0);
   private static final LoggedTunableNumber compactPassiveHelperTime =
@@ -83,7 +85,8 @@ public class TrashCompactor extends FullSubsystem {
   @AutoLogOutput
   private TrashCompactorCompactingMode compactingMode = TrashCompactorCompactingMode.IDLE;
 
-  private static double offset = 0.0;
+  private double offset = 0.0;
+  private double launchingPosition = maxHeight;
   @Getter private boolean zeroed = false;
 
   @Setter private BooleanSupplier coastOverride = () -> false;
@@ -141,6 +144,9 @@ public class TrashCompactor extends FullSubsystem {
         }
         case FORCE_MIN -> {
           runPosition(minHeight);
+        }
+        case LAUNCHING -> {
+          runPosition(launchingPosition);
         }
         case IDLE -> {
           runAmps(0.0);
@@ -205,7 +211,7 @@ public class TrashCompactor extends FullSubsystem {
   }
 
   public Command zeroMinCommand() {
-    return Commands.runOnce(() -> this.zeroMinHeight(), this);
+    return Commands.runOnce(() -> zeroMinHeight());
   }
 
   public Command homeRunMin() {
@@ -227,6 +233,9 @@ public class TrashCompactor extends FullSubsystem {
   public void setCompactingMode(TrashCompactorCompactingMode mode) {
     if (compactingMode != mode) {
       modeTimer.restart();
+      if (mode == TrashCompactorCompactingMode.LAUNCHING) {
+        launchingPosition = getMeasuredHeightMeters() + compactLaunchingOffset.get();
+      }
     }
     compactingMode = mode;
   }
@@ -235,6 +244,7 @@ public class TrashCompactor extends FullSubsystem {
     PASSIVE_DOWN,
     FORCE_MAX,
     FORCE_MIN,
+    LAUNCHING,
     IDLE
   }
 }

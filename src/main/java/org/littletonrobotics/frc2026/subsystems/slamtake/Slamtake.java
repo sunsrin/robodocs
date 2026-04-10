@@ -9,8 +9,8 @@ package org.littletonrobotics.frc2026.subsystems.slamtake;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,6 +23,7 @@ import org.littletonrobotics.frc2026.RobotState;
 import org.littletonrobotics.frc2026.subsystems.rollers.RollerSystem;
 import org.littletonrobotics.frc2026.subsystems.rollers.RollerSystemIO;
 import org.littletonrobotics.frc2026.subsystems.slamtake.SlamIO.SlamIOOutputMode;
+import org.littletonrobotics.frc2026.util.EqualsUtil;
 import org.littletonrobotics.frc2026.util.FullSubsystem;
 import org.littletonrobotics.frc2026.util.LoggedTracer;
 import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
@@ -36,12 +37,15 @@ public class Slamtake extends FullSubsystem {
   private final RollerSystem roller;
   private final Slam slam;
 
-  private static final LoggedTunableNumber slamRampPositionDeg =
-      new LoggedTunableNumber("Slamtake/Slam/RampPositionDeg", 75.0);
+  private static final LoggedTunableNumber slowRetractMaxVelocityRadsPerSec =
+      new LoggedTunableNumber("Slamtake/Slam/SlowRetractMaxVelocity", 1.0);
   private static final LoggedTunableNumber slamGoalDebounceTime =
       new LoggedTunableNumber("Slamtake/Slam/DebounceTime", 0.5);
   private Debouncer slamGoalDebouncer =
       new Debouncer(slamGoalDebounceTime.get(), DebounceType.kRising);
+
+  private SlewRateLimiter slewRateLimiter =
+      new SlewRateLimiter(slowRetractMaxVelocityRadsPerSec.get());
 
   @Getter @Setter @AutoLogOutput private IntakeGoal intakeGoal = IntakeGoal.STOP;
   @Getter @Setter @AutoLogOutput private SlamGoal slamGoal = SlamGoal.RETRACT;
@@ -60,12 +64,15 @@ public class Slamtake extends FullSubsystem {
       slamGoalDebouncer = new Debouncer(slamGoalDebounceTime.get());
     }
 
+    if (slowRetractMaxVelocityRadsPerSec.hasChanged(hashCode())) {
+      slewRateLimiter = new SlewRateLimiter(slowRetractMaxVelocityRadsPerSec.get());
+    }
+
     double rollerVolts = 0.0;
     switch (intakeGoal) {
       case INTAKE -> {
         rollerVolts = rollerIntakeVolts.get();
       }
-
       case OUTTAKE -> {
         rollerVolts = rollerOuttakeVolts.get();
       }
@@ -79,20 +86,25 @@ public class Slamtake extends FullSubsystem {
         slam.runPosition(Slam.slamMinAngle);
         slamState =
             slamGoalDebouncer.calculate(slam.atGoal()) ? SlamState.DEPLOYED : SlamState.MOVING;
-      }
-      case RAMP -> {
-        slam.runPosition(Units.degreesToRadians(slamRampPositionDeg.get()));
-        slamState =
-            slamGoalDebouncer.calculate(slam.atGoal()) ? SlamState.RAMPED : SlamState.MOVING;
+        slewRateLimiter.reset(slam.getMeasuredAngleRad());
       }
       case RETRACT -> {
         slam.runPosition(Slam.slamMaxAngle);
         slamState =
             slamGoalDebouncer.calculate(slam.atGoal()) ? SlamState.RETRACTED : SlamState.MOVING;
+        slewRateLimiter.reset(slam.getMeasuredAngleRad());
+      }
+      case RETRACT_SLOW -> {
+        double goal = Slam.slamMaxAngle;
+        double setpoint = slewRateLimiter.calculate(goal);
+        slam.runPosition(setpoint);
+        slamState =
+            EqualsUtil.epsilonEquals(setpoint, goal) ? SlamState.RETRACTED : SlamState.MOVING;
       }
       case IDLE -> {
         slam.setMode(SlamIOOutputMode.COAST);
         slamState = SlamState.MOVING;
+        slewRateLimiter.reset(slam.getMeasuredAngleRad());
       }
     }
 
@@ -150,14 +162,13 @@ public class Slamtake extends FullSubsystem {
 
   public enum SlamGoal {
     DEPLOY,
-    RAMP,
     RETRACT,
+    RETRACT_SLOW,
     IDLE
   }
 
   public enum SlamState {
     DEPLOYED,
-    RAMPED,
     RETRACTED,
     MOVING
   }

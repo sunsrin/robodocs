@@ -72,7 +72,7 @@ public class DriveCommands {
       new LoggedTunableNumber("DriveCommands/Launching/LockOmegaRadsPerSecThreshold", 0.15);
 
   private static final LoggedTunableNumber driveLaunchMaxPolarVelocityRadPerSec =
-      new LoggedTunableNumber("DriveCommands/Launching/MaxPolarVelocityRadPerSec", 0.6);
+      new LoggedTunableNumber("DriveCommands/Launching/MaxPolarVelocityRadPerSec", 0.4);
   private static final LoggedTunableNumber driveLauncherCORMinErrorDeg =
       new LoggedTunableNumber("DriveCommands/Launching/DriveLauncherCORMinErrorDeg", 15.0);
   private static final LoggedTunableNumber driveLauncherCORMaxErrorDeg =

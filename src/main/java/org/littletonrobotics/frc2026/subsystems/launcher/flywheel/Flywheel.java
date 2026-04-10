@@ -7,8 +7,9 @@
 
 package org.littletonrobotics.frc2026.subsystems.launcher.flywheel;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -16,6 +17,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.DoubleSupplier;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import org.littletonrobotics.frc2026.Constants;
+import org.littletonrobotics.frc2026.Constants.Mode;
 import org.littletonrobotics.frc2026.Robot;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.flywheel.FlywheelIO.FlywheelIOOutputMode;
@@ -45,14 +48,24 @@ public class Flywheel extends FullSubsystem {
   private final Alert follower2Disconnected;
   private final Alert follower3Disconnected;
 
-  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Flywheel/kP", 0.4);
-  private static final LoggedTunableNumber kD = new LoggedTunableNumber("Flywheel/kD", 0.0);
+  private static final DCMotor gearbox = DCMotor.getKrakenX60Foc(4); // Reduction of 1.0
+  private static final double moi = 0.02; // kg*m^2
+  private static final double efficiency = 0.8; // W(out)/W(in)
+
+  private static final LoggedTunableNumber kP = new LoggedTunableNumber("Flywheel/kP", 0.6);
+  private static final LoggedTunableNumber kD = new LoggedTunableNumber("Flywheel/kD", 0.001);
   private static final LoggedTunableNumber kS = new LoggedTunableNumber("Flywheel/kS", 0.4);
   private static final LoggedTunableNumber kV = new LoggedTunableNumber("Flywheel/kV", 0.0193);
+  private static final LoggedTunableNumber kA = new LoggedTunableNumber("Flywheel/kA", 0.002);
   private static final LoggedTunableNumber maxAcceleration =
-      new LoggedTunableNumber("Flywheel/MaxAcceleration", 320.0);
+      new LoggedTunableNumber("Flywheel/MaxAccelerationRadPerSec2", 350.0);
+  private static final LoggedTunableNumber supplyLimitTeleop =
+      new LoggedTunableNumber("Flywheel/SupplyLimitTeleopAmps", 220.0);
+  private static final LoggedTunableNumber supplyLimitAuto =
+      new LoggedTunableNumber("Flywheel/SupplyLimitAutoAmps", 60.0);
 
-  private SlewRateLimiter slewRateLimiter = new SlewRateLimiter(maxAcceleration.get());
+  private double supplyLimit = 200.0;
+  private double setpointVel = 0.0;
 
   @Getter
   @Accessors(fluent = true)
@@ -78,12 +91,14 @@ public class Flywheel extends FullSubsystem {
     outputs.kP = kP.get();
     outputs.kD = kD.get();
 
-    if (maxAcceleration.hasChanged(hashCode())) {
-      slewRateLimiter = new SlewRateLimiter(maxAcceleration.get());
-    }
-
     if (DriverStation.isDisabled()) {
       stop();
+    }
+
+    if (DriverStation.isAutonomous()) {
+      supplyLimit = supplyLimitAuto.get();
+    } else {
+      supplyLimit = supplyLimitTeleop.get();
     }
 
     disconnected.set(
@@ -122,12 +137,44 @@ public class Flywheel extends FullSubsystem {
 
   /** Run closed loop at the specified velocity. */
   private void runVelocity(double velocityRadsPerSec) {
-    double setpointRadPerSec = slewRateLimiter.calculate(velocityRadsPerSec);
-    atGoal = EqualsUtil.epsilonEquals(setpointRadPerSec, velocityRadsPerSec, 2.0);
+    // Limit rate of change on setpoint based on supply limit
+    double vBus = Robot.batteryLogger.getBatteryVoltage();
+    if (Constants.getMode() == Mode.SIM) {
+      vBus = 10.0;
+    }
+    double powerBudget = supplyLimit * vBus * efficiency;
+    double backEmf = setpointVel / gearbox.KvRadPerSecPerVolt;
+    // I_sator x V_motor - P = 0
+    // I_stator x (I_stator x R - backEmf) - P = 0
+    // R x I_stator^2 - backEmf x I_stator - P = 0
+    double maxStatorCurrent =
+        (-backEmf + Math.sqrt(backEmf * backEmf + 4.0 * gearbox.rOhms * powerBudget))
+            / (2.0 * gearbox.rOhms);
+    double voltageLimitedCurrent = Math.max(0.0, (vBus - backEmf) / gearbox.rOhms);
+
+    // Limit accel based on velocity setpoint, max acceleration, and friction
+    maxStatorCurrent = Math.min(maxStatorCurrent, voltageLimitedCurrent);
+    double setpointAccel =
+        (gearbox.getTorque(maxStatorCurrent) - gearbox.getTorque(kS.get() / gearbox.rOhms)) / moi;
+    setpointAccel = MathUtil.clamp(setpointAccel, 0.0, maxAcceleration.get());
+    double maxStep = setpointAccel * Constants.loopPeriodSecs;
+    double error = velocityRadsPerSec - setpointVel;
+    if (Math.abs(error) <= maxStep) {
+      setpointVel = velocityRadsPerSec;
+    } else {
+      setpointVel += Math.copySign(maxStep, error);
+    }
+
+    // Apply outputs
+    atGoal = EqualsUtil.epsilonEquals(setpointVel, velocityRadsPerSec, 2.0);
     outputs.mode = FlywheelIOOutputMode.VELOCITY;
-    outputs.velocityRadsPerSec = setpointRadPerSec;
-    outputs.feedforward = Math.signum(setpointRadPerSec) * kS.get() + setpointRadPerSec * kV.get();
-    Logger.recordOutput("Flywheel/Setpoint", setpointRadPerSec);
+    outputs.velocityRadsPerSec = setpointVel;
+    outputs.feedforward =
+        Math.signum(setpointVel) * kS.get()
+            + setpointVel * kV.get()
+            + Math.signum(error) * setpointAccel * kA.get();
+    Logger.recordOutput("Flywheel/Setpoint", setpointVel);
+    Logger.recordOutput("Flywheel/SetpointAccel", setpointAccel);
     Logger.recordOutput("Flywheel/Goal", velocityRadsPerSec);
     Logger.recordOutput("Flywheel/Feedforward", outputs.feedforward);
   }
@@ -137,7 +184,7 @@ public class Flywheel extends FullSubsystem {
     outputs.mode = FlywheelIOOutputMode.COAST;
     outputs.velocityRadsPerSec = 0.0;
     atGoal = false;
-    slewRateLimiter.reset(inputs.velocityRadsPerSec);
+    setpointVel = getVelocity();
   }
 
   /** Returns the current velocity in RPM. */

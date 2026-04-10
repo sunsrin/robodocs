@@ -10,7 +10,7 @@ package org.littletonrobotics.frc2026.energy;
 public class CurrentLimits {
   public static final double driveLimitAmps = 30;
   public static final double turnLimitAmps = 25;
-  public static final double hopperLimitAmps = 30;
+  public static final double hopperLimitAmps = 60;
   public static final double kickerLimitAmps = 30;
   public static final double flywheelLimitAmps = 60;
   public static final double hoodLimitAmps = 12;

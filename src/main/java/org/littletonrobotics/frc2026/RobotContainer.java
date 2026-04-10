@@ -39,6 +39,7 @@ import org.littletonrobotics.frc2026.AutoSelector.AutoQuestion;
 import org.littletonrobotics.frc2026.AutoSelector.AutoQuestionResponse;
 import org.littletonrobotics.frc2026.Constants.Mode;
 import org.littletonrobotics.frc2026.FieldConstants.AprilTagLayoutType;
+import org.littletonrobotics.frc2026.commands.CompactingCommands;
 import org.littletonrobotics.frc2026.commands.DriveCommands;
 import org.littletonrobotics.frc2026.commands.auto.AutoBuilder;
 import org.littletonrobotics.frc2026.subsystems.drive.Drive;
@@ -400,7 +401,7 @@ public class RobotContainer {
         .whileTrue(hood.runTrackTargetCommand())
         .and(() -> LaunchCalculator.getInstance().getParameters().isValid())
         .and(() -> ignoreHubState.getAsBoolean() || hubActiveOrPassing.getAsBoolean())
-        .and(inLaunchingTolerance.debounce(0.25, DebounceType.kFalling))
+        .and(inLaunchingTolerance.debounce(0.1, DebounceType.kFalling))
         .whileTrue(
             Commands.parallel(
                 Commands.startEnd(
@@ -411,18 +412,7 @@ public class RobotContainer {
                     () -> kicker.setGoal(Kicker.Goal.LAUNCH),
                     () -> kicker.setGoal(Kicker.Goal.STOP),
                     kicker),
-                Commands.waitSeconds(1.0)
-                    .andThen(
-                        Commands.startEnd(
-                            () ->
-                                trashCompactor.setCompactingMode(
-                                    TrashCompactorCompactingMode.FORCE_MIN),
-                            () ->
-                                trashCompactor.setCompactingMode(
-                                    TrashCompactorCompactingMode.PASSIVE_DOWN),
-                            trashCompactor)),
-                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RAMP))
-                    .unless(primary.leftTrigger())))
+                CompactingCommands.compact(trashCompactor, slamtake)))
         .onFalse(
             Commands.startEnd(
                     () -> kicker.setGoal(Kicker.Goal.OUTTAKE),
@@ -455,7 +445,8 @@ public class RobotContainer {
                     Commands.startEnd(
                         () -> kicker.setGoal(Kicker.Goal.LAUNCH),
                         () -> kicker.setGoal(Kicker.Goal.STOP),
-                        kicker))
+                        kicker),
+                    CompactingCommands.compact(trashCompactor, slamtake))
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
     // Outtake
@@ -571,10 +562,11 @@ public class RobotContainer {
         .or(secondary.leftTrigger())
         .whileTrue(
             Commands.runEnd(
-                () -> slamtake.setIntakeGoal(IntakeGoal.INTAKE),
-                () -> slamtake.setIntakeGoal(IntakeGoal.STOP),
-                slamtake))
-        .onTrue(Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)));
+                    () -> slamtake.setIntakeGoal(IntakeGoal.INTAKE),
+                    () -> slamtake.setIntakeGoal(IntakeGoal.STOP),
+                    slamtake)
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming))
+        .whileTrue(Commands.run(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)));
 
     primary.a().whileTrue(DriveCommands.joystickDriveUnderTower(drive, driverX, driverY));
 
@@ -777,16 +769,8 @@ public class RobotContainer {
     // ****** ROBOT STATE *****
 
     // Automatically deploy intake on enable
-    RobotModeTriggers.autonomous()
-        .onTrue(
-            Commands.sequence(
-                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)),
-                Commands.waitSeconds(0.5),
-                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
-                Commands.waitSeconds(0.2),
-                Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))));
-    RobotModeTriggers.teleop()
-        .onTrue(Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)));
+    RobotModeTriggers.disabled()
+        .onFalse(Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)));
 
     // Automatically zero hood and intake
     RobotModeTriggers.teleop()

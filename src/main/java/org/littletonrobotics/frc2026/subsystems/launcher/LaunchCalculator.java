@@ -176,7 +176,7 @@ public class LaunchCalculator {
     timeOfFlightMap.put(3.75, 1.14);
     timeOfFlightMap.put(3.04, 1.09);
     timeOfFlightMap.put(2.43, 1.0);
-    timeOfFlightMap.put(1.64, 1.0);
+    timeOfFlightMap.put(1.64, 0.85);
 
     passingHoodAngleMap.put(5.46, Rotation2d.fromDegrees(38.0));
     passingHoodAngleMap.put(6.62, Rotation2d.fromDegrees(38.0));

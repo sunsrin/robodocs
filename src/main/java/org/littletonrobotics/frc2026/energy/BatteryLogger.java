@@ -20,7 +20,8 @@ public class BatteryLogger {
   @Getter private double driveCurrent = 0.0;
   private double totalPower = 0.0;
   private double totalEnergy = 0.0;
-  @Setter private double batteryVoltage = 12.6;
+
+  @Getter @Setter private double batteryVoltage = 12.6;
   @Setter private double rioCurrent = 0.0;
   @Setter private double macMiniCurrent = 0.0;
 
