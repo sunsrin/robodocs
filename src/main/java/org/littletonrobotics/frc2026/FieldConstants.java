@@ -42,6 +42,8 @@ public class FieldConstants {
   // Fuel dimensions
   public static final double fuelDiameter = Units.inchesToMeters(5.91);
 
+  public static final double trenchBarWidth = Units.inchesToMeters(2.95);
+
   /**
    * Officially defined and relevant vertical lines found on the field (defined by X-axis offset)
    */

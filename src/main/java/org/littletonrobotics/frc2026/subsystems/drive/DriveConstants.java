@@ -150,7 +150,8 @@ public class DriveConstants {
           Constants.getRobot() == RobotType.ALPHABOT
               ? alphabotFullWidthYInches
               : darwinFullWidthYInches);
-  public static final double driveBaseRadius = Math.hypot(trackWidthX / 2, trackWidthY / 2);
+  public static final double driveBaseRadius = Math.hypot(trackWidthX / 2.0, trackWidthY / 2.0);
+  public static final double fullBaseRadius = Math.hypot(fullWidthX / 2.0, fullWidthY / 2.0);
   public static final double maxLinearSpeed =
       Constants.getRobot() == RobotType.ALPHABOT ? alphabotMaxLinearSpeed : darwinMaxLinearSpeed;
   public static final double maxTrajectoryLinearSpeed =

@@ -277,19 +277,7 @@ public class RobotContainer {
     flywheel.setDefaultCommand(
         new ContinuousConditionalCommand(
             flywheel.stopCommand(),
-            flywheel.runFixedCommand(
-                () -> {
-                  var parameters = LaunchCalculator.getInstance().getParameters();
-                  var shift = HubShiftUtil.getShiftedShiftInfo();
-                  if (!parameters.passing()
-                      && (shift.active()
-                          || shift.remainingTime() < 5.0
-                          || ignoreHubState.getAsBoolean())) {
-                    return parameters.flywheelSpeed();
-                  } else {
-                    return LaunchCalculator.passingIdleSpeed.get();
-                  }
-                }),
+            flywheel.runFixedCommand(LaunchCalculator.idleSpeed),
             disableAutoSpinup));
     trashCompactor.setDefaultCommand(
         Commands.run(
@@ -300,21 +288,14 @@ public class RobotContainer {
   private void configureAutos() {
     AutoBuilder autoBuilder =
         new AutoBuilder(
-            drive,
-            slamtake,
-            hopper,
-            kicker,
-            hood,
-            flywheel,
-            trashCompactor,
-            autoSelector::getResponses);
+            drive, slamtake, hopper, kicker, hood, flywheel, autoSelector::getResponses);
 
     // Lowe's Hardware Salesman
     autoSelector.addRoutine(
         "Lowe's Hardware Salesman",
         List.of(
             new AutoQuestion(
-                "Start Location?",
+                "Start Position?",
                 List.of(AutoQuestionResponse.RIGHT_TRENCH, AutoQuestionResponse.RIGHT_BUMP)),
             new AutoQuestion(
                 "Through Tower?", List.of(AutoQuestionResponse.NO, AutoQuestionResponse.YES)),
@@ -326,7 +307,7 @@ public class RobotContainer {
         "Home Depot Salesman",
         List.of(
             new AutoQuestion(
-                "Start Location?",
+                "Start Position?",
                 List.of(AutoQuestionResponse.LEFT_TRENCH, AutoQuestionResponse.LEFT_BUMP)),
             new AutoQuestion(
                 "Through Tower?", List.of(AutoQuestionResponse.NO, AutoQuestionResponse.YES)),
@@ -338,7 +319,7 @@ public class RobotContainer {
         "Monopoly Salesman",
         List.of(
             new AutoQuestion(
-                "Start Location?",
+                "Start Position?",
                 List.of(
                     AutoQuestionResponse.LEFT_TRENCH,
                     AutoQuestionResponse.LEFT_BUMP,
@@ -352,7 +333,7 @@ public class RobotContainer {
         "Timid Salesman",
         List.of(
             new AutoQuestion(
-                "Start Location?",
+                "Start Position?",
                 List.of(
                     AutoQuestionResponse.LEFT_TRENCH,
                     AutoQuestionResponse.LEFT_BUMP,
@@ -399,6 +380,7 @@ public class RobotContainer {
         .whileTrue(DriveCommands.joystickDriveWhileLaunching(drive, driverX, driverY))
         .whileTrue(flywheel.runTrackTargetCommand())
         .whileTrue(hood.runTrackTargetCommand())
+        .onFalse(Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)))
         .and(() -> LaunchCalculator.getInstance().getParameters().isValid())
         .and(() -> ignoreHubState.getAsBoolean() || hubActiveOrPassing.getAsBoolean())
         .and(inLaunchingTolerance.debounce(0.1, DebounceType.kFalling))
@@ -614,16 +596,15 @@ public class RobotContainer {
                         () -> 0.0)));
 
     // Hood and slam and trash compactor run zero commands
-    secondary
-        .x()
-        .onTrue(
-            hood.zeroCommand()
-                .alongWith(slamtake.homeSlam())
-                .alongWith(trashCompactor.homeRunMin()));
+    secondary.x().onTrue(hood.zeroCommand().unless(secondary.b()));
+    secondary.x().onTrue(slamtake.homeSlam().unless(secondary.b()));
+    secondary.x().onTrue(trashCompactor.homeRunMin().asProxy().unless(secondary.b()));
+    secondary.x().and(secondary.b()).onTrue(trashCompactor.homeRunMax());
 
     // Manual zero commands (hood min, slam max, trash compactor min)
     secondary
         .b()
+        .doublePress()
         .onTrue(
             hood.forceZeroCommand()
                 .alongWith(slamtake.zeroMaxSlam())
@@ -769,8 +750,12 @@ public class RobotContainer {
     // ****** ROBOT STATE *****
 
     // Automatically deploy intake on enable
-    RobotModeTriggers.disabled()
-        .onFalse(Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)));
+    RobotModeTriggers.teleop()
+        .onTrue(Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)));
+    RobotModeTriggers.autonomous()
+        .onTrue(
+            Commands.waitSeconds(0.5)
+                .andThen(Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))));
 
     // Automatically zero hood and intake
     RobotModeTriggers.teleop()
@@ -786,11 +771,28 @@ public class RobotContainer {
     // Automatically run intake and flywheel in auto
     RobotModeTriggers.autonomous()
         .whileTrue(
-            Commands.runEnd(
-                () -> slamtake.setIntakeGoal(IntakeGoal.INTAKE),
-                () -> slamtake.setIntakeGoal(IntakeGoal.STOP),
-                slamtake))
-        .whileTrue(flywheel.runTrackTargetCommand());
+            Commands.waitSeconds(1.0)
+                .andThen(
+                    Commands.runEnd(
+                        () -> slamtake.setIntakeGoal(IntakeGoal.INTAKE),
+                        () -> slamtake.setIntakeGoal(IntakeGoal.STOP),
+                        slamtake)))
+        .whileTrue(Commands.waitSeconds(1.5).andThen(flywheel.runTrackTargetCommand()));
+
+    // Force trash compactor up in neutral zone during auto
+    RobotModeTriggers.autonomous()
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  if (TrenchBounds.TrashCompactor.contains(
+                          () -> RobotState.getInstance().getEstimatedPose().getTranslation())
+                      .getAsBoolean()) {
+                    trashCompactor.setCompactingMode(TrashCompactorCompactingMode.FORCE_MIN);
+                  } else {
+                    trashCompactor.setCompactingMode(TrashCompactorCompactingMode.FORCE_MAX);
+                  }
+                },
+                trashCompactor));
 
     // Disable coast when enabling
     RobotModeTriggers.disabled()

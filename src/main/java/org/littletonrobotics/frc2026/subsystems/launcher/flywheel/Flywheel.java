@@ -51,12 +51,13 @@ public class Flywheel extends FullSubsystem {
   private static final DCMotor gearbox = DCMotor.getKrakenX60Foc(4); // Reduction of 1.0
   private static final double moi = 0.02; // kg*m^2
   private static final double efficiency = 0.8; // W(out)/W(in)
+  private static double accelFilterTimeConstant = 0.025; // Seconds
 
   private static final LoggedTunableNumber kP = new LoggedTunableNumber("Flywheel/kP", 0.6);
   private static final LoggedTunableNumber kD = new LoggedTunableNumber("Flywheel/kD", 0.001);
   private static final LoggedTunableNumber kS = new LoggedTunableNumber("Flywheel/kS", 0.4);
   private static final LoggedTunableNumber kV = new LoggedTunableNumber("Flywheel/kV", 0.0193);
-  private static final LoggedTunableNumber kA = new LoggedTunableNumber("Flywheel/kA", 0.002);
+  private static final LoggedTunableNumber kA = new LoggedTunableNumber("Flywheel/kA", 0.003);
   private static final LoggedTunableNumber maxAcceleration =
       new LoggedTunableNumber("Flywheel/MaxAccelerationRadPerSec2", 350.0);
   private static final LoggedTunableNumber supplyLimitTeleop =
@@ -66,6 +67,8 @@ public class Flywheel extends FullSubsystem {
 
   private double supplyLimit = 200.0;
   private double setpointVel = 0.0;
+  private double filteredAccel = 0.0; // Used for kA
+  private boolean nonZeroAccel = false;
 
   @Getter
   @Accessors(fluent = true)
@@ -137,13 +140,15 @@ public class Flywheel extends FullSubsystem {
 
   /** Run closed loop at the specified velocity. */
   private void runVelocity(double velocityRadsPerSec) {
-    // Limit rate of change on setpoint based on supply limit
+    // Calculate power budget from supply limit
     double vBus = Robot.batteryLogger.getBatteryVoltage();
     if (Constants.getMode() == Mode.SIM) {
       vBus = 10.0;
     }
     double powerBudget = supplyLimit * vBus * efficiency;
     double backEmf = setpointVel / gearbox.KvRadPerSecPerVolt;
+
+    // Solve for max stator current from power budget
     // I_sator x V_motor - P = 0
     // I_stator x (I_stator x R - backEmf) - P = 0
     // R x I_stator^2 - backEmf x I_stator - P = 0
@@ -151,18 +156,30 @@ public class Flywheel extends FullSubsystem {
         (-backEmf + Math.sqrt(backEmf * backEmf + 4.0 * gearbox.rOhms * powerBudget))
             / (2.0 * gearbox.rOhms);
     double voltageLimitedCurrent = Math.max(0.0, (vBus - backEmf) / gearbox.rOhms);
-
-    // Limit accel based on velocity setpoint, max acceleration, and friction
     maxStatorCurrent = Math.min(maxStatorCurrent, voltageLimitedCurrent);
-    double setpointAccel =
+
+    // Max acceleration from max stator current
+    double maxAccelFromCurrent =
         (gearbox.getTorque(maxStatorCurrent) - gearbox.getTorque(kS.get() / gearbox.rOhms)) / moi;
-    setpointAccel = MathUtil.clamp(setpointAccel, 0.0, maxAcceleration.get());
-    double maxStep = setpointAccel * Constants.loopPeriodSecs;
+    maxAccelFromCurrent = MathUtil.clamp(maxAccelFromCurrent, 0.0, maxAcceleration.get());
+
+    // Rate-limit velocity setpoint
+    double maxStep = maxAccelFromCurrent * Constants.loopPeriodSecs;
     double error = velocityRadsPerSec - setpointVel;
     if (Math.abs(error) <= maxStep) {
       setpointVel = velocityRadsPerSec;
+      filteredAccel = error / Constants.loopPeriodSecs;
+      nonZeroAccel = false;
     } else {
       setpointVel += Math.copySign(maxStep, error);
+      double rawAccel = Math.copySign(maxAccelFromCurrent, error);
+      if (!nonZeroAccel) {
+        filteredAccel = rawAccel;
+      } else {
+        filteredAccel +=
+            (rawAccel - filteredAccel) * Constants.loopPeriodSecs / accelFilterTimeConstant;
+      }
+      nonZeroAccel = true;
     }
 
     // Apply outputs
@@ -170,11 +187,10 @@ public class Flywheel extends FullSubsystem {
     outputs.mode = FlywheelIOOutputMode.VELOCITY;
     outputs.velocityRadsPerSec = setpointVel;
     outputs.feedforward =
-        Math.signum(setpointVel) * kS.get()
-            + setpointVel * kV.get()
-            + Math.signum(error) * setpointAccel * kA.get();
+        Math.signum(setpointVel) * kS.get() + setpointVel * kV.get() + filteredAccel * kA.get();
+
     Logger.recordOutput("Flywheel/Setpoint", setpointVel);
-    Logger.recordOutput("Flywheel/SetpointAccel", setpointAccel);
+    Logger.recordOutput("Flywheel/SetpointAccel", filteredAccel);
     Logger.recordOutput("Flywheel/Goal", velocityRadsPerSec);
     Logger.recordOutput("Flywheel/Feedforward", outputs.feedforward);
   }

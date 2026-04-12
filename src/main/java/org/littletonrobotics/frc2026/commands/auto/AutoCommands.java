@@ -22,13 +22,13 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.frc2026.AutoFieldConstants;
-import org.littletonrobotics.frc2026.AutoFieldConstants.Bump;
 import org.littletonrobotics.frc2026.AutoSelector.AutoQuestionResponse;
 import org.littletonrobotics.frc2026.Constants;
 import org.littletonrobotics.frc2026.Constants.Mode;
 import org.littletonrobotics.frc2026.FieldConstants;
 import org.littletonrobotics.frc2026.ObjectDetection;
 import org.littletonrobotics.frc2026.RobotState;
+import org.littletonrobotics.frc2026.commands.CompactingCommands;
 import org.littletonrobotics.frc2026.commands.DriveToPose;
 import org.littletonrobotics.frc2026.commands.DriveTrajectory;
 import org.littletonrobotics.frc2026.subsystems.drive.Drive;
@@ -38,10 +38,10 @@ import org.littletonrobotics.frc2026.subsystems.kicker.Kicker;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.flywheel.Flywheel;
 import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake;
+import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake.IntakeGoal;
 import org.littletonrobotics.frc2026.subsystems.slamtake.Slamtake.SlamGoal;
-import org.littletonrobotics.frc2026.subsystems.trashcompactor.TrashCompactor;
-import org.littletonrobotics.frc2026.subsystems.trashcompactor.TrashCompactor.TrashCompactorCompactingMode;
 import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
+import org.littletonrobotics.frc2026.util.SuppliedWaitCommand;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 import org.littletonrobotics.frc2026.util.geometry.Bounds;
 import org.littletonrobotics.frc2026.util.geometry.VerticalFlipUtil;
@@ -55,7 +55,7 @@ public class AutoCommands {
   public static final double bumpCrossTime = 1.5;
 
   // Drives to corner of fuel pool to set up neutral zone intaking
-  public static Command salesmanTurn(Drive drive) {
+  public static Command salesmanTurn(Drive drive, Supplier<AutoQuestionResponse> side) {
     return driveToPose(
             drive,
             () -> {
@@ -71,14 +71,16 @@ public class AutoCommands {
               return new Pose2d(
                   xTarget,
                   MathUtil.interpolate(
-                      isLeftSide()
+                      isLeftSide(side).getAsBoolean()
                           ? FieldConstants.FuelPool.leftCenter.getY() - 0.0
                           : FieldConstants.FuelPool.rightCenter.getY() + 0.0,
-                      isLeftSide()
+                      isLeftSide(side).getAsBoolean()
                           ? FieldConstants.FuelPool.leftCenter.getY() + 3.5
                           : FieldConstants.FuelPool.rightCenter.getY() - 3.5,
                       t),
-                  isLeftSide() ? Rotation2d.fromDegrees(-50.0) : Rotation2d.fromDegrees(50.0));
+                  isLeftSide(side).getAsBoolean()
+                      ? Rotation2d.fromDegrees(-50.0)
+                      : Rotation2d.fromDegrees(50.0));
             })
         .withTimeout(1.0);
   }
@@ -107,7 +109,11 @@ public class AutoCommands {
   public static Command returnToDeterminedLaunchPose(
       Drive drive, Supplier<AutoQuestionResponse> returnResponse) {
     return returnToDeterminedLaunchPose(
-        drive, () -> returnResponse.get() == AutoQuestionResponse.LEFT_BUMP);
+        drive,
+        () ->
+            returnResponse.get().equals(AutoQuestionResponse.LEFT)
+                || returnResponse.get().equals(AutoQuestionResponse.LEFT_BUMP)
+                || returnResponse.get().equals(AutoQuestionResponse.LEFT_NO_TRENCH));
   }
 
   /** Returns to launch pose from neutral zone. */
@@ -144,9 +150,11 @@ public class AutoCommands {
                       t),
                   target.getY());
           var targetRotation =
-              xPosition < FieldConstants.LinesVertical.neutralZoneNear - 0.05
+              xPosition < FieldConstants.LinesVertical.starting - DriveConstants.fullWidthX / 2.0
                   ? target.getRotation()
-                  : targetTranslation.minus(currentPose.getTranslation()).getAngle();
+                  : xPosition < FieldConstants.LinesVertical.neutralZoneNear + 2.5
+                      ? Rotation2d.fromDegrees(leftBump.getAsBoolean() ? 90 : -90)
+                      : targetTranslation.minus(currentPose.getTranslation()).getAngle();
           return new Pose2d(targetTranslation, targetRotation);
         });
   }
@@ -197,6 +205,11 @@ public class AutoCommands {
 
   public static Command followTrajectoryWhileAiming(
       String name, Drive drive, boolean start, BooleanSupplier shouldAim) {
+    return followTrajectoryWhileAiming(name, drive, start, shouldAim, () -> false);
+  }
+
+  public static Command followTrajectoryWhileAiming(
+      String name, Drive drive, boolean start, BooleanSupplier shouldAim, BooleanSupplier mirror) {
     Optional<Trajectory<SwerveSample>> trajectoryOptional = Choreo.loadTrajectory(name);
     if (trajectoryOptional.isPresent()) {
       Trajectory<SwerveSample> trajectory = trajectoryOptional.get();
@@ -209,7 +222,8 @@ public class AutoCommands {
               trajectory,
               () ->
                   shouldAim.getAsBoolean() ? Optional.of(launchOnTheMoveOmega()) : Optional.empty(),
-              drive));
+              drive,
+              mirror));
     } else {
       throw new RuntimeException("Choreo Trajectory Not Found: " + name);
     }
@@ -229,35 +243,57 @@ public class AutoCommands {
         .withTimeout(Constants.getMode().equals(Mode.SIM) ? 0.7 : time);
   }
 
-  public static Command index(
+  public static Command index(Hopper hopper, Kicker kicker, Flywheel flywheel, Slamtake slamtake) {
+    return Commands.waitUntil(flywheel::atGoal)
+        .andThen(
+            new SuppliedWaitCommand(CompactingCommands.slamLaunchDelay)
+                .andThen(
+                    Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT_SLOW)),
+                    Commands.runEnd(
+                            () -> slamtake.setIntakeGoal(IntakeGoal.INTAKE),
+                            () -> slamtake.setIntakeGoal(IntakeGoal.STOP),
+                            slamtake)
+                        .asProxy()))
+        .deadlineFor(
+            Commands.startEnd(
+                () -> {
+                  hopper.setGoal(Hopper.Goal.LAUNCH);
+                  kicker.setGoal(Kicker.Goal.LAUNCH);
+                },
+                () -> {
+                  hopper.setGoal(Hopper.Goal.STOP);
+                  kicker.setGoal(Kicker.Goal.STOP);
+                },
+                hopper,
+                kicker));
+  }
+
+  // Stay retracted while under trench
+  public static Command indexMindfully(
       Hopper hopper,
       Kicker kicker,
       Flywheel flywheel,
       Slamtake slamtake,
-      TrashCompactor trashCompactor) {
-    return Commands.waitUntil(flywheel::atGoal)
+      BooleanSupplier shouldIndex) {
+    return Commands.waitUntil(() -> flywheel.atGoal() && shouldIndex.getAsBoolean())
         .andThen(
-            Commands.startEnd(
-                    () -> {
-                      hopper.setGoal(Hopper.Goal.LAUNCH);
-                      kicker.setGoal(Kicker.Goal.LAUNCH);
-                      trashCompactor.setCompactingMode(TrashCompactorCompactingMode.LAUNCHING);
-                    },
-                    () -> {
-                      hopper.setGoal(Hopper.Goal.STOP);
-                      kicker.setGoal(Kicker.Goal.STOP);
-                      trashCompactor.setCompactingMode(TrashCompactorCompactingMode.PASSIVE_DOWN);
-                    },
-                    hopper,
-                    kicker,
-                    trashCompactor)
-                // .withDeadline(
-                //     Commands.repeatingSequence(
-                //         Commands.waitSeconds(1.5),
-                //         Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.RETRACT)),
-                //         Commands.waitSeconds(0.5),
-                //         Commands.runOnce(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY))))
-                .finallyDo(() -> slamtake.setSlamGoal(SlamGoal.DEPLOY)));
+            new SuppliedWaitCommand(CompactingCommands.slamLaunchDelay)
+                .andThen(
+                    Commands.run(() -> slamtake.setSlamGoal(SlamGoal.RETRACT_SLOW)),
+                    Commands.idle())
+                .deadlineFor(
+                    Commands.startEnd(
+                        () -> {
+                          hopper.setGoal(Hopper.Goal.LAUNCH);
+                          kicker.setGoal(Kicker.Goal.LAUNCH);
+                        },
+                        () -> {
+                          hopper.setGoal(Hopper.Goal.STOP);
+                          kicker.setGoal(Kicker.Goal.STOP);
+                        },
+                        hopper,
+                        kicker)))
+        .finallyDo(() -> slamtake.setSlamGoal(SlamGoal.RETRACT));
   }
 
   public static Translation2d keepOutX(Bounds bounds, Translation2d translation) {
@@ -288,21 +324,46 @@ public class AutoCommands {
       Kicker kicker,
       Flywheel flywheel,
       Slamtake slamtake,
-      TrashCompactor trashCompactor) {
+      Supplier<AutoQuestionResponse> passingMode,
+      double launchTime) {
     Supplier<Pose2d> targetSupplier =
-        () ->
-            LaunchCalculator.getStationaryAimedPose(
-                keepOutY(
-                    AllianceFlipUtil.apply(LaunchCalculator.nearHubBound),
-                    RobotState.getInstance().getEstimatedPose().getTranslation()),
-                false);
+        () -> {
+          // Left-Right and Hub constraints
+          Bounds passingZone =
+              passingMode.get().equals(AutoQuestionResponse.BOTH)
+                  ? new Bounds(0.0, FieldConstants.fieldLength, 0.0, FieldConstants.fieldWidth)
+                  : AllianceFlipUtil.apply(
+                      passingMode.get().equals(AutoQuestionResponse.LEFT_CLOSE)
+                          ? new Bounds(
+                              FieldConstants.LinesVertical.neutralZoneNear,
+                              FieldConstants.LinesVertical.neutralZoneFar,
+                              FieldConstants.LinesHorizontal.leftBumpEnd,
+                              FieldConstants.fieldWidth)
+                          : new Bounds(
+                              FieldConstants.LinesVertical.neutralZoneNear,
+                              FieldConstants.LinesVertical.neutralZoneFar,
+                              0.0,
+                              FieldConstants.LinesHorizontal.rightBumpStart));
+
+          return LaunchCalculator.getStationaryAimedPose(
+              // Stay on close side of neutral zone
+              keepOutX(
+                  AllianceFlipUtil.apply(
+                      new Bounds(
+                          FieldConstants.fieldLength / 2.0 + DriveConstants.fullWidthX / 2.0 - 0.2,
+                          FieldConstants.fieldLength,
+                          0.0,
+                          FieldConstants.fieldWidth)),
+                  passingZone.clamp(RobotState.getInstance().getEstimatedPose().getTranslation())),
+              false);
+        };
 
     return new DriveToPose(drive, targetSupplier)
         .raceWith(
             Commands.sequence(
                 AutoCommands.waitUntilWithinTolerance(
                     targetSupplier, 0.5, Rotation2d.fromDegrees(15)),
-                index(hopper, kicker, flywheel, slamtake, trashCompactor)));
+                index(hopper, kicker, flywheel, slamtake).withTimeout(launchTime)));
   }
 
   public static Bounds expandBounds(Bounds a, Bounds b) {
@@ -336,10 +397,12 @@ public class AutoCommands {
         AllianceFlipUtil.shouldFlip()
             ? (returnSide.get().equals(AutoQuestionResponse.LEFT_BUMP)
                     || returnSide.get().equals(AutoQuestionResponse.LEFT_TRENCH)
+                    || returnSide.get().equals(AutoQuestionResponse.LEFT_NO_TRENCH)
                 ? 2
                 : 3)
             : (returnSide.get().equals(AutoQuestionResponse.LEFT_BUMP)
                     || returnSide.get().equals(AutoQuestionResponse.LEFT_TRENCH)
+                    || returnSide.get().equals(AutoQuestionResponse.LEFT_NO_TRENCH)
                 ? 1
                 : 0);
     Logger.recordOutput("AutoCommands/DynamicBounds/HomeIndex", homeIndex);
@@ -375,15 +438,20 @@ public class AutoCommands {
         homeBounds.maxY());
   }
 
-  public static boolean isLeftSide() {
-    return RobotState.getInstance()
-            .getEstimatedPose()
-            .getTranslation()
-            .getDistance(AllianceFlipUtil.apply(Bump.leftInner.translation()))
-        < RobotState.getInstance()
-            .getEstimatedPose()
-            .getTranslation()
-            .getDistance(AllianceFlipUtil.apply(Bump.rightInner.translation()));
+  public static BooleanSupplier isLeftSide(AutoQuestionResponse side) {
+    return () ->
+        side.equals(AutoQuestionResponse.LEFT)
+            || side.equals(AutoQuestionResponse.LEFT_BUMP)
+            || side.equals(AutoQuestionResponse.LEFT_TRENCH)
+            || side.equals(AutoQuestionResponse.LEFT_NO_TRENCH);
+  }
+
+  public static BooleanSupplier isLeftSide(Supplier<AutoQuestionResponse> side) {
+    return () ->
+        side.get().equals(AutoQuestionResponse.LEFT)
+            || side.get().equals(AutoQuestionResponse.LEFT_BUMP)
+            || side.get().equals(AutoQuestionResponse.LEFT_TRENCH)
+            || side.get().equals(AutoQuestionResponse.LEFT_NO_TRENCH);
   }
 
   public static boolean xCrossed(double xPosition, boolean towardsCenter) {
@@ -492,8 +560,16 @@ public class AutoCommands {
         });
   }
 
-  public static Command resetStartingPose(Supplier<AutoQuestionResponse> startingLocation) {
+  public static Command resetStartingPose(Supplier<AutoQuestionResponse> startPosition) {
     return resetPose(
-        () -> new Pose2d(startingLocation.get().getWaypoint().translation(), Rotation2d.kZero));
+        () -> {
+          if (startPosition.get().equals(AutoQuestionResponse.LEFT_TRENCH)) {
+            return new Pose2d(startPosition.get().getTranslation(), Rotation2d.fromDegrees(-90));
+          } else if (startPosition.get().equals(AutoQuestionResponse.RIGHT_TRENCH)) {
+            return new Pose2d(startPosition.get().getTranslation(), Rotation2d.fromDegrees(90));
+          } else {
+            return new Pose2d(startPosition.get().getTranslation(), Rotation2d.kZero);
+          }
+        });
   }
 }

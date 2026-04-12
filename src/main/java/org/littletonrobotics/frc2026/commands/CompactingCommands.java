@@ -18,7 +18,7 @@ import org.littletonrobotics.frc2026.util.LoggedTunableNumber;
 import org.littletonrobotics.frc2026.util.SuppliedWaitCommand;
 
 public class CompactingCommands {
-  private static final LoggedTunableNumber slamLaunchDelay =
+  public static final LoggedTunableNumber slamLaunchDelay =
       new LoggedTunableNumber("CompactingCommands/SlamLaunchDelay", 0.5);
 
   private CompactingCommands() {}

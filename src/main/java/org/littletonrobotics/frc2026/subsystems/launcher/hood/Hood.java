@@ -10,7 +10,6 @@ package org.littletonrobotics.frc2026.subsystems.launcher.hood;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -24,6 +23,7 @@ import lombok.Setter;
 import org.littletonrobotics.frc2026.DarwinMechanism3d;
 import org.littletonrobotics.frc2026.Robot;
 import org.littletonrobotics.frc2026.RobotState;
+import org.littletonrobotics.frc2026.TrenchBounds;
 import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.subsystems.launcher.hood.HoodIO.HoodIOOutputMode;
 import org.littletonrobotics.frc2026.subsystems.launcher.hood.HoodIO.HoodIOOutputs;
@@ -178,17 +178,12 @@ public class Hood extends FullSubsystem {
         .ignoringDisable(true);
   }
 
-  private boolean inTrenchBounds() {
-    Translation2d robotTranslation = RobotState.getInstance().getEstimatedPose().getTranslation();
-    return HoodTrenchBounds.redNearTrench.contains(robotTranslation)
-        || HoodTrenchBounds.redFarTrench.contains(robotTranslation)
-        || HoodTrenchBounds.blueNearTrench.contains(robotTranslation)
-        || HoodTrenchBounds.blueFarTrench.contains(robotTranslation);
-  }
-
   public Command autonomousCommand() {
     return new ContinuousConditionalCommand(
-        runFixedCommand(() -> minAngle, () -> 0.0), runTrackTargetCommand(), this::inTrenchBounds);
+        runFixedCommand(() -> minAngle, () -> 0.0),
+        runTrackTargetCommand(),
+        TrenchBounds.Hood.contains(
+            () -> RobotState.getInstance().getEstimatedPose().getTranslation()));
   }
 
   public Command runTrackTargetCommand() {

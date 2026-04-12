@@ -119,7 +119,7 @@ public class VisionConstants {
                           return Optional.empty();
                         }
                       })
-                  .id("24736221")
+                  .id("24737133")
                   .width(1280)
                   .height(960)
                   .exposure(colorExposure)
@@ -134,9 +134,9 @@ public class VisionConstants {
                       (Double timestamp) -> {
                         return Optional.of(
                             new Pose3d(
-                                -0.170876,
-                                0.316794,
-                                0.435489,
+                                -0.170833,
+                                0.316631,
+                                0.435463,
                                 new Rotation3d(
                                     0.0,
                                     Units.degreesToRadians(12.0 + cameraPitchFudgeDegrees[2].get()),
@@ -157,15 +157,15 @@ public class VisionConstants {
                       (Double timestamp) -> {
                         return Optional.of(
                             new Pose3d(
-                                -0.157981,
-                                -0.316207,
-                                0.435679,
+                                -0.158133,
+                                -0.316631,
+                                0.435463,
                                 new Rotation3d(
                                     0.0,
                                     Units.degreesToRadians(12.0 + cameraPitchFudgeDegrees[3].get()),
                                     Units.degreesToRadians(-70.0))));
                       })
-                  .id("24737133")
+                  .id("24736221")
                   .width(1280)
                   .height(960)
                   .exposure(colorExposure)

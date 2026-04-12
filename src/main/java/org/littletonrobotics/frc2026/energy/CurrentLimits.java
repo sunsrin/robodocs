@@ -14,7 +14,7 @@ public class CurrentLimits {
   public static final double kickerLimitAmps = 30;
   public static final double flywheelLimitAmps = 60;
   public static final double hoodLimitAmps = 12;
-  public static final double slamLimitAmps = 20;
+  public static final double slamLimitAmps = 50;
   public static final double intakeLimitAmps = 70;
   public static final double trashCompactorLimitAmps = 40;
 }

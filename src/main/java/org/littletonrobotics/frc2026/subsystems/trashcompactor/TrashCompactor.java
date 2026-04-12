@@ -51,8 +51,10 @@ public class TrashCompactor extends FullSubsystem {
   private static final LoggedTunableNumber maxAcceleration =
       new LoggedTunableNumber("TrashCompactor/Profile/MaxAcceleration", 15.0);
 
-  private static final LoggedTunableNumber homingVolts =
-      new LoggedTunableNumber("TrashCompactor/Homing/Volts", -4.0);
+  private static final LoggedTunableNumber homingDownVolts =
+      new LoggedTunableNumber("TrashCompactor/Homing/VoltsDown", -4.0);
+  private static final LoggedTunableNumber homingUpVolts =
+      new LoggedTunableNumber("TrashCompactor/Homing/VoltsUp", 4.0);
   private static final LoggedTunableNumber homingVelocityThreshold =
       new LoggedTunableNumber("TrashCompactor/Homing/VelocityThreshold", 0.02);
 
@@ -105,6 +107,9 @@ public class TrashCompactor extends FullSubsystem {
 
     motorDisconnectedAlert.set(
         Robot.showHardwareAlerts() && !motorConnectedDebouncer.calculate(inputs.connected));
+
+    Robot.batteryLogger.reportCurrentUsage(
+        "TrashCompactor", false, inputs.connected ? inputs.supplyCurrentAmps : 0.0);
 
     if (kP.hasChanged(hashCode()) || kD.hasChanged(hashCode())) {
       outputs.kP = kP.get();
@@ -210,6 +215,11 @@ public class TrashCompactor extends FullSubsystem {
     zeroed = true;
   }
 
+  public void zeroMaxHeight() {
+    offset = maxHeight - inputs.positionRads * sprocketRadius;
+    zeroed = true;
+  }
+
   public Command zeroMinCommand() {
     return Commands.runOnce(() -> zeroMinHeight());
   }
@@ -217,7 +227,7 @@ public class TrashCompactor extends FullSubsystem {
   public Command homeRunMin() {
     return run(() -> {
           // Override command from periodic
-          runVolts(homingVolts.get());
+          runVolts(homingDownVolts.get());
           zeroed = false;
         })
         .raceWith(
@@ -228,6 +238,22 @@ public class TrashCompactor extends FullSubsystem {
                             Math.abs(getMeasuredVelocityMetersPerSec())
                                 <= homingVelocityThreshold.get())))
         .andThen(this::zeroMinHeight);
+  }
+
+  public Command homeRunMax() {
+    return run(() -> {
+          // Override command from periodic
+          runVolts(homingUpVolts.get());
+          zeroed = false;
+        })
+        .raceWith(
+            Commands.waitSeconds(1.0)
+                .andThen(
+                    Commands.waitUntil(
+                        () ->
+                            Math.abs(getMeasuredVelocityMetersPerSec())
+                                <= homingVelocityThreshold.get())))
+        .andThen(this::zeroMaxHeight);
   }
 
   public void setCompactingMode(TrashCompactorCompactingMode mode) {

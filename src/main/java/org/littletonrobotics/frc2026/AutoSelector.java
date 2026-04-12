@@ -7,6 +7,7 @@
 
 package org.littletonrobotics.frc2026;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -21,7 +22,7 @@ import org.littletonrobotics.frc2026.util.VirtualSubsystem;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class AutoSelector extends VirtualSubsystem {
-  private static final int maxQuestions = 4;
+  private static final int maxQuestions = 6;
   private static final AutoRoutine defaultRoutine =
       new AutoRoutine("Posthumous Salesman", List.of(), Commands.none());
 
@@ -146,26 +147,28 @@ public class AutoSelector extends VirtualSubsystem {
     CENTER(Hub.centerStart),
     RIGHT_BUMP(Bump.rightInner),
     RIGHT_TRENCH(Trench.rightStart),
+    LEFT(),
+    RIGHT(),
     LEFT_CLOSE(),
     RIGHT_CLOSE(),
-    DYNAMIC_ETHICAL(),
-    DYNAMIC_UNETHICAL(),
+    LEFT_NO_TRENCH(),
+    RIGHT_NO_TRENCH(),
     CLOSEST(),
-    CLIMB(),
     NOTHING(),
     YES(),
     NO(),
+    BOTH(),
     NONE(),
     FULL_CLOSE();
 
-    @Getter private final Waypoint waypoint;
+    @Getter private final Translation2d translation;
 
-    AutoQuestionResponse(Waypoint waypoint) {
-      this.waypoint = waypoint;
+    AutoQuestionResponse(Translation2d translation) {
+      this.translation = translation;
     }
 
     AutoQuestionResponse() {
-      waypoint = null;
+      translation = null;
     }
   }
 }
