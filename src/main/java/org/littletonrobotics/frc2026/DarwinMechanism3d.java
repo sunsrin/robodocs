@@ -73,7 +73,10 @@ public class DarwinMechanism3d {
     if (Constants.getRobot() == RobotType.DARWIN) {
       var cameraPose = VisionConstants.cameras[1].poseFunction().apply(Timer.getTimestamp());
       if (cameraPose.isPresent()) {
-        Logger.recordOutput(key + "/Camera", cameraPose.get());
+        Logger.recordOutput(
+            key + "/Camera",
+            new Pose3d(RobotState.getInstance().getEstimatedPose())
+                .transformBy(cameraPose.get().toTransform3d()));
       }
     }
   }

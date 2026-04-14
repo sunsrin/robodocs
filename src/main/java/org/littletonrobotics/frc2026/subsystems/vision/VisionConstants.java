@@ -30,6 +30,8 @@ public class VisionConstants {
   public static final double thetaStdDevCoefficient = 0.03;
   public static final double fuelDetectConfidenceThreshold = 0.0; // Enforced by Northstar
   public static final double robotDetectConfidenceThreshold = 0.0; // Enforced by Northstar
+  public static final double zMin = -0.5;
+  public static final double zMax = 1.0;
 
   // Moving camera constants
   public static final double robotToPivotX = Units.inchesToMeters(12.480);
@@ -44,8 +46,8 @@ public class VisionConstants {
   private static LoggedTunableNumber[] cameraPitchFudgeDegrees =
       new LoggedTunableNumber[] {
         new LoggedTunableNumber("Vision/Camera0PitchFudgeDeg", 0.0),
-        new LoggedTunableNumber("Vision/Camera1PitchFudgeDeg", 0.0),
-        new LoggedTunableNumber("Vision/Camera2PitchFudgeDeg", 0.0),
+        new LoggedTunableNumber("Vision/Camera1PitchFudgeDeg", -4.5),
+        new LoggedTunableNumber("Vision/Camera2PitchFudgeDeg", -1.0),
         new LoggedTunableNumber("Vision/Camera3PitchFudgeDeg", 0.0)
       };
 
@@ -107,7 +109,7 @@ public class VisionConstants {
                                   + hopperWallToCameraX;
                           return Optional.of(
                               new Pose3d(
-                                  Units.inchesToMeters(cameraPosition),
+                                  cameraPosition,
                                   Units.inchesToMeters(8.476),
                                   Units.inchesToMeters(19.096),
                                   new Rotation3d(

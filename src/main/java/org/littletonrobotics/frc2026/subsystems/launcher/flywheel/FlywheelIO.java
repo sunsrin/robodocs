@@ -19,6 +19,7 @@ public interface FlywheelIO {
     public double positionRads;
     public double velocityRadsPerSec;
     public double appliedVoltage;
+    public double supplyVoltage;
     public double supplyCurrentAmps;
     public double torqueCurrentAmps;
     public double tempCelsius;
@@ -32,7 +33,8 @@ public interface FlywheelIO {
 
   public static enum FlywheelIOOutputMode {
     COAST,
-    VELOCITY
+    VELOCITY,
+    VOLTAGE
   }
 
   public static class FlywheelIOOutputs {

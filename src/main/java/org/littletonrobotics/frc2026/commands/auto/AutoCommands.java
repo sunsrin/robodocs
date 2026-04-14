@@ -152,9 +152,8 @@ public class AutoCommands {
           var targetRotation =
               xPosition < FieldConstants.LinesVertical.starting - DriveConstants.fullWidthX / 2.0
                   ? target.getRotation()
-                  : xPosition < FieldConstants.LinesVertical.neutralZoneNear + 2.5
-                      ? Rotation2d.fromDegrees(leftBump.getAsBoolean() ? 90 : -90)
-                      : targetTranslation.minus(currentPose.getTranslation()).getAngle();
+                  : AllianceFlipUtil.apply(
+                      Rotation2d.fromDegrees(leftBump.getAsBoolean() ? 90 : -90));
           return new Pose2d(targetTranslation, targetRotation);
         });
   }
@@ -451,6 +450,7 @@ public class AutoCommands {
         side.get().equals(AutoQuestionResponse.LEFT)
             || side.get().equals(AutoQuestionResponse.LEFT_BUMP)
             || side.get().equals(AutoQuestionResponse.LEFT_TRENCH)
+            || side.get().equals(AutoQuestionResponse.LEFT_TRENCH_OFFSET)
             || side.get().equals(AutoQuestionResponse.LEFT_NO_TRENCH);
   }
 
@@ -564,9 +564,15 @@ public class AutoCommands {
     return resetPose(
         () -> {
           if (startPosition.get().equals(AutoQuestionResponse.LEFT_TRENCH)) {
-            return new Pose2d(startPosition.get().getTranslation(), Rotation2d.fromDegrees(-90));
+            return new Pose2d(AutoFieldConstants.Trench.leftStart, Rotation2d.fromDegrees(-90));
+          } else if (startPosition.get().equals(AutoQuestionResponse.LEFT_TRENCH_OFFSET)) {
+            return new Pose2d(
+                AutoFieldConstants.Trench.leftStartOffset, Rotation2d.fromDegrees(-90));
           } else if (startPosition.get().equals(AutoQuestionResponse.RIGHT_TRENCH)) {
-            return new Pose2d(startPosition.get().getTranslation(), Rotation2d.fromDegrees(90));
+            return new Pose2d(AutoFieldConstants.Trench.rightStart, Rotation2d.fromDegrees(90));
+          } else if (startPosition.get().equals(AutoQuestionResponse.RIGHT_TRENCH_OFFSET)) {
+            return new Pose2d(
+                AutoFieldConstants.Trench.rightStartOffset, Rotation2d.fromDegrees(90));
           } else {
             return new Pose2d(startPosition.get().getTranslation(), Rotation2d.kZero);
           }

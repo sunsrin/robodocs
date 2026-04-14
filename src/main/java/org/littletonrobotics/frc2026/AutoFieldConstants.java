@@ -15,15 +15,6 @@ import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
 import org.littletonrobotics.frc2026.util.geometry.VerticalFlipUtil;
 
 public class AutoFieldConstants {
-  public enum Area {
-    DEPOT,
-    TOWER,
-    OUTPOST,
-    START,
-    NEUTRAL_ZONE,
-    LAUNCH
-  }
-
   public static class Trench {
     // Positioned so the robot is right in front of the starting line
     public static final Translation2d leftStart =
@@ -33,6 +24,15 @@ public class AutoFieldConstants {
                     + FieldConstants.LinesHorizontal.leftTrenchOpenEnd)
                 / 2.0);
     public static final Translation2d rightStart = VerticalFlipUtil.apply(leftStart);
+
+    // Positioned so the robot is right behind the starting line
+    public static final Translation2d leftStartOffset =
+        new Translation2d(
+            FieldConstants.LinesVertical.starting - DriveConstants.fullWidthX / 2.0,
+            (FieldConstants.LinesHorizontal.leftTrenchOpenStart
+                    + FieldConstants.LinesHorizontal.leftTrenchOpenEnd)
+                / 2.0);
+    public static final Translation2d rightStartOffset = VerticalFlipUtil.apply(leftStartOffset);
 
     // Inside from the trench so that the robot clears the trapezoid extension
     public static final Translation2d leftEntry =
@@ -102,20 +102,6 @@ public class AutoFieldConstants {
         new Translation2d(
             FieldConstants.Depot.depth / 2.0 + 0.2,
             FieldConstants.Depot.rightCorner.getY() - DriveConstants.fullWidthX / 2.0 - 0.1);
-  }
-
-  public static class Outpost {
-    public static final Pose2d leftIntake =
-        new Pose2d(
-            FieldConstants.Outpost.centerPoint.plus(
-                new Translation2d(DriveConstants.fullWidthX / 2 + 0.1, 0.25)),
-            Rotation2d.fromDegrees(-90));
-
-    public static final Pose2d frontIntake =
-        new Pose2d(
-            FieldConstants.Outpost.centerPoint.plus(
-                new Translation2d(DriveConstants.fullWidthX / 2.0 + 0.25, 0.1)),
-            Rotation2d.kPi);
   }
 
   public static class Tower {

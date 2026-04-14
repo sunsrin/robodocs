@@ -115,7 +115,9 @@ public class LaunchCalculator {
           new LoggedTunableNumber("LaunchCalculator/Presets/HoodMax/FlywheelSpeed", 50));
 
   public static final LoggedTunableNumber idleSpeed =
-      new LoggedTunableNumber("LaunchCalculator/IdleSpeed", 125);
+      new LoggedTunableNumber("LaunchCalculator/IdleSpeed", 80);
+  public static final LoggedTunableNumber linearDragTimeConstant =
+      new LoggedTunableNumber("LaunchCalculator/LinearDragTimeConstant", 0.45);
 
   public static record LaunchPreset(
       LoggedTunableNumber hoodAngleDeg, LoggedTunableNumber flywheelSpeed) {}
@@ -143,20 +145,31 @@ public class LaunchCalculator {
           FieldConstants.LinesHorizontal.leftBumpEnd);
 
   static {
-    minDistance = 1.0;
-    maxDistance = 4.9;
+    minDistance = 0.6;
+    maxDistance = 5.3;
     passingMinDistance = 5.4;
     passingMaxDistance = 17.16;
     phaseDelay = 0.03;
 
-    hoodAngleMap.put(1.15, Rotation2d.fromDegrees(10.0));
-    hoodAngleMap.put(1.41, Rotation2d.fromDegrees(14.0));
-    hoodAngleMap.put(1.81, Rotation2d.fromDegrees(17.0));
-    hoodAngleMap.put(2.32, Rotation2d.fromDegrees(21.0));
-    hoodAngleMap.put(2.71, Rotation2d.fromDegrees(24.0));
-    hoodAngleMap.put(3.38, Rotation2d.fromDegrees(29.0));
-    hoodAngleMap.put(4.04, Rotation2d.fromDegrees(33.0));
-    hoodAngleMap.put(4.83, Rotation2d.fromDegrees(38.0));
+    hoodAngleMap.put(0.75, Rotation2d.fromDegrees(10.0));
+    hoodAngleMap.put(1.65, Rotation2d.fromDegrees(20.0));
+    hoodAngleMap.put(2.10, Rotation2d.fromDegrees(23.0));
+    hoodAngleMap.put(2.62, Rotation2d.fromDegrees(26.0));
+    hoodAngleMap.put(3.40, Rotation2d.fromDegrees(29.0));
+    hoodAngleMap.put(3.80, Rotation2d.fromDegrees(31.0));
+    hoodAngleMap.put(4.27, Rotation2d.fromDegrees(33.0));
+    hoodAngleMap.put(4.65, Rotation2d.fromDegrees(34.0));
+    hoodAngleMap.put(5.00, Rotation2d.fromDegrees(37.0));
+
+    flywheelSpeedMap.put(0.75, 145.0);
+    flywheelSpeedMap.put(1.65, 145.0);
+    flywheelSpeedMap.put(2.10, 155.0);
+    flywheelSpeedMap.put(2.62, 160.0);
+    flywheelSpeedMap.put(3.40, 175.0);
+    flywheelSpeedMap.put(3.80, 180.0);
+    flywheelSpeedMap.put(4.27, 190.0);
+    flywheelSpeedMap.put(4.65, 195.0);
+    flywheelSpeedMap.put(5.00, 200.0);
 
     flywheelSpeedMap.put(1.15, 170.0);
     flywheelSpeedMap.put(1.41, 160.0);
@@ -172,11 +185,11 @@ public class LaunchCalculator {
     kickerSurfaceSpeedMap.put(4.0, 3.0);
     kickerSurfaceSpeedMap.put(5.0, 3.0);
 
-    timeOfFlightMap.put(4.83, 1.14);
-    timeOfFlightMap.put(3.75, 1.14);
-    timeOfFlightMap.put(3.04, 1.09);
-    timeOfFlightMap.put(2.43, 1.0);
-    timeOfFlightMap.put(1.64, 0.85);
+    timeOfFlightMap.put(1.63, 1.017);
+    timeOfFlightMap.put(2.40, 0.967);
+    timeOfFlightMap.put(3.25, 1.19);
+    timeOfFlightMap.put(4.15, 1.18);
+    timeOfFlightMap.put(4.875, 1.25);
 
     passingHoodAngleMap.put(5.46, Rotation2d.fromDegrees(38.0));
     passingHoodAngleMap.put(6.62, Rotation2d.fromDegrees(38.0));
@@ -186,7 +199,7 @@ public class LaunchCalculator {
     passingFlywheelSpeedMap.put(5.46, 160.0);
     passingFlywheelSpeedMap.put(6.62, 180.0);
     passingFlywheelSpeedMap.put(7.80, 200.0);
-    passingFlywheelSpeedMap.put(17.16, 360.0);
+    passingFlywheelSpeedMap.put(17.16, 400.0);
 
     passingKickerSurfaceSpeedMap.put(0.0, 6.0);
 
@@ -195,7 +208,7 @@ public class LaunchCalculator {
     passingTimeOfFlightMap.put(7.8, 1.49);
     passingTimeOfFlightMap.put(11.0, 1.75);
     passingTimeOfFlightMap.put(13.0, 1.76);
-    passingTimeOfFlightMap.put(17.16, 2.16);
+    passingTimeOfFlightMap.put(17.16, 2.5);
 
     passingPreset =
         new LaunchPreset(
@@ -287,8 +300,11 @@ public class LaunchCalculator {
           passing
               ? passingTimeOfFlightMap.get(lookaheadLauncherToTargetDistance)
               : timeOfFlightMap.get(lookaheadLauncherToTargetDistance);
-      double offsetX = launcherVelocity.vxMetersPerSecond * timeOfFlight;
-      double offsetY = launcherVelocity.vyMetersPerSecond * timeOfFlight;
+      double effectiveTOF =
+          (1 - Math.exp(-timeOfFlight * linearDragTimeConstant.get()))
+              / linearDragTimeConstant.get();
+      double offsetX = launcherVelocity.vxMetersPerSecond * effectiveTOF;
+      double offsetY = launcherVelocity.vyMetersPerSecond * effectiveTOF;
       lookaheadPose =
           new Pose2d(
               launcherPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),

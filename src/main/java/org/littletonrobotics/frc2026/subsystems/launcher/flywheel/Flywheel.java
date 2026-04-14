@@ -51,20 +51,28 @@ public class Flywheel extends FullSubsystem {
   private static final DCMotor gearbox = DCMotor.getKrakenX60Foc(4); // Reduction of 1.0
   private static final double moi = 0.02; // kg*m^2
   private static final double efficiency = 0.8; // W(out)/W(in)
-  private static double accelFilterTimeConstant = 0.025; // Seconds
+  private static double accelFilterTimeConstant = 0.050; // Seconds
 
+  private static final LoggedTunableNumber bangBangConstant =
+      new LoggedTunableNumber("Flywheel/BangBangConstant", 2.0);
+  private static final LoggedTunableNumber bangBangMinDistance =
+      new LoggedTunableNumber("Flywheel/BangBangMinDistance", 3.5);
+  private static final LoggedTunableNumber pidSetpointOffset =
+      new LoggedTunableNumber(
+          "Flywheel/PIDSetpointOffset", 5.0); // Offset up when not running bang-bang
   private static final LoggedTunableNumber kP = new LoggedTunableNumber("Flywheel/kP", 0.6);
   private static final LoggedTunableNumber kD = new LoggedTunableNumber("Flywheel/kD", 0.001);
-  private static final LoggedTunableNumber kS = new LoggedTunableNumber("Flywheel/kS", 0.4);
-  private static final LoggedTunableNumber kV = new LoggedTunableNumber("Flywheel/kV", 0.0193);
-  private static final LoggedTunableNumber kA = new LoggedTunableNumber("Flywheel/kA", 0.003);
+  private static final LoggedTunableNumber kS = new LoggedTunableNumber("Flywheel/kS", 0.28);
+  private static final LoggedTunableNumber kV = new LoggedTunableNumber("Flywheel/kV", 0.018);
+  private static final LoggedTunableNumber kA = new LoggedTunableNumber("Flywheel/kA", 0.007);
   private static final LoggedTunableNumber maxAcceleration =
       new LoggedTunableNumber("Flywheel/MaxAccelerationRadPerSec2", 350.0);
   private static final LoggedTunableNumber supplyLimitTeleop =
-      new LoggedTunableNumber("Flywheel/SupplyLimitTeleopAmps", 220.0);
+      new LoggedTunableNumber("Flywheel/SupplyLimitTeleopAmps", 160.0);
   private static final LoggedTunableNumber supplyLimitAuto =
       new LoggedTunableNumber("Flywheel/SupplyLimitAutoAmps", 60.0);
 
+  private double goalVel = 0.0;
   private double supplyLimit = 200.0;
   private double setpointVel = 0.0;
   private double filteredAccel = 0.0; // Used for kA
@@ -139,7 +147,7 @@ public class Flywheel extends FullSubsystem {
   }
 
   /** Run closed loop at the specified velocity. */
-  private void runVelocity(double velocityRadsPerSec) {
+  private void runVelocity(double velocityRadsPerSec, boolean bangBang) {
     // Calculate power budget from supply limit
     double vBus = Robot.batteryLogger.getBatteryVoltage();
     if (Constants.getMode() == Mode.SIM) {
@@ -166,33 +174,42 @@ public class Flywheel extends FullSubsystem {
     // Rate-limit velocity setpoint
     double maxStep = maxAccelFromCurrent * Constants.loopPeriodSecs;
     double error = velocityRadsPerSec - setpointVel;
+    double rawAccel;
     if (Math.abs(error) <= maxStep) {
       setpointVel = velocityRadsPerSec;
-      filteredAccel = error / Constants.loopPeriodSecs;
-      nonZeroAccel = false;
+      rawAccel = error / Constants.loopPeriodSecs;
     } else {
       setpointVel += Math.copySign(maxStep, error);
-      double rawAccel = Math.copySign(maxAccelFromCurrent, error);
-      if (!nonZeroAccel) {
-        filteredAccel = rawAccel;
-      } else {
-        filteredAccel +=
-            (rawAccel - filteredAccel) * Constants.loopPeriodSecs / accelFilterTimeConstant;
-      }
-      nonZeroAccel = true;
+      rawAccel = Math.copySign(maxAccelFromCurrent, error);
     }
+    if (!nonZeroAccel) {
+      filteredAccel = rawAccel;
+    } else {
+      filteredAccel +=
+          (rawAccel - filteredAccel) * Constants.loopPeriodSecs / accelFilterTimeConstant;
+    }
+    nonZeroAccel = true;
 
     // Apply outputs
     atGoal = EqualsUtil.epsilonEquals(setpointVel, velocityRadsPerSec, 2.0);
-    outputs.mode = FlywheelIOOutputMode.VELOCITY;
+    goalVel = velocityRadsPerSec;
+    outputs.mode = bangBang ? FlywheelIOOutputMode.VOLTAGE : FlywheelIOOutputMode.VELOCITY;
     outputs.velocityRadsPerSec = setpointVel;
     outputs.feedforward =
         Math.signum(setpointVel) * kS.get() + setpointVel * kV.get() + filteredAccel * kA.get();
+    if (bangBang) {
+      if (inputs.velocityRadsPerSec < setpointVel) {
+        outputs.feedforward *= bangBangConstant.get();
+      }
+    } else {
+      outputs.velocityRadsPerSec += pidSetpointOffset.get();
+    }
 
     Logger.recordOutput("Flywheel/Setpoint", setpointVel);
     Logger.recordOutput("Flywheel/SetpointAccel", filteredAccel);
     Logger.recordOutput("Flywheel/Goal", velocityRadsPerSec);
     Logger.recordOutput("Flywheel/Feedforward", outputs.feedforward);
+    Logger.recordOutput("Flywheel/BangBag", bangBang);
   }
 
   /** Stops the flywheel. */
@@ -208,14 +225,29 @@ public class Flywheel extends FullSubsystem {
     return inputs.velocityRadsPerSec;
   }
 
+  public boolean withinTolerance(double toleranceRadPerSec) {
+    return Math.abs(inputs.velocityRadsPerSec - goalVel) < toleranceRadPerSec;
+  }
+
   public Command runTrackTargetCommand() {
     return runEnd(
-        () -> runVelocity(LaunchCalculator.getInstance().getParameters().flywheelSpeed()),
+        () ->
+            runVelocity(
+                LaunchCalculator.getInstance().getParameters().flywheelSpeed(),
+                LaunchCalculator.getInstance().getParameters().distanceNoLookahead()
+                        > bangBangMinDistance.get()
+                    && !LaunchCalculator.getInstance().getParameters().passing()),
         this::stop);
   }
 
-  public Command runFixedCommand(DoubleSupplier velocity) {
-    return runEnd(() -> runVelocity(velocity.getAsDouble()), this::stop);
+  public Command runBangBangTrackTargetCommand() {
+    return runEnd(
+        () -> runVelocity(LaunchCalculator.getInstance().getParameters().flywheelSpeed(), true),
+        this::stop);
+  }
+
+  public Command runFixedCommand(DoubleSupplier velocity, boolean bangBang) {
+    return runEnd(() -> runVelocity(velocity.getAsDouble(), bangBang), this::stop);
   }
 
   public Command stopCommand() {

@@ -208,6 +208,10 @@ public class Vision extends VirtualSubsystem {
           continue;
         }
 
+        if (robotPose.getZ() < zMin || robotPose.getZ() > zMax) {
+          continue;
+        }
+
         // Get tag poses and update last detection times
         List<Pose3d> tagPoses = new ArrayList<>();
         for (int i = (values[0] == 1 ? 9 : 17); i < values.length; i += 10) {

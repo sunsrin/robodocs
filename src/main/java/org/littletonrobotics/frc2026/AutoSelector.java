@@ -143,10 +143,12 @@ public class AutoSelector extends VirtualSubsystem {
   /** Responses to auto routine questions. */
   public static enum AutoQuestionResponse {
     LEFT_TRENCH(Trench.leftStart),
+    LEFT_TRENCH_OFFSET(Trench.leftStartOffset),
     LEFT_BUMP(Bump.leftInner),
     CENTER(Hub.centerStart),
     RIGHT_BUMP(Bump.rightInner),
     RIGHT_TRENCH(Trench.rightStart),
+    RIGHT_TRENCH_OFFSET(Trench.rightStartOffset),
     LEFT(),
     RIGHT(),
     LEFT_CLOSE(),

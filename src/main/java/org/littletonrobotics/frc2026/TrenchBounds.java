@@ -64,7 +64,7 @@ public class TrenchBounds {
 
   public static class Hood {
     // Distance from hugging the trench bar
-    private static double generosity = 0.2;
+    private static double generosity = 0.4;
 
     public static final Bounds blueLeftTrench =
         new Bounds(

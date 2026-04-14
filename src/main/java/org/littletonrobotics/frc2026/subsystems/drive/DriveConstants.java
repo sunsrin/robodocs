@@ -27,7 +27,7 @@ public class DriveConstants {
       5.374; // maxLinearSpeed / driveBaseRadius (0.7814886979 meters)
   public static final double darwinWheelRadiusInches = 1.93045163;
   public static final double darwinTrajectoryWheelRadiusInches = 2.0;
-  public static final double darwinMaxTrajectoryWheelTorque = 3.0; // N * m
+  public static final double darwinMaxTrajectoryWheelTorque = 4.0; // N * m
   public static final double darwinMassLbs = 150.0;
   public static final double darwinWheelCOF = 1.5;
   public static final double darwinRotationMOI = 6.0; // kg * m^2

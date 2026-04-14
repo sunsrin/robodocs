@@ -78,6 +78,7 @@ import org.littletonrobotics.frc2026.util.controllers.RazerWolverineController;
 import org.littletonrobotics.frc2026.util.controllers.TriggerUtil;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 @ExtensionMethod({TriggerUtil.class})
 public class RobotContainer {
@@ -122,6 +123,9 @@ public class RobotContainer {
   // Dashboard inputs and outputs
   private final AutoSelector autoSelector = new AutoSelector("Auto");
   private final LoggedDashboardChooser<AprilTagLayoutType> aprilTagLayoutChooser;
+  private final LoggedNetworkNumber offsetTime =
+      new LoggedNetworkNumber("/SmartDashboard/Auto/Offset Time?", 0.0);
+  ;
 
   private boolean coastOverride = false;
 
@@ -277,7 +281,7 @@ public class RobotContainer {
     flywheel.setDefaultCommand(
         new ContinuousConditionalCommand(
             flywheel.stopCommand(),
-            flywheel.runFixedCommand(LaunchCalculator.idleSpeed),
+            flywheel.runFixedCommand(LaunchCalculator.idleSpeed, false),
             disableAutoSpinup));
     trashCompactor.setDefaultCommand(
         Commands.run(
@@ -288,31 +292,14 @@ public class RobotContainer {
   private void configureAutos() {
     AutoBuilder autoBuilder =
         new AutoBuilder(
-            drive, slamtake, hopper, kicker, hood, flywheel, autoSelector::getResponses);
-
-    // Lowe's Hardware Salesman
-    autoSelector.addRoutine(
-        "Lowe's Hardware Salesman",
-        List.of(
-            new AutoQuestion(
-                "Start Position?",
-                List.of(AutoQuestionResponse.RIGHT_TRENCH, AutoQuestionResponse.RIGHT_BUMP)),
-            new AutoQuestion(
-                "Through Tower?", List.of(AutoQuestionResponse.NO, AutoQuestionResponse.YES)),
-            new AutoQuestion("Post-Launch?", List.of(AutoQuestionResponse.NOTHING))),
-        autoBuilder.lowesHardwareSalesman());
-
-    // Home Depot Salesman
-    autoSelector.addRoutine(
-        "Home Depot Salesman",
-        List.of(
-            new AutoQuestion(
-                "Start Position?",
-                List.of(AutoQuestionResponse.LEFT_TRENCH, AutoQuestionResponse.LEFT_BUMP)),
-            new AutoQuestion(
-                "Through Tower?", List.of(AutoQuestionResponse.NO, AutoQuestionResponse.YES)),
-            new AutoQuestion("Post-Launch?", List.of(AutoQuestionResponse.NOTHING))),
-        autoBuilder.homeDepotSalesman());
+            drive,
+            slamtake,
+            hopper,
+            kicker,
+            hood,
+            flywheel,
+            autoSelector::getResponses,
+            offsetTime);
 
     // Monopoly Salesman
     autoSelector.addRoutine(
@@ -320,11 +307,7 @@ public class RobotContainer {
         List.of(
             new AutoQuestion(
                 "Start Position?",
-                List.of(
-                    AutoQuestionResponse.LEFT_TRENCH,
-                    AutoQuestionResponse.LEFT_BUMP,
-                    AutoQuestionResponse.RIGHT_BUMP,
-                    AutoQuestionResponse.RIGHT_TRENCH)),
+                List.of(AutoQuestionResponse.LEFT_TRENCH, AutoQuestionResponse.LEFT_BUMP)),
             new AutoQuestion("Post-Launch?", List.of(AutoQuestionResponse.NOTHING))),
         autoBuilder.monopolySalesman());
 
@@ -369,7 +352,9 @@ public class RobotContainer {
         new Trigger(
             () ->
                 hood.atGoal()
-                        && flywheel.atGoal()
+                        && (LaunchCalculator.getInstance().getParameters().passing()
+                            ? flywheel.withinTolerance(40.0)
+                            : flywheel.atGoal())
                         && DriveCommands.atLaunchGoal()
                         && DriveCommands.atPitchAndRollTolerance()
                     || noTiltCheck.getAsBoolean());
@@ -469,7 +454,7 @@ public class RobotContainer {
         .lowerRightPaddle()
         .whileTrue(
             flywheel
-                .runFixedCommand(LaunchCalculator.outpostPreset.flywheelSpeed())
+                .runFixedCommand(LaunchCalculator.outpostPreset.flywheelSpeed(), true)
                 .alongWith(
                     hood.runFixedCommand(
                         () ->
@@ -482,7 +467,7 @@ public class RobotContainer {
         .leftClaw()
         .whileTrue(
             flywheel
-                .runFixedCommand(LaunchCalculator.passingPreset.flywheelSpeed())
+                .runFixedCommand(LaunchCalculator.passingPreset.flywheelSpeed(), true)
                 .alongWith(
                     hood.runFixedCommand(
                         () ->
@@ -495,7 +480,7 @@ public class RobotContainer {
         .lowerLeftPaddle()
         .whileTrue(
             flywheel
-                .runFixedCommand(LaunchCalculator.towerPreset.flywheelSpeed())
+                .runFixedCommand(LaunchCalculator.towerPreset.flywheelSpeed(), false)
                 .alongWith(
                     hood.runFixedCommand(
                         () ->
@@ -508,7 +493,7 @@ public class RobotContainer {
         .upperLeftPaddle()
         .whileTrue(
             flywheel
-                .runFixedCommand(LaunchCalculator.trenchPreset.flywheelSpeed())
+                .runFixedCommand(LaunchCalculator.trenchPreset.flywheelSpeed(), false)
                 .alongWith(
                     hood.runFixedCommand(
                         () ->
@@ -574,7 +559,7 @@ public class RobotContainer {
         .a()
         .whileTrue(
             flywheel
-                .runFixedCommand(LaunchCalculator.hoodMinPreset.flywheelSpeed())
+                .runFixedCommand(LaunchCalculator.hoodMinPreset.flywheelSpeed(), false)
                 .alongWith(
                     hood.runFixedCommand(
                         () ->
@@ -587,7 +572,7 @@ public class RobotContainer {
         .y()
         .whileTrue(
             flywheel
-                .runFixedCommand(LaunchCalculator.hoodMaxPreset.flywheelSpeed())
+                .runFixedCommand(LaunchCalculator.hoodMaxPreset.flywheelSpeed(), false)
                 .alongWith(
                     hood.runFixedCommand(
                         () ->
@@ -654,7 +639,7 @@ public class RobotContainer {
     // Test flywheel spin-up
     secondary
         .leftBumper()
-        .whileTrue(flywheel.runFixedCommand(() -> 200.0))
+        .whileTrue(flywheel.runFixedCommand(() -> 200.0, false))
         .onFalse(flywheel.stopCommand());
 
     // ****** OVERRIDE SWITCHES *****
@@ -777,7 +762,7 @@ public class RobotContainer {
                         () -> slamtake.setIntakeGoal(IntakeGoal.INTAKE),
                         () -> slamtake.setIntakeGoal(IntakeGoal.STOP),
                         slamtake)))
-        .whileTrue(Commands.waitSeconds(1.5).andThen(flywheel.runTrackTargetCommand()));
+        .whileTrue(Commands.waitSeconds(1.5).andThen(flywheel.runBangBangTrackTargetCommand()));
 
     // Force trash compactor up in neutral zone during auto
     RobotModeTriggers.autonomous()
