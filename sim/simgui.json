@@ -29,6 +29,8 @@
       "/SmartDashboard/Auto/Question #2 Chooser": "String Chooser",
       "/SmartDashboard/Auto/Question #3 Chooser": "String Chooser",
       "/SmartDashboard/Auto/Question #4 Chooser": "String Chooser",
+      "/SmartDashboard/Auto/Question #5 Chooser": "String Chooser",
+      "/SmartDashboard/Auto/Question #6 Chooser": "String Chooser",
       "/SmartDashboard/Auto/Routine": "String Chooser",
       "/SmartDashboard/Choreo Alerts": "Alerts"
     },
@@ -62,6 +64,16 @@
           "visible": true
         }
       },
+      "/SmartDashboard/Auto/Question #5 Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Auto/Question #6 Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Auto/Routine": {
         "window": {
           "name": "Auto Routine",
@@ -70,10 +82,17 @@
       }
     }
   },
+  "NetworkTables": {
+    "transitory": {
+      "SmartDashboard": {
+        "Auto": {
+          "open": true
+        },
+        "open": true
+      }
+    }
+  },
   "NetworkTables Info": {
     "visible": true
-  },
-  "NetworkTables View": {
-    "visible": false
   }
 }

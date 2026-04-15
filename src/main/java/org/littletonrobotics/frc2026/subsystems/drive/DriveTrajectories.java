@@ -424,6 +424,79 @@ public class DriveTrajectories {
             .stopAtEnd(false)
             .build());
 
+    paths.put(
+        "launchLeftBumpThroughLeftTrenchToCoriolis",
+        PathRequest.builder()
+            .segments(launchLeftBumpThroughLeftTrench.build().segments)
+            .segments(
+                PathRequestSegment.builder()
+                    // Turn into fuel pool
+                    .waypoints(
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.FuelPool.nearLeftCorner.plus(
+                                        new Translation2d(
+                                            0.0, DriveConstants.fullWidthX / 2.0 + 0.1)),
+                                    Rotation2d.fromDegrees(-60)))
+                            .build())
+                    .build(),
+                PathRequestSegment.builder()
+                    // Conservatively enter fuel pool
+                    .waypoints(
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.FuelPool.nearLeftCorner.plus(
+                                        new Translation2d(0.3, -0.1)),
+                                    Rotation2d.fromDegrees(-80)))
+                            .build())
+                    .maxVelocity(1.8)
+                    .build(),
+                PathRequestSegment.builder()
+                    // Conservatively drive through fuel pool
+                    .waypoints(
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.fieldCenter
+                                        .plus(
+                                            new Translation2d(
+                                                -DriveConstants.fullWidthX / 2.0,
+                                                DriveConstants.fullWidthX / 2.0))
+                                        .plus(new Translation2d(0.1, 0.4)),
+                                    Rotation2d.fromDegrees(-90)))
+                            .build())
+                    .keepInLaneWidth(0.05)
+                    .maxVelocity(1.8)
+                    .maxAngularVelocity(0.2)
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Turn towards hub
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.fieldCenter.plus(
+                                        new Translation2d(
+                                            -DriveConstants.fullWidthX / 2.0,
+                                            DriveConstants.fullWidthX / 2.0)),
+                                    Rotation2d.kPi))
+                            .build())
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Drive behind hub
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.LinesVertical.neutralZoneNear
+                                        + DriveConstants.fullWidthX / 2.0
+                                        + 0.5,
+                                    FieldConstants.fieldWidth / 2.0 + 0.4,
+                                    Rotation2d.kPi))
+                            .build())
+                    .maxVelocity(1.8)
+                    .maxAngularVelocity(0.2)
+                    .build())
+            .stopAtEnd(false)
+            .build());
+
     PathRequestBuilder launchLeftBumpThroughTrenchToBehindHub =
         PathRequest.builder()
             .segments(launchLeftBumpThroughLeftTrench.build().segments)
@@ -448,6 +521,36 @@ public class DriveTrajectories {
                                         new Translation2d(
                                             DriveConstants.fullWidthX / 2.0 + 0.8,
                                             -DriveConstants.fullWidthX / 2.0)),
+                                    Rotation2d.fromDegrees(-90)))
+                            .build())
+                    .keepInLaneWidth(0.08)
+                    .maxAngularVelocity(0.1)
+                    .build());
+
+    PathRequestBuilder launchLeftBumpThroughTrenchToBehindHubFriendship =
+        PathRequest.builder()
+            .segments(launchLeftBumpThroughLeftTrench.build().segments)
+            .segments(
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Fix rotation before robot has crossed bump
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.LeftBump.farLeftCorner.plus(
+                                        new Translation2d(
+                                            DriveConstants.fullWidthX / 2.0 + 0.5, 0)),
+                                    Rotation2d.fromDegrees(-90)))
+                            .build())
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Behind the hub
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.LeftBump.farRightCorner.plus(
+                                        new Translation2d(
+                                            DriveConstants.fullWidthX / 2.0 + 0.5,
+                                            DriveConstants.fullWidthX / 2.0 + 0.2)),
                                     Rotation2d.fromDegrees(-90)))
                             .build())
                     .keepInLaneWidth(0.08)
@@ -494,6 +597,32 @@ public class DriveTrajectories {
                     .maxAngularVelocity(0.1)
                     .build());
 
+    PathRequestBuilder launchLeftBumpOverBumpToBehindHubFriendship =
+        PathRequest.builder()
+            .segments(
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Just after bump
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    Bump.leftOuter.plus(new Translation2d(0.4, 0)),
+                                    Rotation2d.kZero))
+                            .build())
+                    .maxVelocity(3.2)
+                    .build(),
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Point behind hub
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.LeftBump.farRightCorner.plus(
+                                        new Translation2d(
+                                            DriveConstants.fullWidthX / 2.0 + 0.3,
+                                            DriveConstants.fullWidthX / 2.0)),
+                                    Rotation2d.fromDegrees(-90)))
+                            .build())
+                    .build());
+
     paths.put(
         "launchLeftBumpThroughTrenchToBehindHub",
         PathRequest.builder()
@@ -502,9 +631,23 @@ public class DriveTrajectories {
             .build());
 
     paths.put(
+        "launchLeftBumpThroughTrenchToBehindHubFriendship",
+        PathRequest.builder()
+            .segments(launchLeftBumpThroughTrenchToBehindHubFriendship.build().segments)
+            .stopAtEnd(false)
+            .build());
+
+    paths.put(
         "launchLeftBumpOverBumpToBehindHub",
         PathRequest.builder()
             .segments(launchLeftBumpOverBumpToBehindHub.build().segments)
+            .stopAtEnd(false)
+            .build());
+
+    paths.put(
+        "launchLeftBumpOverBumpToBehindHubFriendship",
+        PathRequest.builder()
+            .segments(launchLeftBumpOverBumpToBehindHubFriendship.build().segments)
             .stopAtEnd(false)
             .build());
 
@@ -535,6 +678,40 @@ public class DriveTrajectories {
                             .build())
                     .build());
 
+    PathRequestBuilder behindHubThroughDavisFriendship =
+        PathRequest.builder()
+            .segments(
+                // Curve into a sweep of the centerline
+                PathRequestSegment.builder()
+                    .waypoints(
+                        // Start turning towards the center
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.LeftBump.farRightCorner.getX() + 1.0,
+                                    FieldConstants.LeftBump.farRightCorner.getY(),
+                                    Rotation2d.fromDegrees(-37)))
+                            .build(),
+                        // Intermediate to follow through curve
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.fieldCenter.plus(
+                                        new Translation2d(
+                                            -DriveConstants.fullWidthX / 2.0,
+                                            DriveConstants.fullWidthX / 2.0 - 0.15)),
+                                    Rotation2d.fromDegrees(30)))
+                            .build(),
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.fieldCenter.plus(new Translation2d(0.0, 1.0)),
+                                    Rotation2d.fromDegrees(90)))
+                            .build(),
+                        PathWaypoint.from(
+                                new Pose2d(
+                                    FieldConstants.fieldCenter.plus(new Translation2d(0.0, 1.5)),
+                                    Rotation2d.fromDegrees(90)))
+                            .build())
+                    .build());
+
     paths.put(
         "launchLeftBumpThroughTrenchToDavis",
         PathRequest.builder()
@@ -544,10 +721,26 @@ public class DriveTrajectories {
             .build());
 
     paths.put(
+        "launchLeftBumpThroughTrenchToDavisFriendship",
+        PathRequest.builder()
+            .segments(launchLeftBumpThroughTrenchToBehindHubFriendship.build().segments)
+            .segments(behindHubThroughDavisFriendship.build().segments)
+            .stopAtEnd(false)
+            .build());
+
+    paths.put(
         "launchLeftBumpOverBumpToDavis",
         PathRequest.builder()
             .segments(launchLeftBumpOverBumpToBehindHub.build().segments)
             .segments(behindHubThroughDavis.build().segments)
+            .stopAtEnd(false)
+            .build());
+
+    paths.put(
+        "launchLeftBumpOverBumpToDavisFriendship",
+        PathRequest.builder()
+            .segments(launchLeftBumpOverBumpToBehindHubFriendship.build().segments)
+            .segments(behindHubThroughDavisFriendship.build().segments)
             .stopAtEnd(false)
             .build());
 
