@@ -51,22 +51,12 @@ The codebase heavily utilizes the **AdvantageKit IO Layer Pattern**. The documen
 
 ### Architecture Diagram
 
-```text
-[ RobotContainer ]  (Instantiates Subsystems, binds Commands)
-       |
-       v
-[ Subsystem (e.g., Drive.java) ]  (Contains all math, kinematics, and periodic control logic. Does NOT touch hardware directly.)
-       |
-       v
-[ IO Interface (e.g., ModuleIO.java) ]  (Defines inputs (sensors) and outputs (motors). AdvantageKit logs the Inputs here.)
-      / \
-     /   \
-    /     \
-[ Sim ] [ Real HW ]
-   |       |
-   |       +---> (e.g., ModuleIOTalonFX.java - Talks to physical CAN devices)
-   |
-   +---> (e.g., ModuleIOSim.java - Simulates physics using WPILib physics classes)
+```mermaid
+graph TD
+    A[RobotContainer<br/>Instantiates Subsystems, binds Commands] --> B[Subsystem e.g., Drive.java<br/>Contains all math, kinematics, and periodic control logic.<br/>Does NOT touch hardware directly.]
+    B --> C[IO Interface e.g., ModuleIO.java<br/>Defines inputs and outputs.<br/>AdvantageKit logs the Inputs here.]
+    C --> D[Sim Implementation<br/>e.g., ModuleIOSim.java<br/>Simulates physics using WPILib]
+    C --> E[Real Implementation<br/>e.g., ModuleIOTalonFX.java<br/>Talks to physical CAN devices]
 ```
 
 **Key Architectural Rules:**
