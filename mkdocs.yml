@@ -1,0 +1,9 @@
+site_name: RobotCode2026Public Documentation
+theme:
+  name: material
+  palette:
+    primary: deep purple
+    accent: deep orange
+docs_dir: docs_site
+nav:
+  - Home: index.md
