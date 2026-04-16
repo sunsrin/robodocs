@@ -10,3 +10,6 @@ nav:
   - 101 Beginner: 101-beginner.md
   - 201 Intermediate: 201-intermediate.md
   - 301 Architecture: 301-architecture.md
+  - Cookbook:
+    - Add a Subsystem: cookbook-subsystem.md
+    - Implement Vision: cookbook-vision.md
