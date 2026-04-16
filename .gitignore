@@ -184,3 +184,6 @@ compile_commands.json
 
 # Version file
 src/main/java/org/littletonrobotics/frc2026/BuildConstants.java
+
+# Worktrees
+.worktrees/
