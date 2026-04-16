@@ -8,3 +8,5 @@ docs_dir: docs_site
 nav:
   - Home: index.md
   - 101 Beginner: 101-beginner.md
+  - 201 Intermediate: 201-intermediate.md
+  - 301 Architecture: 301-architecture.md
