@@ -1,0 +1,1565 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../203-auto/">
+      
+      
+        <link rel="next" href="../205-simulation-replay/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>204 Vision & Object Detection - RobotCode2026Public Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#204-vision-object-detection" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="RobotCode2026Public Documentation" class="md-header__button md-logo" aria-label="RobotCode2026Public Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RobotCode2026Public Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              204 Vision & Object Detection
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="RobotCode2026Public Documentation" class="md-nav__button md-logo" aria-label="RobotCode2026Public Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    RobotCode2026Public Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basics
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Basics
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../101-beginner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    101 Beginner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../102-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    102 Developer Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../103-controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    103 Controls & Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intermediate
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Intermediate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../201-intermediate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    201 Architecture & AdvantageKit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../202-subsystems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    202 Subsystems Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../203-auto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    203 Autonomous & Pathing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    204 Vision & Object Detection
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    204 Vision & Object Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#main-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Main Files
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#northstar-instances" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Northstar Instances
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#camera-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Camera Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#apriltag-frame-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AprilTag Frame Processing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vision-filtering-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vision Filtering Constants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#apriltag-layout-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AprilTag Layout Selection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#object-detection-frames" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Object Detection Frames
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fuel-position-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fuel Position Tracking
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#robot-position-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Robot Position Tracking
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recording-and-throttling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recording and Throttling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#disconnect-alerts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disconnect Alerts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-or-moving-a-camera" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding or Moving a Camera
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#object-detection-model-note" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Object Detection Model Note
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../205-simulation-replay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    205 Simulation & Replay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Advanced
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../301-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    301 System Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../302-logging-dashboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    302 Logging & Dashboard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mentors & Reviewers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Mentors & Reviewers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../401-mentor-review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    401 PR Review Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../402-hardware-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    402 Hardware Reference Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cookbook
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cookbook-subsystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add a Subsystem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cookbook-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implement Vision
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#main-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Main Files
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#northstar-instances" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Northstar Instances
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#camera-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Camera Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#apriltag-frame-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AprilTag Frame Processing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vision-filtering-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vision Filtering Constants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#apriltag-layout-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AprilTag Layout Selection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#object-detection-frames" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Object Detection Frames
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fuel-position-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fuel Position Tracking
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#robot-position-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Robot Position Tracking
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recording-and-throttling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recording and Throttling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#disconnect-alerts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disconnect Alerts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-or-moving-a-camera" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding or Moving a Camera
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#object-detection-model-note" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Object Detection Model Note
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="204-vision-object-detection">204: Vision &amp; Object Detection</h1>
+<p>The vision stack combines Northstar coprocessors, AprilTag pose estimation, object detection frames, timestamped robot state, and AdvantageKit logging. Vision does not command motors directly; it publishes observations that other systems can use.</p>
+<h2 id="main-files">Main Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>subsystems/vision/Vision.java</code></td>
+<td>Reads all camera IO, logs frames, filters AprilTag observations, handles object detections, and forwards accepted pose observations.</td>
+</tr>
+<tr>
+<td><code>subsystems/vision/VisionIO.java</code></td>
+<td>Defines NetworkTables connection status, AprilTag frame inputs, object detection frame inputs, recording control, and throttle control.</td>
+</tr>
+<tr>
+<td><code>subsystems/vision/VisionIONorthstar.java</code></td>
+<td>NetworkTables implementation for Northstar devices.</td>
+</tr>
+<tr>
+<td><code>subsystems/vision/VisionConstants.java</code></td>
+<td>Camera IDs, resolutions, exposure/gain, robot-to-camera transforms, filtering constants, and confidence thresholds.</td>
+</tr>
+<tr>
+<td><code>ObjectDetection.java</code></td>
+<td>Converts object detection <code>tx/ty</code> observations into field-relative fuel and robot translations.</td>
+</tr>
+<tr>
+<td><code>RobotState.java</code></td>
+<td>Provides timestamped pose, rotation, and slamtake-angle buffers used by vision.</td>
+</tr>
+<tr>
+<td><code>northstar</code></td>
+<td>Coprocessor-side workers and support code.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="northstar-instances">Northstar Instances</h2>
+<p><code>VisionIONorthstar</code> creates one NetworkTables table per device:</p>
+<div class="highlight"><pre><span></span><code>northstar_0
+northstar_1
+northstar_2
+northstar_3
+</code></pre></div>
+<p>For each instance, robot code publishes camera configuration under <code>config</code> and subscribes to frame output under <code>output</code>.</p>
+<p>Published configuration includes:</p>
+<ul>
+<li>Camera ID.</li>
+<li>Resolution.</li>
+<li>Exposure, gain, denoise.</li>
+<li>Color balance values.</li>
+<li>AprilTag fiducial size.</li>
+<li>Recording state.</li>
+<li>Timestamp.</li>
+<li>Event name, match type, and match number.</li>
+<li>AprilTag layout.</li>
+<li>Throttle FPS.</li>
+</ul>
+<p>Subscribed outputs include:</p>
+<ul>
+<li><code>observations</code>: AprilTag frames.</li>
+<li><code>objdetect_observations</code>: object detection frames.</li>
+<li><code>fps_apriltags</code>.</li>
+<li><code>fps_objdetect</code>.</li>
+</ul>
+<h2 id="camera-configuration">Camera Configuration</h2>
+<p><code>VisionConstants.cameras</code> is selected by robot type.</p>
+<p>Darwin currently defines four cameras:</p>
+<table>
+<thead>
+<tr>
+<th>Index</th>
+<th>Camera ID</th>
+<th>Resolution</th>
+<th>Main use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td><code>40552081</code></td>
+<td><code>1800x1200</code></td>
+<td>Monochrome AprilTag camera facing rearward.</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td><code>24737133</code></td>
+<td><code>1280x960</code></td>
+<td>Color camera with a moving pose based on slamtake angle.</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td><code>24736167</code></td>
+<td><code>1280x960</code></td>
+<td>Color camera angled to one side.</td>
+</tr>
+<tr>
+<td><code>3</code></td>
+<td><code>24736221</code></td>
+<td><code>1280x960</code></td>
+<td>Color camera angled to the other side.</td>
+</tr>
+</tbody>
+</table>
+<p>Alphabot currently defines two cameras.</p>
+<p>Camera 1 on Darwin is special: its pose depends on <code>RobotState.getSlamAngle(timestamp)</code>. If the slamtake angle is not available for the frame timestamp, that camera returns <code>Optional.empty()</code> and the frame is skipped.</p>
+<h2 id="apriltag-frame-processing">AprilTag Frame Processing</h2>
+<p><code>Vision.periodic()</code> reads all queued frames from each camera. For each AprilTag frame:</p>
+<ol>
+<li>It gets the frame timestamp.</li>
+<li>It gets the camera pose at that timestamp.</li>
+<li>It skips blank frames.</li>
+<li>It decodes either a multi-tag single-pose result or a one-tag two-pose ambiguous result.</li>
+<li>For ambiguous one-tag results, it chooses the pose whose rotation is closer to the current estimated robot rotation if the ambiguity ratio is acceptable.</li>
+<li>It rejects poses outside the field border margin.</li>
+<li>It rejects poses outside allowed Z bounds.</li>
+<li>It finds tag poses in the selected AprilTag layout.</li>
+<li>It calculates average camera-to-tag distance.</li>
+<li>It computes XY and theta standard deviations.</li>
+<li>It creates a <code>RobotState.VisionObservation</code>.</li>
+</ol>
+<p>Accepted observations are sorted by timestamp and sent to:</p>
+<div class="highlight"><pre><span></span><code><span class="n">RobotState</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">addVisionObservation</span><span class="p">(...)</span>
+</code></pre></div>
+<h2 id="vision-filtering-constants">Vision Filtering Constants</h2>
+<p>Important constants in <code>VisionConstants</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ambiguityThreshold</code></td>
+<td>Used to reject or choose between ambiguous one-tag pose solutions.</td>
+</tr>
+<tr>
+<td><code>fieldBorderMargin</code></td>
+<td>Allowed margin outside field before rejecting a robot pose.</td>
+</tr>
+<tr>
+<td><code>zMin</code>, <code>zMax</code></td>
+<td>Allowed robot Z range for accepted vision poses.</td>
+</tr>
+<tr>
+<td><code>xyStdDevCoefficient</code></td>
+<td>Scales XY measurement uncertainty.</td>
+</tr>
+<tr>
+<td><code>thetaStdDevCoefficient</code></td>
+<td>Scales rotation measurement uncertainty.</td>
+</tr>
+<tr>
+<td><code>targetLogTimeSecs</code></td>
+<td>How long recently detected tag poses remain visible in logs.</td>
+</tr>
+</tbody>
+</table>
+<p>The standard deviation model increases uncertainty with distance and decreases uncertainty with more detected tags.</p>
+<h2 id="apriltag-layout-selection">AprilTag Layout Selection</h2>
+<p><code>RobotContainer</code> creates a logged dashboard chooser named <code>AprilTag Layout</code>. Options include:</p>
+<ul>
+<li><code>Official</code>.</li>
+<li><code>Hub</code>.</li>
+<li><code>Tower</code>.</li>
+<li><code>Outpost</code>.</li>
+<li><code>None</code>.</li>
+</ul>
+<p>The selected layout is passed to <code>Vision</code> and published to Northstar. <code>RobotContainer</code> raises an alert when a non-default layout is selected.</p>
+<p>AprilTag layout JSON files live under:</p>
+<div class="highlight"><pre><span></span><code>src/main/deploy/apriltags
+</code></pre></div>
+<p>They are grouped by layout source/type such as <code>andymark</code>, <code>hq</code>, and <code>welded</code>.</p>
+<h2 id="object-detection-frames">Object Detection Frames</h2>
+<p>Object detection frames are arrays of detections. Each detection uses 10 values:</p>
+<ol>
+<li>Class ID.</li>
+<li>Confidence.</li>
+<li>Corner 0 <code>tx</code>.</li>
+<li>Corner 0 <code>ty</code>.</li>
+<li>Corner 1 <code>tx</code>.</li>
+<li>Corner 1 <code>ty</code>.</li>
+<li>Corner 2 <code>tx</code>.</li>
+<li>Corner 2 <code>ty</code>.</li>
+<li>Corner 3 <code>tx</code>.</li>
+<li>Corner 3 <code>ty</code>.</li>
+</ol>
+<p>The current class IDs are:</p>
+<ul>
+<li><code>0</code>: fuel.</li>
+<li><code>1</code>: robot.</li>
+</ul>
+<p>Northstar enforces the confidence threshold, so the robot-side thresholds currently default to <code>0.0</code>.</p>
+<h2 id="fuel-position-tracking">Fuel Position Tracking</h2>
+<p><code>ObjectDetection</code> stores fuel positions in a spatial hash grid with 1-meter cells. The flow is:</p>
+<ol>
+<li>Autonomous initializes assumed starting fuel positions.</li>
+<li>Vision clears old fuel and fuel inside the robot intake footprint.</li>
+<li>For the most recent object detection frame from a camera, vision clears fuel in that camera's field of view.</li>
+<li>New fuel observations are projected to the field using robot pose, camera pose, and corner <code>tx/ty</code> data.</li>
+<li>Fuel outside the field is rejected.</li>
+<li>Nearby fuel records are deduplicated using a tunable overlap distance.</li>
+</ol>
+<p>In real mode, fuel observations are ignored outside autonomous. In SIMBOT mode, <code>ObjectDetection.getFuelTranslations()</code> returns fuel from <code>FuelSim</code>.</p>
+<h2 id="robot-position-tracking">Robot Position Tracking</h2>
+<p>Robot detections use the lower bounding-box corners to estimate the top-down position of another robot. They are projected through the same timestamped pose and camera-pose process, then deduplicated using <code>ObjectDetection/RobotOverlap</code>.</p>
+<p>Recent robot translations are logged by <code>Robot.robotPeriodic()</code> as 3D poses for visualization.</p>
+<h2 id="recording-and-throttling">Recording and Throttling</h2>
+<p>Vision publishes recording and throttle requests to Northstar:</p>
+<ul>
+<li>Recording is enabled when FMS has been attached long enough, when <code>/SmartDashboard/Enable Recording</code> is true, or when <code>alwaysRecord</code> is true.</li>
+<li>Throttle is set to <code>1.0</code> FPS when <code>Robot.shouldThrottle()</code> returns true.</li>
+<li>Otherwise throttle is set to <code>-1.0</code>, meaning no requested throttle.</li>
+</ul>
+<p><code>Robot.shouldThrottle()</code> becomes true after the robot has been disabled for 5 seconds.</p>
+<h2 id="disconnect-alerts">Disconnect Alerts</h2>
+<p>Each Northstar instance has a disconnect timer. Alerts distinguish between:</p>
+<ul>
+<li>Northstar disconnected from NetworkTables.</li>
+<li>Northstar connected to NetworkTables but not publishing frames.</li>
+</ul>
+<p>If no AprilTag or object detection frames arrive for <code>1.5</code> seconds, the instance is treated as disconnected or stale.</p>
+<h2 id="adding-or-moving-a-camera">Adding or Moving a Camera</h2>
+<p>Use this checklist:</p>
+<ol>
+<li>Add or update the <code>CameraConfig</code> in <code>VisionConstants</code>.</li>
+<li>Set the correct camera ID, resolution, exposure, gain, denoise, color balance, FOV, and <code>stdDevFactor</code>.</li>
+<li>Define the camera pose as a function of timestamp.</li>
+<li>If the camera moves, ensure the required mechanism state is buffered in <code>RobotState</code>.</li>
+<li>Update Northstar device setup so the expected camera ID is attached to the expected instance.</li>
+<li>Test NetworkTables connectivity and frame publishing.</li>
+<li>Check <code>AprilTagVision/Inst*/RobotPose</code>, <code>TagPoses</code>, latency, and FPS in AdvantageScope.</li>
+<li>Update this page and any hardware port notes.</li>
+</ol>
+<h2 id="object-detection-model-note">Object Detection Model Note</h2>
+<p>The historical CoreML object detection models for Rebuilt are documented in the repository's original notes and are AGPL-3.0 licensed. Keep model licensing visible when adding or distributing object detection assets.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

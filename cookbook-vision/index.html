@@ -1,0 +1,1411 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../cookbook-subsystem/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Implement Vision - RobotCode2026Public Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#cookbook-implement-vision-detection" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="RobotCode2026Public Documentation" class="md-header__button md-logo" aria-label="RobotCode2026Public Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RobotCode2026Public Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Implement Vision
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="RobotCode2026Public Documentation" class="md-nav__button md-logo" aria-label="RobotCode2026Public Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    RobotCode2026Public Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basics
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Basics
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../101-beginner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    101 Beginner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../102-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    102 Developer Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../103-controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    103 Controls & Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intermediate
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Intermediate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../201-intermediate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    201 Architecture & AdvantageKit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../202-subsystems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    202 Subsystems Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../203-auto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    203 Autonomous & Pathing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../204-vision-object-detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    204 Vision & Object Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../205-simulation-replay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    205 Simulation & Replay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Advanced
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../301-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    301 System Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../302-logging-dashboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    302 Logging & Dashboard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mentors & Reviewers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Mentors & Reviewers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../401-mentor-review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    401 PR Review Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../402-hardware-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    402 Hardware Reference Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cookbook
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cookbook-subsystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add a Subsystem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implement Vision
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implement Vision
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-identify-the-vision-goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Identify the Vision Goal
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-add-or-update-cameraconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Add or Update CameraConfig
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-configure-northstar-topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Configure Northstar Topics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-validate-apriltag-pose-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Validate AprilTag Pose Estimation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-tune-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Tune Filtering
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-add-object-detection-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Add Object Detection Handling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-project-txty-to-field-coordinates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Project tx/ty to Field Coordinates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-add-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Add Diagnostics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-test-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Test Sequence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-documentation-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Documentation Updates
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-identify-the-vision-goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Identify the Vision Goal
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-add-or-update-cameraconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Add or Update CameraConfig
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-configure-northstar-topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Configure Northstar Topics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-validate-apriltag-pose-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Validate AprilTag Pose Estimation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-tune-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Tune Filtering
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-add-object-detection-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Add Object Detection Handling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-project-txty-to-field-coordinates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Project tx/ty to Field Coordinates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-add-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Add Diagnostics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-test-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Test Sequence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-documentation-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Documentation Updates
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="cookbook-implement-vision-detection">Cookbook: Implement Vision Detection</h1>
+<p>Use this cookbook when adding or changing AprilTag cameras, object detection cameras, Northstar topics, or robot-side vision filtering.</p>
+<h2 id="1-identify-the-vision-goal">1. Identify the Vision Goal</h2>
+<p>Decide what the change is meant to provide:</p>
+<ul>
+<li>Global pose estimation from AprilTags.</li>
+<li>Fuel detection for autonomous pathing or visualization.</li>
+<li>Opponent robot detection.</li>
+<li>Driver or pit diagnostics.</li>
+<li>Recording or dataset collection.</li>
+</ul>
+<p>The goal determines the required camera pose accuracy, frame rate, exposure, logging, and filtering.</p>
+<h2 id="2-add-or-update-cameraconfig">2. Add or Update CameraConfig</h2>
+<p>Edit <code>VisionConstants.cameras</code>. Each <code>CameraConfig</code> needs:</p>
+<ul>
+<li><code>poseFunction</code>: robot-to-camera pose as a function of timestamp.</li>
+<li><code>id</code>: camera serial or stable identifier published to Northstar.</li>
+<li><code>width</code> and <code>height</code>.</li>
+<li>Exposure, gain, denoise, and color balance.</li>
+<li><code>stdDevFactor</code>.</li>
+<li><code>fovRads</code>.</li>
+</ul>
+<p>Static camera example:</p>
+<div class="highlight"><pre><span></span><code><span class="n">CameraConfig</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<span class="w">    </span><span class="p">.</span><span class="na">poseFunction</span><span class="p">(</span>
+<span class="w">        </span><span class="n">timestamp</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">            </span><span class="n">Optional</span><span class="p">.</span><span class="na">of</span><span class="p">(</span>
+<span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">Pose3d</span><span class="p">(</span>
+<span class="w">                    </span><span class="n">xMeters</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">yMeters</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">zMeters</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">new</span><span class="w"> </span><span class="n">Rotation3d</span><span class="p">(</span><span class="n">roll</span><span class="p">,</span><span class="w"> </span><span class="n">pitch</span><span class="p">,</span><span class="w"> </span><span class="n">yaw</span><span class="p">))))</span>
+<span class="w">    </span><span class="p">.</span><span class="na">id</span><span class="p">(</span><span class="s">&quot;camera-id&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">width</span><span class="p">(</span><span class="mi">1280</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">height</span><span class="p">(</span><span class="mi">960</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">exposure</span><span class="p">(</span><span class="mi">4500</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">gain</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">stdDevFactor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">fovRads</span><span class="p">(</span><span class="n">Units</span><span class="p">.</span><span class="na">degreesToRadians</span><span class="p">(</span><span class="mf">90.0</span><span class="p">))</span>
+<span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+</code></pre></div>
+<p>Moving camera example:</p>
+<div class="highlight"><pre><span></span><code><span class="p">.</span><span class="na">poseFunction</span><span class="p">(</span>
+<span class="w">    </span><span class="n">timestamp</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">var</span><span class="w"> </span><span class="n">angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RobotState</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">getSlamAngle</span><span class="p">(</span><span class="n">timestamp</span><span class="p">);</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">angle</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Optional</span><span class="p">.</span><span class="na">empty</span><span class="p">();</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">Optional</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">calculateRobotToCamera</span><span class="p">(</span><span class="n">angle</span><span class="p">.</span><span class="na">get</span><span class="p">()));</span>
+<span class="w">    </span><span class="p">})</span>
+</code></pre></div>
+<p>If the camera moves, make sure the relevant mechanism writes timestamped state into <code>RobotState</code>.</p>
+<h2 id="3-configure-northstar-topics">3. Configure Northstar Topics</h2>
+<p><code>VisionIONorthstar</code> publishes configuration under:</p>
+<div class="highlight"><pre><span></span><code>northstar_&lt;index&gt;/config
+</code></pre></div>
+<p>It subscribes under:</p>
+<div class="highlight"><pre><span></span><code>northstar_&lt;index&gt;/output
+</code></pre></div>
+<p>Make sure the coprocessor publishes:</p>
+<ul>
+<li><code>observations</code> for AprilTags.</li>
+<li><code>objdetect_observations</code> for object detection.</li>
+<li><code>fps_apriltags</code>.</li>
+<li><code>fps_objdetect</code>.</li>
+</ul>
+<p>The robot publishes timestamp, match info, recording state, layout string, and throttle request. Northstar should consume those fields.</p>
+<h2 id="4-validate-apriltag-pose-estimation">4. Validate AprilTag Pose Estimation</h2>
+<p>In AdvantageScope, inspect:</p>
+<ul>
+<li><code>Vision/Inst*</code>.</li>
+<li><code>Vision/AprilTags/Inst*</code>.</li>
+<li><code>AprilTagVision/Inst*/RobotPose</code>.</li>
+<li><code>AprilTagVision/Inst*/TagPoses</code>.</li>
+<li><code>AprilTagVision/RobotPoses</code>.</li>
+<li><code>RobotState/EstimatedPose</code>.</li>
+</ul>
+<p>Check:</p>
+<ul>
+<li>Camera pose is on the correct side of the robot.</li>
+<li>Yaw/pitch/roll signs match WPILib coordinates.</li>
+<li>Estimated robot pose moves smoothly.</li>
+<li>Rejected frames are explainable.</li>
+<li>Latency is plausible.</li>
+<li>Multi-tag estimates have lower uncertainty than long-distance single-tag estimates.</li>
+</ul>
+<h2 id="5-tune-filtering">5. Tune Filtering</h2>
+<p>Filtering lives mostly in <code>VisionConstants</code> and <code>Vision.periodic()</code>.</p>
+<p>Adjust carefully:</p>
+<ul>
+<li><code>ambiguityThreshold</code> for one-tag pose ambiguity.</li>
+<li><code>fieldBorderMargin</code> for off-field rejection.</li>
+<li><code>zMin</code> and <code>zMax</code> for impossible robot height.</li>
+<li><code>xyStdDevCoefficient</code> and <code>thetaStdDevCoefficient</code> for pose estimator trust.</li>
+<li>Per-camera <code>stdDevFactor</code> for camera-specific trust.</li>
+</ul>
+<p>Do not tune by feel alone. Compare logs before and after.</p>
+<h2 id="6-add-object-detection-handling">6. Add Object Detection Handling</h2>
+<p>Object detection frames are processed in chunks of 10 values:</p>
+<div class="highlight"><pre><span></span><code>class, confidence, tx0, ty0, tx1, ty1, tx2, ty2, tx3, ty3
+</code></pre></div>
+<p>The existing robot-side classes are:</p>
+<ul>
+<li><code>0</code>: fuel.</li>
+<li><code>1</code>: robot.</li>
+</ul>
+<p>For a new class, add a new case in <code>Vision.periodic()</code> and define a new observation record or handler in <code>ObjectDetection</code> if needed.</p>
+<h2 id="7-project-txty-to-field-coordinates">7. Project tx/ty to Field Coordinates</h2>
+<p><code>ObjectDetection</code> uses:</p>
+<ul>
+<li>Timestamped robot pose from <code>RobotState</code>.</li>
+<li>Timestamped robot-to-camera pose from <code>VisionConstants</code>.</li>
+<li>Camera roll compensation.</li>
+<li>Camera pitch and target height.</li>
+<li>Field bounds rejection.</li>
+<li>Spatial deduplication.</li>
+</ul>
+<p>When adding a target type, define:</p>
+<ul>
+<li>Which bounding-box points represent the ground contact or physical reference.</li>
+<li>The expected target height.</li>
+<li>Maximum persistence time.</li>
+<li>Deduplication distance.</li>
+<li>Whether observations should be accepted in teleop, autonomous, sim, or real mode.</li>
+</ul>
+<h2 id="8-add-diagnostics">8. Add Diagnostics</h2>
+<p>Log enough to debug calibration and filtering:</p>
+<ul>
+<li>Raw frame arrays through <code>VisionIO</code> inputs.</li>
+<li>Accepted object translations.</li>
+<li>Rejected target counts if needed.</li>
+<li>Camera FPS.</li>
+<li>Camera latency.</li>
+<li>Per-camera robot pose.</li>
+<li>Selected AprilTag layout.</li>
+</ul>
+<p>For a new camera, also document physical mounting and port assignment.</p>
+<h2 id="9-test-sequence">9. Test Sequence</h2>
+<ol>
+<li>Verify Northstar connects to NetworkTables.</li>
+<li>Verify each camera publishes FPS.</li>
+<li>Verify camera config topics match the expected IDs and exposure values.</li>
+<li>Point at known AprilTags and inspect robot pose.</li>
+<li>Move the robot and confirm pose changes in the correct direction.</li>
+<li>Test object detection with known field positions.</li>
+<li>Replay logs after any filtering change.</li>
+<li>Confirm disconnected-camera alerts behave correctly.</li>
+</ol>
+<h2 id="10-documentation-updates">10. Documentation Updates</h2>
+<p>Update these docs when vision changes:</p>
+<ul>
+<li><code>204 Vision &amp; Object Detection</code> for architecture or frame format changes.</li>
+<li><code>402 Hardware Reference Notes</code> for camera IDs, ports, or mounting assumptions.</li>
+<li><code>103 Controls &amp; Operations</code> if drivers get new dashboard controls or warnings.</li>
+<li>The relevant code comments or constants if a calibration value needs context.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
