@@ -1223,19 +1223,50 @@
 <h1 id="301-system-design">301: System Design</h1>
 <p>This page explains the higher-level design decisions that connect robot lifecycle, subsystem structure, logging, replay, simulation, and operator workflows.</p>
 <h2 id="architecture-diagram">Architecture Diagram</h2>
-<div class="highlight"><pre><span></span><code>graph TD
-    Main[Main.java] --&gt; Robot[Robot.java&lt;br/&gt;Lifecycle, logging, scheduler]
-    Robot --&gt; Container[RobotContainer.java&lt;br/&gt;Composition, controls, autos]
-    Container --&gt; Subsystems[Subsystems&lt;br/&gt;Drive, launcher, intake, hopper, kicker, vision, LEDs]
-    Container --&gt; Commands[Commands&lt;br/&gt;Drive, launch, compact, auto]
-    Subsystems --&gt; IO[IO interfaces&lt;br/&gt;Logged inputs and requested outputs]
-    IO --&gt; Sim[Simulation IO&lt;br/&gt;Physics models and simulated sensors]
-    IO --&gt; Real[Real IO&lt;br/&gt;Vendor hardware and device config]
-    IO --&gt; Replay[No-op/replay path&lt;br/&gt;Logged inputs drive behavior]
-    Subsystems --&gt; State[RobotState&lt;br/&gt;Pose, velocity, buffers, vision fusion]
-    Vision[Vision/Northstar] --&gt; State
+<pre class="mermaid"><code>flowchart TB
+    subgraph Entry["Robot program entry"]
+        Main["Main.java"]
+        Robot["Robot.java&lt;br/&gt;Lifecycle, logging, scheduler"]
+        Container["RobotContainer.java&lt;br/&gt;Composition, controls, autos"]
+    end
+
+    subgraph Behavior["Behavior layer"]
+        Commands["Commands&lt;br/&gt;Drive, launch, compact, auto"]
+        Subsystems["Subsystems&lt;br/&gt;Drive, launcher, intake, hopper, kicker, vision, LEDs"]
+        State["RobotState&lt;br/&gt;Pose, velocity, buffers, vision fusion"]
+    end
+
+    subgraph Boundary["Hardware abstraction boundary"]
+        IO["IO interfaces&lt;br/&gt;Logged inputs and requested outputs"]
+        Sim["Simulation IO&lt;br/&gt;Physics models and simulated sensors"]
+        Real["Real IO&lt;br/&gt;Vendor hardware and device config"]
+        Replay["Replay/no-op IO&lt;br/&gt;Logged inputs drive behavior"]
+    end
+
+    subgraph External["External services"]
+        Vision["Vision / Northstar"]
+    end
+
+    Main --&gt; Robot --&gt; Container
+    Container --&gt; Commands
+    Container --&gt; Subsystems
     Commands --&gt; Subsystems
-</code></pre></div>
+    Subsystems --&gt; IO
+    Subsystems --&gt; State
+    IO --&gt; Sim
+    IO --&gt; Real
+    IO --&gt; Replay
+    Vision --&gt; State
+
+    classDef entry fill:#ede7f6,stroke:#5e35b1,color:#111827
+    classDef behavior fill:#e0f2fe,stroke:#0369a1,color:#111827
+    classDef boundary fill:#dcfce7,stroke:#15803d,color:#111827
+    classDef external fill:#ffedd5,stroke:#c2410c,color:#111827
+
+    class Main,Robot,Container entry
+    class Commands,Subsystems,State behavior
+    class IO,Sim,Real,Replay boundary
+    class Vision external</code></pre>
 <h2 id="composition-root">Composition Root</h2>
 <p><code>RobotContainer</code> is the composition root. It owns:</p>
 <ul>
